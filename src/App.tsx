@@ -7,6 +7,7 @@ import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
 import ModeSwitcher from './components/ModeSwitcher';
 import CommandMode from './components/command/CommandMode';
+import EmergencyMode from './components/emergency/EmergencyMode';
 import CheckpointModal from './components/CheckpointModal';
 import CongestionPredictionModal from './components/CongestionPredictionModal';
 import StrategyModal from './components/StrategyModal';
@@ -150,6 +151,7 @@ function App() {
         )}
 
         {systemMode === 'command' && <CommandMode />}
+        {systemMode === 'emergency' && <EmergencyMode />}
 
         {/* Modals */}
         <CheckpointModal />
