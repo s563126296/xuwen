@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>指挥模式 V4.0 视觉草图</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#000; overflow:hidden; }
+body { display:flex; justify-content:center; align-items:center; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const W = 1920, H = 1080;
+const root = document.getElementById('root');
+root.style.cssText = `width:${W}px;height:${H}px;position:relative;background:#0A0F19;overflow:hidden;transform-origin:center center;flex-shrink:0;font-family:'Noto Sans SC',sans-serif;color:#E2E8F0;`;
+
+function resize() {
+  const s = Math.min(window.innerWidth / W, window.innerHeight / H);
+  root.style.transform = `scale(${s})`;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ===== 颜色变量 =====
+const C = {
+  primary: '#00D0E9', red: '#FF4757', green: '#2ED573', orange: '#F5A623',
+  purple: '#A78BFA', bg: '#0A0F19', card: 'rgba(13,27,42,0.8)',
+  border: 'rgba(0,208,233,0.12)', text1: '#E2E8F0', text2: '#A0A8B4', text3: '#64748B',
+};
+
+// ===== Helper =====
+function el(tag, style, html) {
+  const e = document.createElement(tag);
+  if (style) Object.assign(e.style, style);
+  if (html) e.innerHTML = html;
+  return e;
+}
+
+// ===== 1. Header (0-80px) =====
+const header = el('div', {
+  position:'absolute', top:'0', left:'0', right:'0', height:'80px',
+  display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 30px',
+  background:'linear-gradient(180deg, rgba(18,26,38,0.98), rgba(10,15,25,0.9))',
+  borderBottom:`1px solid ${C.border}`, zIndex:'100',
+}, `
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="width:40px;height:40px;background:linear-gradient(135deg,#00D0E9,#00A8CC);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px rgba(0,208,233,0.4)">
+      <span style="color:#0A0F19;font-size:20px;font-weight:700">T</span>
+    </div>
+    <div>
+      <div style="font-size:22px;font-weight:700;color:#fff;letter-spacing:2px">徐闻县智慧交通大数据系统</div>
+      <div style="font-size:11px;color:${C.text2};letter-spacing:2px;margin-top:2px">XUWEN INTELLIGENT TRANSPORTATION SYSTEM</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:4px">
+    <span style="padding:6px 16px;border-radius:4px;font-size:12px;color:${C.text2}">总览</span>
+    <span style="padding:6px 16px;border-radius:4px;font-size:12px;color:${C.text2}">港口</span>
+    <span style="padding:6px 16px;border-radius:4px;font-size:12px;color:${C.primary};background:rgba(0,208,233,0.1);border:1px solid rgba(0,208,233,0.3)">指挥</span>
+    <span style="padding:6px 16px;border-radius:4px;font-size:12px;color:${C.text2}">应急</span>
+    <span style="padding:6px 16px;border-radius:4px;font-size:12px;color:${C.text2}">分析</span>
+  </div>
+  <div style="text-align:right">
+    <div style="font-family:DIN,Orbitron,monospace;font-size:26px;font-weight:700;color:${C.primary};text-shadow:0 0 20px rgba(0,208,233,0.5);letter-spacing:3px">15:53:56</div>
+    <div style="font-size:11px;color:${C.text2};margin-top:2px">2026.04.19 星期六</div>
+  </div>
+`);
+root.appendChild(header);
+
+// ===== 2. 指挥摘要条 (84-132px) =====
+const summary = el('div', {
+  position:'absolute', top:'84px', left:'16px', right:'16px', height:'48px',
+  background:`linear-gradient(90deg, rgba(255,71,87,0.12) 0%, rgba(10,15,25,0.95) 40%)`,
+  border:`1px solid ${C.border}`, borderLeft:`3px solid ${C.red}`, borderRadius:'6px',
+  display:'flex', alignItems:'center', padding:'0 20px', gap:'16px',
+  boxShadow:'0 2px 12px rgba(255,71,87,0.08)', backdropFilter:'blur(10px)', zIndex:'90',
+}, `
+  <span style="font-family:DIN,Orbitron,monospace;font-size:22px;font-weight:700;color:${C.red};text-shadow:0 0 10px rgba(255,71,87,0.4)">6.5</span>
+  <span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(255,71,87,0.15);color:${C.red};border:1px solid rgba(255,71,87,0.3)">重度拥堵</span>
+  <span style="font-size:12px;color:${C.text2}">进港大道 · 排队1200辆 · 持续42min · 主因：港口积压70%</span>
+  <span style="color:#475569">|</span>
+  <span style="font-size:12px;color:${C.primary}">建议：S376分流 + 应急车道借用</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <span style="font-size:12px;color:${C.text2};font-family:DIN,monospace">≈45min 缓解</span>
+    <span style="padding:3px 10px;border-radius:4px;font-size:11px;border:1px solid rgba(0,208,233,0.4);background:rgba(0,208,233,0.1);color:${C.primary}">徐闻港</span>
+    <span style="padding:3px 10px;border-radius:4px;font-size:11px;border:1px solid rgba(255,255,255,0.1);color:${C.text2}">海安新港</span>
+    <span style="padding:3px 12px;border-radius:4px;font-size:11px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:${C.text2}">← 返回总览</span>
+  </div>
+`);
+root.appendChild(summary);
+
+// ===== 3. 主内容区 (140px → bottom 190px) =====
+const main = el('div', {
+  position:'absolute', top:'140px', left:'16px', right:'16px', bottom:'190px',
+  display:'flex', gap:'12px',
+});
+root.appendChild(main);
+
+// 3a. 地图区
+const mapArea = el('div', { flex:'1', position:'relative', background:'rgba(13,27,42,0.5)', border:`1px solid ${C.border}`, borderRadius:'6px', overflow:'hidden' });
+mapArea.innerHTML = `
+  <div style="position:absolute;top:12px;left:12px;z-index:10;padding:8px 14px;border-radius:6px;background:rgba(10,15,25,0.9);border:1px solid ${C.border};backdrop-filter:blur(10px)">
+    <div style="font-size:13px;font-weight:600;color:#E2E8F0">进港大道拥堵态势</div>
+    <div style="font-size:11px;color:${C.text3};margin-top:2px">点击路段可聚焦放大</div>
+  </div>
+  <div style="width:100%;height:100%;background:linear-gradient(135deg,#0A1628,#0D1B2A,#0A1628);display:flex;align-items:center;justify-content:center;color:${C.text3};font-size:14px">
+    高德地图 · 实时路况 · 拥堵着色 + 分流路线
+  </div>
+  <div style="position:absolute;right:12px;bottom:12px;width:240px;padding:10px;border-radius:8px;background:rgba(10,15,25,0.92);border:1px solid ${C.border};backdrop-filter:blur(10px)">
+    <div style="font-size:12px;font-weight:600;color:${C.text2};margin-bottom:6px">视频联动</div>
+    <div style="height:90px;border-radius:6px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:${C.text3};font-size:11px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.04)">自动调取进港大道沿线视频</div>
+    <div style="display:flex;gap:6px">
+      <span style="flex:1;padding:4px 0;font-size:11px;border-radius:4px;text-align:center;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#C9CDD4">切换视频</span>
+      <span style="flex:1;padding:4px 0;font-size:11px;border-radius:4px;text-align:center;border:1px solid rgba(0,208,233,0.25);background:rgba(0,208,233,0.08);color:${C.primary}">派出无人机</span>
+    </div>
+  </div>
+`;
+main.appendChild(mapArea);
+
+// 3b. 策略栏
+const panel = el('div', {
+  width:'300px', overflowY:'auto', background:'rgba(10,15,25,0.95)',
+  border:`1px solid ${C.border}`, borderRadius:'6px', padding:'12px',
+  backdropFilter:'blur(10px)', display:'flex', flexDirection:'column', gap:'12px',
+});
+
+function sectionCard(title, content) {
+  return `<div style="position:relative;background:${C.card};border-radius:6px;padding:12px;border:1px solid ${C.border}">
+    <div style="display:flex;align-items:center;gap:8px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid rgba(0,208,233,0.08)">
+      <div style="width:3px;height:14px;border-radius:1px;background:linear-gradient(180deg,${C.primary},rgba(0,208,233,0.3))"></div>
+      <span style="font-size:12px;font-weight:500;color:#E2E8F0">${title}</span>
+    </div>
+    ${content}
+  </div>`;
+}
+
+function strategyCard(id, name, effect, time, reduce, diff, perm, permColor, recommended) {
+  const border = recommended ? `border:1px solid rgba(0,208,233,0.2);box-shadow:0 0 10px rgba(0,208,233,0.06)` : `border:1px solid rgba(255,255,255,0.06)`;
+  const badge = recommended ? `<span style="padding:1px 6px;border-radius:3px;font-size:11px;font-weight:500;background:rgba(0,208,233,0.12);color:${C.primary}">推荐</span>` : '';
+  const btn = perm === '需审批'
+    ? `<div style="width:100%;padding:6px 0;border-radius:4px;font-size:11px;font-weight:600;text-align:center;margin-top:6px;background:transparent;color:${C.primary};border:1px solid ${C.primary}">提交审批</div>`
+    : `<div style="width:100%;padding:6px 0;border-radius:4px;font-size:11px;font-weight:600;text-align:center;margin-top:6px;background:${C.primary};color:#0A0F19">确认执行</div>`;
+  return `<div style="padding:10px 12px;border-radius:6px;margin-bottom:8px;background:rgba(13,27,42,0.6);${border};backdrop-filter:blur(10px)">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      ${badge}
+      <span style="font-size:12px;font-weight:600;color:#E2E8F0;flex:1">${id}: ${name}</span>
+      <span style="padding:1px 6px;border-radius:3px;font-size:11px;background:${permColor}15;color:${permColor}">${perm}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0"><span style="font-size:11px;color:${C.text3}">预计效果</span><span style="font-size:11px;color:${C.primary};font-family:DIN,monospace">${effect}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0"><span style="font-size:11px;color:${C.text3}">缓解时间</span><span style="font-size:11px;color:#C9CDD4;font-family:DIN,monospace">${time}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0"><span style="font-size:11px;color:${C.text3}">减少积压</span><span style="font-size:11px;color:#C9CDD4;font-family:DIN,monospace">${reduce}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0"><span style="font-size:11px;color:${C.text3}">执行难度</span><span style="font-size:11px;color:${C.orange}">${diff}</span></div>
+    ${btn}
+  </div>`;
+}
+
+function resourceRow(label, pct, num, color) {
+  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+    <span style="font-size:11px;color:${C.text3};width:60px">${label}</span>
+    <div style="flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:2px"></div></div>
+    <span style="font-size:11px;color:#C9CDD4;font-family:DIN,monospace;width:60px;text-align:right">${num}</span>
+  </div>`;
+}
+
+panel.innerHTML = sectionCard('AI 策略建议',
+  strategyCard('S-01','应急车道借用','6.5 → 4.8','约 30 分钟','~350 辆','★★☆','需审批',C.red,true) +
+  strategyCard('S-02','S376省道分流','6.5 → 5.2','约 20 分钟','~200 辆','★☆☆','需确认',C.orange,true)
+) + sectionCard('可调度资源',
+  resourceRow('在岗交警',50,'6 / 可调3',C.green) +
+  resourceRow('无人机',50,'1 架',C.green) +
+  resourceRow('拖车',40,'2 辆',C.orange)
+) + sectionCard('历史参考',
+  `<div style="font-size:11px;color:${C.text3};margin-bottom:8px">上次类似拥堵：上周五 15:30，S376分流+信号灯优化，45分钟缓解</div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:${C.text3}">S-01 应急车道</span><span style="font-size:11px;color:${C.green};font-family:DIN,monospace">89%</span></div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:${C.text3}">S-02 S376分流</span><span style="font-size:11px;color:${C.primary};font-family:DIN,monospace">76%</span></div>
+  <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:${C.text3}">S-04 信号灯优化</span><span style="font-size:11px;color:${C.orange};font-family:DIN,monospace">62%</span></div>`
+);
+main.appendChild(panel);
+
+// ===== 4. 底部通信面板 (bottom 12px, height 160px) =====
+const events = [
+  { type:'system', time:'15:23', src:'系统', text:'拥堵指数升至 6.5，自动切换指挥模式', color:C.primary },
+  { type:'ai', time:'15:24', src:'AI 分析', text:'主因：港口积压（70%），建议启动 S376 分流', color:C.purple },
+  { type:'command', time:'15:25', src:'指挥员小王', text:'确认执行 S-02 S376 省道分流', color:C.green },
+  { type:'system', time:'15:25', src:'系统', text:'指令 #CMD-0419-001 已生成，推送至张三', color:C.primary },
+  { type:'field', time:'15:27', src:'张三', text:'已到达路口 A，开始引导分流', color:C.text2 },
+  { type:'system', time:'15:30', src:'系统', text:'S376 分流已生效 3 分钟，拥堵指数 6.2（↓0.3）', color:C.primary },
+  { type:'field', time:'15:32', src:'张三', text:'📷 现场照片：分流车辆正常通行', color:C.text2 },
+  { type:'alert', time:'15:35', src:'AI 分析', text:'⚠ 缓解速度低于预期，建议追加策略', color:C.red, urgent:true },
+  { type:'alert', time:'15:36', src:'港口调度', text:'⚠ 15:45 有大船靠港，预计增加 500 辆车', color:C.red, urgent:true },
+  { type:'approval', time:'15:38', src:'值班领导', text:'审批通过 S-01 应急车道借用', color:C.green },
+  { type:'field', time:'15:42', src:'李四', text:'📞 请求视频通话：应急车道有违停需拖移', color:C.red, urgent:true },
+  { type:'command', time:'15:43', src:'指挥员小王', text:'已调度拖车前往，预计 5 分钟到达', color:C.green },
+  { type:'system', time:'15:45', src:'系统', text:'拥堵指数 5.1（↓1.4），两个策略协同生效', color:C.primary },
+  { type:'ai', time:'15:50', src:'AI 分析', text:'效果达标，预计 16:15 恢复通畅', color:C.purple },
+];
+
+const typeBg = { system:'rgba(0,208,233,0.04)', ai:'rgba(167,139,250,0.05)', command:'rgba(45,213,115,0.04)', field:'rgba(255,255,255,0.02)', alert:'rgba(255,71,87,0.06)', approval:'rgba(45,213,115,0.05)' };
+const typeBorderL = { system:`2px solid rgba(0,208,233,0.5)`, ai:`2px solid rgba(167,139,250,0.5)`, command:`2px solid rgba(45,213,115,0.5)`, field:`2px solid rgba(148,163,184,0.3)`, alert:`2px solid rgba(255,71,87,0.6)`, approval:`2px solid rgba(45,213,115,0.5)` };
+const typeBorderC = { system:'rgba(0,208,233,0.1)', ai:'rgba(167,139,250,0.12)', command:'rgba(45,213,115,0.1)', field:'rgba(255,255,255,0.06)', alert:'rgba(255,71,87,0.2)', approval:'rgba(45,213,115,0.15)' };
+
+const comm = el('div', {
+  position:'absolute', bottom:'12px', left:'16px', right:'16px', height:'160px',
+  background:C.card, border:`1px solid ${C.border}`, borderRadius:'6px',
+  backdropFilter:'blur(10px)', boxShadow:'0 -2px 12px rgba(0,208,233,0.04)',
+  display:'flex', flexDirection:'column', overflow:'hidden',
+});
+
+comm.innerHTML = `
+  <div style="padding:6px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(0,208,233,0.06);flex-shrink:0">
+    <div style="width:3px;height:12px;border-radius:1px;background:linear-gradient(180deg,${C.primary},rgba(0,208,233,0.3))"></div>
+    <span style="font-size:12px;font-weight:600;color:#E2E8F0">指挥通信时间线</span>
+    <span style="font-size:11px;color:${C.text3}">${events.length} 条记录</span>
+    <div style="width:6px;height:6px;border-radius:50%;background:${C.green}"></div>
+    <span style="font-size:11px;color:${C.green};font-weight:600;letter-spacing:1px">实时</span>
+    <span style="margin-left:auto;font-size:11px;color:#475569">← 滑动查看历史</span>
+  </div>
+  <div style="flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;padding:6px 12px;gap:0">
+    ${events.map((e, i) => {
+      const card = `<div style="width:200px;flex-shrink:0;padding:8px 10px;border-radius:5px;display:flex;flex-direction:column;gap:3px;background:${typeBg[e.type]};border:1px solid ${typeBorderC[e.type]};border-left:${typeBorderL[e.type]}${e.urgent ? ';animation:alertPulse 2s infinite' : ''}">
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:11px;font-family:DIN,monospace;font-weight:600;color:${e.color}">${e.time}</span>
+          <span style="font-size:11px;color:${C.text2}">${e.src}</span>
+        </div>
+        <div style="font-size:11px;color:${e.urgent ? '#FCA5A5' : '#C9CDD4'};${e.urgent ? 'font-weight:600;' : ''}line-height:1.5">${e.text}</div>
+      </div>`;
+      const conn = i < events.length - 1 ? `<div style="width:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:1px;background:linear-gradient(90deg,rgba(0,208,233,0.08),rgba(0,208,233,0.2),rgba(0,208,233,0.08))"></div></div>` : '';
+      return card + conn;
+    }).join('')}
+  </div>
+  <style>@keyframes alertPulse { 0%,100% { border-color:rgba(255,71,87,0.2); } 50% { border-color:rgba(255,71,87,0.5);box-shadow:0 0 8px rgba(255,71,87,0.15); } }</style>
+`;
+root.appendChild(comm);
+</script>
+</body>
+</html>

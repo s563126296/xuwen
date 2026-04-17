@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI态势研判面板 - 设计草图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0A0F19; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; color: #C9CDD4; padding: 20px; }
+  h2 { color: #86909C; font-size: 13px; font-weight: 400; margin: 30px 0 12px; letter-spacing: 2px; }
+  h2:first-of-type { margin-top: 10px; }
+  .label { color: #86909C; font-size: 11px; margin-top: 4px; }
+  .note { color: #4B5563; font-size: 11px; font-style: italic; margin-top: 6px; }
+
+  /* ====== 折叠态 ====== */
+  .collapsed-bar {
+    width: 1200px; height: 48px;
+    background: rgba(245, 166, 35, 0.08);
+    border-bottom: 1px solid rgba(245, 166, 35, 0.2);
+    display: flex; align-items: center; padding: 0 32px;
+    cursor: pointer; border-radius: 0;
+    transition: background 0.2s;
+  }
+  .collapsed-bar:hover { background: rgba(245, 166, 35, 0.12); }
+  .level-icon { width: 28px; height: 28px; border-radius: 6px; background: rgba(245,166,35,0.15); display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; }
+  .level-icon svg { width: 16px; height: 16px; }
+  .conclusion { font-size: 13px; font-weight: 500; color: #F5A623; }
+  .separator { color: rgba(245,166,35,0.3); margin: 0 12px; font-size: 11px; }
+  .suggestion-hint { font-size: 12px; color: #00D0E9; }
+  .badge-group { display: flex; gap: 8px; margin-left: auto; }
+  .badge { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: 'DIN', monospace; }
+  .badge.flow { background: rgba(0,208,233,0.1); border: 1px solid rgba(0,208,233,0.2); color: #00D0E9; }
+  .badge.resilience { background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.2); color: #F5A623; }
+  .badge.port { background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.2); color: #FF6B35; }
+  .expand-icon { margin-left: 16px; color: #86909C; font-size: 14px; }
+
+  /* ====== 展开态 ====== */
+  .expanded-panel {
+    width: 1200px;
+    background: #0D1220;
+    border: 1px solid rgba(245, 166, 35, 0.15);
+    border-top: 2px solid #F5A623;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+  }
+  .expanded-header {
+    height: 48px; display: flex; align-items: center; padding: 0 32px;
+    background: rgba(245,166,35,0.06);
+    border-bottom: 1px solid rgba(245,166,35,0.1);
+  }
+  .expanded-body {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+    padding: 0;
+  }
+  .panel-section {
+    padding: 20px 24px;
+    border-right: 1px solid rgba(255,255,255,0.04);
+  }
+  .panel-section:last-child { border-right: none; }
+  .section-title {
+    font-size: 11px; color: #86909C; margin-bottom: 14px; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-title .dot { width: 4px; height: 4px; border-radius: 50%; }
+
+  /* 态势卡片 */
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .metric-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px; padding: 10px 12px;
+  }
+  .metric-card .value {
+    font-family: 'DIN', monospace; font-weight: 700; font-size: 22px; line-height: 1.2;
+  }
+  .metric-card .name { font-size: 11px; color: #86909C; margin-top: 2px; }
+  .metric-card .tag {
+    display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 3px;
+    margin-left: 4px; vertical-align: middle;
+  }
+  .tag.up { background: rgba(255,71,87,0.12); color: #FF4757; }
+  .tag.down { background: rgba(46,213,115,0.12); color: #2ED573; }
+  .tag.neutral { background: rgba(0,208,233,0.1); color: #00D0E9; }
+
+  /* 预判列表 */
+  .forecast-list { display: flex; flex-direction: column; gap: 12px; }
+  .forecast-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+  }
+  .forecast-item.warn { border-left-color: #F5A623; }
+  .forecast-item.danger { border-left-color: #FF6B35; }
+  .forecast-item.info { border-left-color: #00D0E9; }
+  .forecast-time {
+    font-family: 'DIN', monospace; font-size: 12px; font-weight: 600;
+    color: #F5A623; flex-shrink: 0; min-width: 40px;
+  }
+  .forecast-text { font-size: 12px; line-height: 1.5; color: #C9CDD4; }
+
+  /* 建议操作 */
+  .action-list { display: flex; flex-direction: column; gap: 8px; }
+  .action-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-item:hover {
+    background: rgba(0,208,233,0.06);
+    border-color: rgba(0,208,233,0.2);
+  }
+  .action-priority {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .action-priority.high { background: #FF6B35; }
+  .action-priority.medium { background: #F5A623; }
+  .action-priority.low { background: #00D0E9; }
+  .action-content { flex: 1; }
+  .action-title { font-size: 12px; color: #E0E4E8; font-weight: 500; }
+  .action-time { font-size: 10px; color: #86909C; margin-top: 2px; }
+  .action-btn {
+    padding: 4px 12px; border-radius: 4px; font-size: 11px;
+    background: rgba(0,208,233,0.1); border: 1px solid rgba(0,208,233,0.25);
+    color: #00D0E9; cursor: pointer; flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .action-btn:hover { background: rgba(0,208,233,0.2); border-color: #00D0E9; }
+
+  /* 底部同比 */
+  .compare-bar {
+    padding: 10px 32px;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.04);
+    font-size: 11px; color: #86909C;
+    display: flex; gap: 20px;
+  }
+  .compare-bar span { color: #C9CDD4; }
+  .compare-bar .good { color: #2ED573; }
+  .compare-bar .bad { color: #FF4757; }
+</style>
+</head>
+<body>
+
+<h2>▎状态一：折叠态（常态）</h2>
+
+<div class="collapsed-bar">
+  <div class="level-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  </div>
+  <span class="conclusion">正常高峰</span>
+  <span class="separator">·</span>
+  <span class="suggestion-hint">建议 14:45 启动 S376 分流</span>
+  <div class="badge-group">
+    <span class="badge flow">车流 3.5万</span>
+    <span class="badge port">港口等1200</span>
+    <span class="badge resilience">韧性 45</span>
+  </div>
+  <span class="expand-icon">▼</span>
+</div>
+
+<p class="note">↑ 高度 48px，左侧结论 + 右侧关键徽章，点击展开</p>
+
+<h2>▎状态二：展开态（点击后下拉覆盖）</h2>
+
+<div class="expanded-panel">
+  <!-- Header -->
+  <div class="expanded-header">
+    <div class="level-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <span class="conclusion">五一假期第 2 天 · 正常高峰范围</span>
+    <span style="margin-left:auto; color:#86909C; font-size:12px;">AI 态势研判</span>
+    <span class="expand-icon" style="margin-left:12px">▲</span>
+  </div>
+
+  <!-- Body: 三栏 -->
+  <div class="expanded-body">
+    <!-- 左栏：当前态势 -->
+    <div class="panel-section">
+      <div class="section-title"><span class="dot" style="background:#00D0E9"></span>当前态势</div>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="value" style="color:#00D0E9">34,847</div>
+          <div class="name">今日车流 <span class="tag neutral">2.8x</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="value" style="color:#FF6B35">1,200</div>
+          <div class="name">港口等待(辆) <span class="tag up">↑ 5h40m</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="value" style="color:#F5A623">92%</div>
+          <div class="name">南向通道压力</div>
+        </div>
+        <div class="metric-card">
+          <div class="value" style="color:#F5A623">45<span style="font-size:13px;color:#86909C">/100</span></div>
+          <div class="name">应急韧性 <span class="tag up">薄弱</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中栏：趋势预判 -->
+    <div class="panel-section">
+      <div class="section-title"><span class="dot" style="background:#F5A623"></span>趋势预判 (2h)</div>
+      <div class="forecast-list">
+        <div class="forecast-item warn">
+          <div class="forecast-time">15:00</div>
+          <div class="forecast-text">预计达到<strong style="color:#F5A623">峰值</strong>，大船靠港叠加下班高峰</div>
+        </div>
+        <div class="forecast-item danger">
+          <div class="forecast-time">15:30</div>
+          <div class="forecast-text">港口压力持续上升，韧性预计降至 <strong style="color:#FF6B35">35</strong>（橙→红）</div>
+        </div>
+        <div class="forecast-item info">
+          <div class="forecast-time">16:30</div>
+          <div class="forecast-text">预计开始回落，压力逐步缓解</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右栏：建议操作 -->
+    <div class="panel-section">
+      <div class="section-title"><span class="dot" style="background:#2ED573"></span>建议操作</div>
+      <div class="action-list">
+        <div class="action-item">
+          <span class="action-priority high"></span>
+          <div class="action-content">
+            <div class="action-title">启动 S376 省道分流</div>
+            <div class="action-time">建议 14:45 前执行 · 预计缓解南向 15%</div>
+          </div>
+          <button class="action-btn">执行</button>
+        </div>
+        <div class="action-item">
+          <span class="action-priority medium"></span>
+          <div class="action-content">
+            <div class="action-title">关注东向通道压力</div>
+            <div class="action-time">当前 78%，接近预警阈值</div>
+          </div>
+          <button class="action-btn">定位</button>
+        </div>
+        <div class="action-item">
+          <span class="action-priority low"></span>
+          <div class="action-content">
+            <div class="action-title">查看港口排队详情</div>
+            <div class="action-time">徐闻港 1200辆 · 海安新港 380辆</div>
+          </div>
+          <button class="action-btn">查看</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部同比 -->
+  <div class="compare-bar">
+    <span>vs 去年五一同期:</span>
+    <span>车流 <span class="good">-5% ↓</span></span>
+    <span>港口消化 <span class="good">+8% ↑</span></span>
+    <span>通道压力 <span class="bad">+3% ↑</span></span>
+    <span style="margin-left:auto; color:#2ED573">整体优于去年</span>
+  </div>
+</div>
+
+<p class="note">↑ 展开约 280px，三栏结构：态势 | 预判 | 建议（可执行），底部同比参考</p>
+
+</body>
+</html>
