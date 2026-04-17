@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDashboardStore } from '../../store/dashboardStore';
-import { playClickSound } from '../../utils/soundEffects';
+import { playMessageSound } from '../../utils/soundEffects';
 
 const typeColor = {
   system: '#00D0E9',
@@ -24,7 +24,7 @@ export default function EmergencyCommPanel() {
 
   const handleSend = () => {
     if (!inputText.trim()) return;
-    playClickSound();
+    playMessageSound();
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const newItem = {

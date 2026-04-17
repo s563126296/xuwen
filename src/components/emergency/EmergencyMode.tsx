@@ -7,49 +7,59 @@ import EmergencyTaskBoard from './EmergencyTaskBoard';
 import EmergencyPlanPanel from './EmergencyPlanPanel';
 import EmergencyCommPanel from './EmergencyCommPanel';
 import EmergencyTimeline from './EmergencyTimeline';
+import EmergencySimulator from './EmergencySimulator';
 
 export default function EmergencyMode() {
   return (
     <>
-      {/* Top alert banner: below header (80px) */}
-      <div style={{ position: 'absolute', top: 84, left: 0, right: 0, zIndex: 110 }}>
-        <EmergencyBanner />
+      <style>{`
+        @keyframes emergencyFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+      <EmergencySimulator />
+      <div style={{ animation: 'emergencyFadeIn 0.5s ease-out' }}>
+        {/* Top alert banner: below header (80px) */}
+        <div style={{ position: 'absolute', top: 84, left: 0, right: 0, zIndex: 110 }}>
+          <EmergencyBanner />
+        </div>
+
+        {/* Main 3-column layout */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 184,
+            left: 16,
+            right: 16,
+            bottom: 184,
+            display: 'flex',
+            gap: 12,
+          }}
+        >
+          {/* Left column */}
+          <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto', minHeight: 0 }}>
+            <EmergencyForecastPanel />
+            <SpecialVehiclePanel />
+            <SupplyDemandPanel />
+          </div>
+
+          {/* Center: map */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <EmergencyMap />
+          </div>
+
+          {/* Right column */}
+          <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
+            <EmergencyTaskBoard />
+            <EmergencyPlanPanel />
+            <EmergencyCommPanel />
+          </div>
+        </div>
+
+        {/* Bottom timeline */}
+        <EmergencyTimeline />
       </div>
-
-      {/* Main 3-column layout */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 184,
-          left: 16,
-          right: 16,
-          bottom: 184,
-          display: 'flex',
-          gap: 12,
-        }}
-      >
-        {/* Left column */}
-        <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto', minHeight: 0 }}>
-          <EmergencyForecastPanel />
-          <SpecialVehiclePanel />
-          <SupplyDemandPanel />
-        </div>
-
-        {/* Center: map */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <EmergencyMap />
-        </div>
-
-        {/* Right column */}
-        <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
-          <EmergencyTaskBoard />
-          <EmergencyPlanPanel />
-          <EmergencyCommPanel />
-        </div>
-      </div>
-
-      {/* Bottom timeline */}
-      <EmergencyTimeline />
     </>
   );
 }

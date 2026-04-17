@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDashboardStore } from '../../store/dashboardStore';
-import { playClickSound } from '../../utils/soundEffects';
+import { playClickSound, playMessageSound } from '../../utils/soundEffects';
 import AddTaskModal from './AddTaskModal';
 
 const priorityColor = {
@@ -29,7 +29,11 @@ export default function EmergencyTaskBoard() {
   const [showModal, setShowModal] = useState(false);
 
   const handleStatusChange = (taskId: string, newStatus: 'received' | 'executing' | 'done') => {
-    playClickSound();
+    if (newStatus === 'done') {
+      playMessageSound();
+    } else {
+      playClickSound();
+    }
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const updatedTasks = tasks.map((t) =>
