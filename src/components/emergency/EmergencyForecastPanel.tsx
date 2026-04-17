@@ -1,7 +1,12 @@
 import { useDashboardStore } from '../../store/dashboardStore';
+import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export default function EmergencyForecastPanel() {
   const forecast = useDashboardStore((s) => s.emergencyState.forecast);
+  const timeline = useDashboardStore((s) => s.emergencyState.timeline);
+
+  // Last 8 data points for sparkline
+  const sparkData = timeline.slice(-8).map((pt) => ({ value: pt.value }));
 
   return (
     <div className="card" style={{ padding: 14, minHeight: 220 }}>
@@ -28,6 +33,31 @@ export default function EmergencyForecastPanel() {
         <div style={{ fontSize: 11, color: '#94A3B8' }}>停航时长 / 消化时间</div>
         <div style={{ marginTop: 4, fontSize: 13, color: '#E2E8F0' }}>
           预计停航 {forecast.estimatedShutdownHours} 小时 · 复航后消化约 {forecast.estimatedRecoveryHours} 小时
+        </div>
+      </div>
+      {/* Sparkline: stranded vehicle trend */}
+      <div style={{ marginTop: 10 }}>
+        <div style={{ fontSize: 10, color: '#64748B', marginBottom: 4 }}>滞留趋势</div>
+        <div style={{ height: 60 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={sparkData} margin={{ top: 2, right: 0, left: 0, bottom: 2 }}>
+              <defs>
+                <linearGradient id="strandedGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F5A623" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="#F5A623" stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#F5A623"
+                strokeWidth={1.5}
+                fill="url(#strandedGrad)"
+                dot={false}
+                isAnimationActive={false}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

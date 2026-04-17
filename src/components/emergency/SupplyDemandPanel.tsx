@@ -1,15 +1,17 @@
+import { useState } from 'react';
 import { useDashboardStore } from '../../store/dashboardStore';
+import { playClickSound } from '../../utils/soundEffects';
 
 // 物资库存（mock，待民政局确认后替换真实数据）
 const supplyInventory = [
-  { key: 'meals', label: '盒饭', unit: '份', available: 8000, perPersonPerDay: 3 },
-  { key: 'water', label: '饮用水', unit: '箱', available: 1000, perPersonPerDay: 0.15 },
-  { key: 'raincoat', label: '雨衣', unit: '件', available: 2000, perPersonPerDay: 0.5 },
-  { key: 'blanket', label: '毛毯', unit: '条', available: 800, perPersonPerDay: 0.3 },
-  { key: 'powerbank', label: '充电宝', unit: '个', available: 500, perPersonPerDay: 0.2 },
-  { key: 'medicine', label: '应急药品包', unit: '份', available: 300, perPersonPerDay: 0.05 },
-  { key: 'toilet', label: '移动厕所', unit: '座', available: 20, fixedDemand: 15 },
-  { key: 'tent', label: '应急帐篷', unit: '顶', available: 30, fixedDemand: 20 },
+  { key: 'meals', label: '盒饭', unit: '份', available: 8000, perPersonPerDay: 3, dispatchAmount: 2000 },
+  { key: 'water', label: '饮用水', unit: '箱', available: 1000, perPersonPerDay: 0.15, dispatchAmount: 300 },
+  { key: 'raincoat', label: '雨衣', unit: '件', available: 2000, perPersonPerDay: 0.5, dispatchAmount: 500 },
+  { key: 'blanket', label: '毛毯', unit: '条', available: 800, perPersonPerDay: 0.3, dispatchAmount: 200 },
+  { key: 'powerbank', label: '充电宝', unit: '个', available: 500, perPersonPerDay: 0.2, dispatchAmount: 100 },
+  { key: 'medicine', label: '应急药品包', unit: '份', available: 300, perPersonPerDay: 0.05, dispatchAmount: 100 },
+  { key: 'toilet', label: '移动厕所', unit: '座', available: 20, fixedDemand: 15, dispatchAmount: 5 },
+  { key: 'tent', label: '应急帐篷', unit: '顶', available: 30, fixedDemand: 20, dispatchAmount: 10 },
 ];
 
 function getBarColor(ratio: number): string {
@@ -20,20 +22,43 @@ function getBarColor(ratio: number): string {
 
 export default function SupplyDemandPanel() {
   const forecast = useDashboardStore((s) => s.emergencyState.forecast);
+  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
+  const communications = useDashboardStore((s) => s.emergencyState.communications);
   const strandedPeople = Math.round(forecast.currentStrandedVehicles * 2);
   const shutdownDays = Math.max(1, Math.ceil(forecast.estimatedShutdownHours / 24));
+
+  // Track dispatched amounts per item key
+  const [dispatched, setDispatched] = useState<Record<string, number>>({});
 
   const items = supplyInventory.map((item) => {
     const demand = item.fixedDemand
       ? item.fixedDemand
       : Math.round(strandedPeople * (item.perPersonPerDay ?? 0) * shutdownDays * 1.2);
-    const ratio = demand > 0 ? Math.min(item.available / demand, 1) : 1;
-    return { ...item, demand, ratio };
+    const extra = dispatched[item.key] ?? 0;
+    const available = item.available + extra;
+    const ratio = demand > 0 ? Math.min(available / demand, 1) : 1;
+    return { ...item, available, demand, ratio };
   });
 
   const overallRatio = items.length > 0
     ? items.reduce((sum, i) => sum + i.ratio, 0) / items.length
     : 1;
+
+  const handleDispatch = (item: typeof items[0]) => {
+    playClickSound();
+    setDispatched((prev) => ({ ...prev, [item.key]: (prev[item.key] ?? 0) + item.dispatchAmount }));
+    // Add comm record
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const newComm = {
+      id: `ec-dispatch-${Date.now()}`,
+      type: 'department' as const,
+      source: '民政局',
+      time: timeStr,
+      content: `已调拨 ${item.label} ${item.dispatchAmount.toLocaleString()} ${item.unit}`,
+    };
+    setEmergencyState({ communications: [...communications, newComm] });
+  };
 
   return (
     <div className="card" style={{ padding: 14, minHeight: 0 }}>
@@ -56,12 +81,22 @@ export default function SupplyDemandPanel() {
           const color = getBarColor(item.ratio);
           return (
             <div key={item.key}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3, alignItems: 'center' }}>
                 <span style={{ color: '#94A3B8' }}>{item.label}</span>
-                <span style={{ color: '#E2E8F0' }}>
-                  <span style={{ color }}>{item.available.toLocaleString()}</span>
-                  <span style={{ color: '#64748B' }}> / {item.demand.toLocaleString()}{item.unit} ({pct}%)</span>
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ color: '#E2E8F0' }}>
+                    <span style={{ color }}>{item.available.toLocaleString()}</span>
+                    <span style={{ color: '#64748B' }}> / {item.demand.toLocaleString()}{item.unit} ({pct}%)</span>
+                  </span>
+                  <button
+                    onClick={() => handleDispatch(item)}
+                    style={{
+                      fontSize: 10, padding: '1px 5px', borderRadius: 3,
+                      background: 'transparent', border: '1px solid #2ED573',
+                      color: '#2ED573', cursor: 'pointer', lineHeight: 1.4,
+                    }}
+                  >调拨</button>
+                </div>
               </div>
               <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.08)' }}>
                 <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2, background: color, transition: 'width 0.3s' }} />

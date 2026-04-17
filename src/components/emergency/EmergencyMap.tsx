@@ -37,6 +37,7 @@ export default function EmergencyMap() {
   const [mapReady, setMapReady] = useState(false);
   const points = useDashboardStore((s) => s.emergencyState.resourcePoints);
   const typhoon = useDashboardStore((s) => s.emergencyState.typhoon);
+  const currentStranded = useDashboardStore((s) => s.emergencyState.forecast.currentStrandedVehicles);
 
   // 根据台风距离计算当前位置（线性插值）
   const getTyphoonPosition = (distance: number): [number, number] => {
@@ -96,6 +97,12 @@ export default function EmergencyMap() {
         interval: 30,
       }));
 
+      // Dynamic parking usage rates
+      const p1Usage = Math.min(100, Math.round(currentStranded / 3200 * 82));
+      const p2Usage = Math.min(100, Math.round(currentStranded / 3200 * 46));
+      const p1Color = p1Usage >= 80 ? '#FF4757' : p1Usage >= 60 ? '#F5A623' : '#00D0E9';
+      const p2Color = p2Usage >= 80 ? '#FF4757' : p2Usage >= 60 ? '#F5A623' : '#00D0E9';
+
       // 资源点位标注
       points.forEach((point) => {
         const color = point.status === 'critical' ? '#FF4757' : point.status === 'warning' ? '#F5A623' : '#00D0E9';
@@ -120,23 +127,23 @@ export default function EmergencyMap() {
                   ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
                       <span style="font-size:10px;color:#94A3B8;width:28px;">P-1</span>
                       <div style="flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden;">
-                        <div style="width:82%;height:100%;background:#F5A623;border-radius:3px;"></div>
+                        <div style="width:${p1Usage}%;height:100%;background:${p1Color};border-radius:3px;"></div>
                       </div>
-                      <span style="font-size:10px;color:#F5A623;width:28px;">82%</span>
+                      <span style="font-size:10px;color:${p1Color};width:28px;">${p1Usage}%</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;">
                       <span style="font-size:10px;color:#94A3B8;width:28px;">P-2</span>
                       <div style="flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden;">
-                        <div style="width:46%;height:100%;background:#00D0E9;border-radius:3px;"></div>
+                        <div style="width:${p2Usage}%;height:100%;background:${p2Color};border-radius:3px;"></div>
                       </div>
-                      <span style="font-size:10px;color:#00D0E9;width:28px;">46%</span>
+                      <span style="font-size:10px;color:${p2Color};width:28px;">${p2Usage}%</span>
                     </div>`
                   : `<div style="display:flex;align-items:center;gap:6px;">
                       <span style="font-size:10px;color:#94A3B8;width:28px;">P-2</span>
                       <div style="flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden;">
-                        <div style="width:46%;height:100%;background:#00D0E9;border-radius:3px;"></div>
+                        <div style="width:${p2Usage}%;height:100%;background:${p2Color};border-radius:3px;"></div>
                       </div>
-                      <span style="font-size:10px;color:#00D0E9;width:28px;">46%</span>
+                      <span style="font-size:10px;color:${p2Color};width:28px;">${p2Usage}%</span>
                     </div>`
                 }
               </div>`
@@ -269,6 +276,26 @@ export default function EmergencyMap() {
       });
       map.add(typhoonMarker);
       typhoonMarkerRef.current = typhoonMarker;
+
+      // === 无人机巡查路线（青色虚线环路）===
+      // drone point → P-1 → supply point → P-2 → back to drone point
+      const dronePatrolPath: [number, number][] = [
+        [110.1574, 20.2911], // d1 drone point
+        [110.1465, 20.243],  // p1 parking
+        [110.1505, 20.263],  // s1 supply
+        [110.158, 20.289],   // p2 parking
+        [110.1574, 20.2911], // back to drone
+      ];
+      map.add(new AMap.Polyline({
+        path: dronePatrolPath,
+        strokeColor: '#00FFFF',
+        strokeWeight: 2,
+        strokeOpacity: 0.4,
+        strokeStyle: 'dashed',
+        strokeDasharray: [6, 4],
+        zIndex: 120,
+        lineJoin: 'round',
+      }));
 
       setMapReady(true);
     }).catch((e: any) => {
