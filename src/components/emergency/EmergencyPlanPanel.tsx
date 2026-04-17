@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { useDashboardStore } from '../../store/dashboardStore';
-import EmergencyReportModal from './EmergencyReportModal';
 
 const levelColorMap = {
   I: '#FF4757',
@@ -11,16 +9,15 @@ const levelColorMap = {
 
 export default function EmergencyPlanPanel() {
   const emergency = useDashboardStore((s) => s.emergencyState);
+  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
   const color = levelColorMap[emergency.emergencyLevel];
-  const [showReport, setShowReport] = useState(false);
 
   return (
     <div className="card" style={{ padding: 14, flex: '25 0 0', minHeight: 0, overflow: 'hidden' }}>
-      {showReport && <EmergencyReportModal onClose={() => setShowReport(false)} />}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>G. 应急预案与响应等级</div>
         <button
-          onClick={() => setShowReport(true)}
+          onClick={() => setActiveModal('emergency-report')}
           style={{
             fontSize: 10, padding: '3px 8px', borderRadius: 4,
             background: 'rgba(0,208,233,0.1)', border: '1px solid rgba(0,208,233,0.3)',

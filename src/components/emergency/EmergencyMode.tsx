@@ -8,8 +8,13 @@ import EmergencyPlanPanel from './EmergencyPlanPanel';
 import EmergencyCommPanel from './EmergencyCommPanel';
 import EmergencyTimeline from './EmergencyTimeline';
 import EmergencySimulator from './EmergencySimulator';
+import EmergencyReportModal from './EmergencyReportModal';
+import { useDashboardStore } from '../../store/dashboardStore';
 
 export default function EmergencyMode() {
+  const activeModal = useDashboardStore((s) => s.activeModal);
+  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+
   return (
     <>
       <style>{`
@@ -19,6 +24,9 @@ export default function EmergencyMode() {
         }
       `}</style>
       <EmergencySimulator />
+      {activeModal === 'emergency-report' && (
+        <EmergencyReportModal onClose={() => setActiveModal(null)} />
+      )}
       <div style={{ animation: 'emergencyFadeIn 0.5s ease-out' }}>
         {/* Top alert banner: below header (80px) */}
         <div style={{ position: 'absolute', top: 84, left: 0, right: 0, zIndex: 110 }}>
