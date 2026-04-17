@@ -20,7 +20,7 @@ export default function EmergencyMode() {
       <div
         style={{
           position: 'absolute',
-          top: 152,
+          top: 184,
           left: 16,
           right: 16,
           bottom: 184,
