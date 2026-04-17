@@ -29,7 +29,7 @@ export default function EmergencyMode() {
         }}
       >
         {/* Left column */}
-        <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto', minHeight: 0 }}>
           <EmergencyForecastPanel />
           <SpecialVehiclePanel />
           <SupplyDemandPanel />
@@ -41,7 +41,7 @@ export default function EmergencyMode() {
         </div>
 
         {/* Right column */}
-        <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto', minHeight: 0 }}>
           <EmergencyTaskBoard />
           <EmergencyPlanPanel />
           <EmergencyCommPanel />
