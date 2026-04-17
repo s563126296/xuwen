@@ -36,9 +36,9 @@ export default function EmergencyTaskBoard() {
   };
 
   return (
-    <div className="card" style={{ padding: 14, minHeight: 260 }}>
+    <div className="card" style={{ padding: 14, flex: '1 1 auto', minHeight: 0, maxHeight: 280 }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 12 }}>F. 跨部门任务板</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', maxHeight: 220 }}>
         {tasks.map((task) => {
           const btnConfig = nextStatusConfig[task.status];
           return (

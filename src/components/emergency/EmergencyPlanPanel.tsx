@@ -12,7 +12,7 @@ export default function EmergencyPlanPanel() {
   const color = levelColorMap[emergency.emergencyLevel];
 
   return (
-    <div className="card" style={{ padding: 14, minHeight: 200 }}>
+    <div className="card" style={{ padding: 14, flexShrink: 0 }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 12 }}>G. 应急预案与响应等级</div>
       <div style={{ padding: 12, borderRadius: 6, background: `${color}11`, border: `1px solid ${color}33` }}>
         <div style={{ fontSize: 11, color: '#94A3B8' }}>当前响应等级</div>
