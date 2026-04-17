@@ -1,5 +1,11 @@
 import { useDashboardStore } from '../../store/dashboardStore';
 
+const coldChainAlerts = [
+  { level: '黄色', threshold: '> 6h', count: 42, color: '#F5A623' },
+  { level: '橙色', threshold: '> 12h', count: 18, color: '#FF6B35' },
+  { level: '红色', threshold: '> 24h', count: 3, color: '#FF4757' },
+];
+
 export default function SpecialVehiclePanel() {
   const forecast = useDashboardStore((s) => s.emergencyState.forecast);
 
@@ -15,9 +21,18 @@ export default function SpecialVehiclePanel() {
           <span style={{ fontSize: 12, color: '#94A3B8' }}>危化品车</span>
           <span style={{ fontSize: 18, fontWeight: 700, color: '#FF6B35' }}>{forecast.hazardousVehicles} 辆</span>
         </div>
-        <div style={{ padding: 10, borderRadius: 6, background: 'rgba(245,166,35,0.08)', border: '1px solid rgba(245,166,35,0.15)' }}>
-          <div style={{ fontSize: 11, color: '#F5A623', fontWeight: 600 }}>重点关注</div>
-          <div style={{ marginTop: 4, fontSize: 12, color: '#CBD5E1' }}>冷链车需要优先安排有电源停车位，复航后优先放行。</div>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8 }}>
+          <div style={{ fontSize: 11, color: '#64748B', marginBottom: 6 }}>冷链超时预警</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {coldChainAlerts.map((alert) => (
+              <div key={alert.level} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: alert.color, flexShrink: 0 }} />
+                <span style={{ color: alert.color, fontWeight: 600, width: 28 }}>{alert.level}</span>
+                <span style={{ color: '#64748B', flex: 1 }}>{alert.threshold}</span>
+                <span style={{ color: '#E2E8F0', fontWeight: 700 }}>{alert.count} 辆</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

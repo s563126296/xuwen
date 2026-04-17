@@ -7,12 +7,27 @@ export function getEmergencyLevel(peakVehicles: number, shutdownHours: number): 
   return 'IV';
 }
 
-export function getEmergencyPhase(portShutdown: boolean, current: number, peak: number, recovered: boolean): EmergencyPhase {
+export function getEmergencyPhase(
+  portShutdown: boolean,
+  current: number,
+  peak: number,
+  recovered: boolean,
+  resumingSoon: boolean,
+): EmergencyPhase {
   if (!portShutdown) return 'warning';
   if (recovered) return 'recovery';
-  if (current < peak * 0.5) return 'shutdown_start';
-  return 'peak';
+  if (resumingSoon) return 'recovery_prepare';
+  if (current >= peak * 0.5) return 'peak';
+  return 'shutdown_start';
 }
+
+export const PHASE_LABELS: Record<EmergencyPhase, string> = {
+  warning: '阶段1：预警期',
+  shutdown_start: '阶段2：停航初期',
+  peak: '阶段3：滞留高峰',
+  recovery_prepare: '阶段4：复航准备',
+  recovery: '阶段5：复航消化',
+};
 
 export function buildEmergencyTimeline(current: number, peak: number): EmergencyTimelinePoint[] {
   return [
