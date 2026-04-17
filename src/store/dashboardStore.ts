@@ -750,13 +750,13 @@ const defaultWeatherCoupling: WeatherCoupling = {
 };
 
 const defaultCurrentWeather: CurrentWeather = {
-  temperature: 28,
-  condition: '多云',
-  conditionIcon: 'cloud',
-  windDirection: '东北',
-  windLevel: 3,
-  visibility: 10,
-  waveHeight: 0.5,
+  temperature: 24,
+  condition: '暴雨',
+  conditionIcon: 'cloud-rain',
+  windDirection: '西北',
+  windLevel: 10,
+  visibility: 2.5,
+  waveHeight: 4.5,
 };
 
 // === Command Mode Default Mock Data ===
