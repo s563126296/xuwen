@@ -78,68 +78,6 @@ export interface CommandResourceStatus {
   towTrucksAvailable: number;
 }
 
-// Emergency Mode Types
-export type EmergencyLevel = 'IV' | 'III' | 'II' | 'I';
-export type EmergencyPhase = 'warning' | 'shutdown_start' | 'peak' | 'recovery_prepare' | 'recovery';
-
-export interface EmergencyForecast {
-  currentStrandedVehicles: number;
-  peakStrandedVehicles: number;
-  strandedGrowthPerHour: number;
-  estimatedResumeTime: string;
-  estimatedRecoveryHours: number;
-  estimatedShutdownHours: number;
-  coldChainVehicles: number;
-  hazardousVehicles: number;
-  strandedPhase: EmergencyPhase;
-}
-
-export interface EmergencyTask {
-  id: string;
-  department: '公安交警' | '民政局' | '交通运输局' | '港口管理方' | '城管局' | '应急管理局';
-  title: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'received' | 'executing' | 'done';
-  owner: string;
-  updatedAt: string;
-}
-
-export interface EmergencyResourcePoint {
-  id: string;
-  type: 'parking' | 'supply' | 'personnel' | 'drone' | 'fuel';
-  name: string;
-  position: [number, number];
-  status: 'normal' | 'warning' | 'critical';
-  detail: string;
-}
-
-export interface EmergencyTimelinePoint {
-  time: string;
-  value: number;
-  label: string;
-  phase: EmergencyPhase;
-}
-
-export interface EmergencyCommItem {
-  id: string;
-  time: string;
-  from: string;
-  to: string;
-  content: string;
-  type: 'call' | 'message' | 'report';
-}
-
-export interface EmergencyState {
-  isShutdown: boolean;
-  shutdownStartTime: string;
-  emergencyLevel: EmergencyLevel;
-  forecast: EmergencyForecast;
-  tasks: EmergencyTask[];
-  resourcePoints: EmergencyResourcePoint[];
-  timeline: EmergencyTimelinePoint[];
-  commLog: EmergencyCommItem[];
-}
-
 export interface CommandFocusRoad {
   road: string;
   queueLength: string;
@@ -604,6 +542,10 @@ interface DashboardState {
   startCall: (personId: string) => void;
   endCall: () => void;
   openChatWith: (personId: string) => void;
+
+  // === Emergency Mode State ===
+  emergencyState: EmergencyState;
+  setEmergencyState: (data: Partial<EmergencyState>) => void;
 }
 
 // === Original Default Data ===
@@ -1381,4 +1323,47 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       },
     }));
   },
+
+  // === Emergency Mode State ===
+  emergencyState: {
+    portShutdown: true,
+    shutdownStartTime: '14:30',
+    emergencyLevel: getEmergencyLevel(3200, 48),
+    bannerTitle: '台风"摩羯"橙色预警 · 徐闻港已停航',
+    bannerSubtitle: '预计停航 48 小时 · 预计峰值滞留 3200 辆 · 冷链车约 180 辆',
+    phaseLabel: '阶段2：停航初期',
+    forecast: {
+      currentStrandedVehicles: 1960,
+      peakStrandedVehicles: 3200,
+      strandedGrowthPerHour: 180,
+      estimatedResumeTime: '后天 10:00',
+      estimatedRecoveryHours: 6,
+      estimatedShutdownHours: 48,
+      coldChainVehicles: 157,
+      hazardousVehicles: 24,
+      strandedPhase: 'shutdown_start',
+    },
+    tasks: [
+      { id: 'em-task-1', department: '公安交警', title: '部署 6 组交警至进港大道', priority: 'high', status: 'executing', owner: '王队', updatedAt: '15:02' },
+      { id: 'em-task-2', department: '交通运输局', title: '启用 P-1 / P-2 临时停车区', priority: 'high', status: 'received', owner: '李科', updatedAt: '14:58' },
+      { id: 'em-task-3', department: '民政局', title: '准备首批 5000 份盒饭和 800 箱水', priority: 'medium', status: 'pending', owner: '张主任', updatedAt: '15:05' },
+      { id: 'em-task-4', department: '港口管理方', title: '确认预计复航窗口并回传', priority: 'high', status: 'received', owner: '港调中心', updatedAt: '15:08' },
+    ],
+    resourcePoints: [
+      { id: 'p1', type: 'parking', name: 'P-1 港口周边停车区', position: [110.1465, 20.243], status: 'warning', detail: '容量 350 辆 · 当前使用率 82%' },
+      { id: 'p2', type: 'parking', name: 'P-2 S376 交叉口停车区', position: [110.158, 20.289], status: 'normal', detail: '容量 280 辆 · 当前使用率 46%' },
+      { id: 's1', type: 'supply', name: '盒饭/饮水发放点', position: [110.1505, 20.263], status: 'normal', detail: '盒饭 3200 份 · 饮水 600 箱' },
+      { id: 'g1', type: 'personnel', name: '交警临时指挥点', position: [110.1538, 20.279], status: 'normal', detail: '交警 12 人在岗' },
+      { id: 'd1', type: 'drone', name: '无人机巡查点', position: [110.1574, 20.2911], status: 'normal', detail: '无人机 1 架巡逻中' },
+    ],
+    timeline: buildEmergencyTimeline(1960, 3200),
+    communications: [
+      { id: 'ec-1', type: 'system', source: '系统', time: '14:30', content: '收到港口停航通知，自动切换应急模式', urgent: true },
+      { id: 'ec-2', type: 'port', source: '港口管理方', time: '14:36', content: '预计停航 48 小时，复航时间待气象确认' },
+      { id: 'ec-3', type: 'department', source: '公安交警', time: '15:02', content: '首批交警已到进港大道执勤点位' },
+    ],
+  },
+  setEmergencyState: (data) => set((state) => ({
+    emergencyState: { ...state.emergencyState, ...data },
+  })),
 }));
