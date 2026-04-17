@@ -432,6 +432,19 @@ export interface EmergencyState {
   resourcePoints: EmergencyResourcePoint[];
   timeline: EmergencyTimelinePoint[];
   communications: EmergencyCommItem[];
+  // 台风气象信息
+  typhoon: {
+    name: string;
+    distance: number;       // 距离（公里）
+    windLevel: number;       // 风力等级
+    windSpeed: number;       // 风速（m/s）
+    rainfall: number;        // 降雨量（mm/h）
+    visibility: number;      // 能见度（km）
+    direction: string;       // 移动方向
+    speed: number;           // 移动速度（km/h）
+    landingTime: string;     // 预计登陆时间
+    warningLevel: '蓝色' | '黄色' | '橙色' | '红色';
+  };
 }
 
 // === End Emergency Mode Interfaces ===
@@ -1362,6 +1375,18 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       { id: 'ec-2', type: 'port', source: '港口管理方', time: '14:36', content: '预计停航 48 小时，复航时间待气象确认' },
       { id: 'ec-3', type: 'department', source: '公安交警', time: '15:02', content: '首批交警已到进港大道执勤点位' },
     ],
+    typhoon: {
+      name: '摩羯',
+      distance: 85,
+      windLevel: 10,
+      windSpeed: 28,
+      rainfall: 45,
+      visibility: 2.5,
+      direction: '西北',
+      speed: 18,
+      landingTime: '今晚 22:00',
+      warningLevel: '橙色',
+    },
   },
   setEmergencyState: (data) => set((state) => ({
     emergencyState: { ...state.emergencyState, ...data },

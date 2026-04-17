@@ -135,23 +135,33 @@
 ### 应急模式（Phase 1 MVP ✅ 2026-04-17）
 
 **已完成：**
-- ✅ Emergency Store（emergencyStore.ts）：事件生命周期、资源调度、时间线状态管理
-- ✅ Emergency Engine（emergencyEngine.ts）：威胁评估、资源匹配、任务分配算法
+- ✅ Emergency Store + Engine（emergencyEngine.ts：响应等级、阶段判定、物资估算、时间轴生成）
 - ✅ 10 个 UI 组件：
-  - EmergencyMode.tsx — 主布局容器
-  - EmergencyHeader.tsx — 顶部事件头（等级 + 倒计时）
-  - EmergencyMap.tsx — 地图（资源标注 + 拥堵热力 + 应急路线）
-  - EmergencyAlertPanel.tsx — 告警面板（实时事件流）
-  - EmergencyResourcePanel.tsx — 资源调度面板（人员/车辆/设备）
-  - EmergencyTaskPanel.tsx — 任务追踪面板（任务卡片 + 进度）
-  - EmergencyTimelinePanel.tsx — 时间线面板（处置流程记录）
-  - EmergencyVideoPanel.tsx — 视频监控面板（多路摄像头）
-  - EmergencyCommandPanel.tsx — 指令下发面板
-  - EmergencyReportModal.tsx — 应急处置报告弹窗
+  - EmergencyMode.tsx — 主布局容器（三栏 + 横幅 + 时间轴）
+  - EmergencyBanner.tsx — 顶部红色预警横幅（停航状态 + 响应等级 + 阶段）
+  - EmergencyForecastPanel.tsx — 左栏：滞留预测（A 模块）
+  - SpecialVehiclePanel.tsx — 左栏：特殊车辆追踪（B 模块简化版）
+  - SupplyDemandPanel.tsx — 左栏：物资需求估算（C 模块简化版）
+  - EmergencyMap.tsx — 中央：应急资源部署地图（D 模块基础版）
+  - EmergencyTaskBoard.tsx — 右栏：跨部门任务板（F 模块基础版）
+  - EmergencyPlanPanel.tsx — 右栏：应急预案（G 模块基础版）
+  - EmergencyCommPanel.tsx — 右栏：通信记录（H 模块基础版）
+  - EmergencyTimeline.tsx — 底部：滞留趋势时间轴（I 模块基础版）
 - ✅ App.tsx 集成（emergency 模式路由）
-- ✅ 生产构建通过（npm run build，8.70s）
+- ✅ 生产构建通过
 
-**Plan 文档：** `docs/superpowers/plans/2026-04-17-emergency-mode-phase1.md`
+**Phase 2 待做：**
+- [ ] 特殊车辆明细追踪（冷链车告警规则、危化品车监控、地图标注）
+- [ ] 物资管理闭环（已备 vs 需求 vs 缺口、发放记录）
+- [ ] 阶段自动切换（5 阶段状态机 + 横幅/任务板联动）
+- [ ] 任务板交互（确认接收、进度更新、紧急标记）
+- [ ] 地图增强（临时停车区使用率、滞留密度热力、深色遮罩）
+
+**Phase 3 待做：**
+- [ ] 视频/无人机画中画
+- [ ] 完整跨部门通信（智能外呼 + 短信通知）
+- [ ] 事件日志导出
+- [ ] 与指挥模式衔接（复航消化期自动切换）
 
 ### P2 — 其他模式
 
