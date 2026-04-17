@@ -9,6 +9,8 @@ import EmergencyCommPanel from './EmergencyCommPanel';
 import EmergencyTimeline from './EmergencyTimeline';
 import EmergencySimulator from './EmergencySimulator';
 import EmergencyReportModal from './EmergencyReportModal';
+import EmergencyPlanLibraryModal from './EmergencyPlanLibraryModal';
+import EmergencyPlanDetailModal from './EmergencyPlanDetailModal';
 import { useDashboardStore } from '../../store/dashboardStore';
 
 export default function EmergencyMode() {
@@ -26,6 +28,12 @@ export default function EmergencyMode() {
       <EmergencySimulator />
       {activeModal === 'emergency-report' && (
         <EmergencyReportModal onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'plan-library' && (
+        <EmergencyPlanLibraryModal onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'plan-detail' && (
+        <EmergencyPlanDetailModal onClose={() => setActiveModal(null)} />
       )}
       <div style={{ animation: 'emergencyFadeIn 0.5s ease-out' }}>
         {/* Top alert banner: below header (80px) */}

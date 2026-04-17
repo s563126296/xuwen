@@ -1,21 +1,45 @@
 import { useDashboardStore } from '../../store/dashboardStore';
+import { getPlanById } from '../../data/emergencyPlans';
+import { PHASE_ORDER, PHASE_LABELS } from '../../utils/emergencyEngine';
 
-const levelColorMap = {
-  I: '#FF4757',
-  II: '#FF6B35',
-  III: '#F5A623',
-  IV: '#00D0E9',
-} as const;
+const PHASE_COLORS = ['#F5A623', '#FF6B35', '#FF4757', '#00D0E9', '#2ED573'];
 
 export default function EmergencyPlanPanel() {
   const emergency = useDashboardStore((s) => s.emergencyState);
   const setActiveModal = useDashboardStore((s) => s.setActiveModal);
-  const color = levelColorMap[emergency.emergencyLevel];
+  const { activePlan, tasks } = emergency;
+
+  if (!activePlan) {
+    return (
+      <div className="card" style={{ padding: 14, flex: '25 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+        <div style={{ fontSize: 12, color: '#64748B' }}>未启动预案</div>
+        <button
+          onClick={() => setActiveModal('plan-library')}
+          style={{
+            fontSize: 11, padding: '6px 16px', borderRadius: 5,
+            background: 'rgba(0,208,233,0.15)', border: '1px solid rgba(0,208,233,0.4)',
+            color: '#00D0E9', cursor: 'pointer', fontWeight: 600,
+          }}
+        >选择预案</button>
+      </div>
+    );
+  }
+
+  const plan = getPlanById(activePlan.planId);
+  const currentPhaseIdx = PHASE_ORDER.indexOf(activePlan.currentPhase);
+
+  // Task completion rate across all plan steps
+  const planTaskIds = new Set(activePlan.generatedTaskIds);
+  const planTasks = tasks.filter((t) => planTaskIds.has(t.id));
+  const doneTasks = planTasks.filter((t) => t.status === 'done').length;
+  const totalTasks = planTasks.length;
+  const completionPct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
   return (
     <div className="card" style={{ padding: 14, flex: '25 0 0', minHeight: 0, overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>G. 应急预案与响应等级</div>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>G. 应急预案执行</div>
         <button
           onClick={() => setActiveModal('emergency-report')}
           style={{
@@ -25,21 +49,63 @@ export default function EmergencyPlanPanel() {
           }}
         >查看报告</button>
       </div>
-      <div style={{ padding: 10, borderRadius: 6, background: `${color}11`, border: `1px solid ${color}33` }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 11, color: '#94A3B8' }}>当前响应等级</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color }}>{emergency.emergencyLevel}级</div>
-        </div>
-        <div style={{ fontSize: 11, color: '#CBD5E1', marginTop: 4 }}>
-          {emergency.emergencyLevel === 'I' && '特别重大，需省级以上统筹'}
-          {emergency.emergencyLevel === 'II' && '重大事件，需市级统筹'}
-          {emergency.emergencyLevel === 'III' && '较大事件，县级统筹'}
-          {emergency.emergencyLevel === 'IV' && '一般事件，县级响应'}
-        </div>
+
+      {/* Plan name */}
+      <div style={{ fontSize: 12, color: '#CBD5E1', marginBottom: 10, fontWeight: 600 }}>
+        《{plan?.name ?? activePlan.planId}》
       </div>
-      <div style={{ marginTop: 8, padding: 8, borderRadius: 6, background: 'rgba(13,27,42,0.72)', border: '1px solid rgba(0,208,233,0.12)' }}>
-        <div style={{ fontSize: 11, color: '#00D0E9', fontWeight: 600 }}>已启动预案</div>
-        <div style={{ marginTop: 4, fontSize: 11, color: '#E2E8F0' }}>《徐闻港停航应急预案》</div>
+
+      {/* 5-segment phase progress bar */}
+      <div style={{ display: 'flex', gap: 3, marginBottom: 6 }}>
+        {PHASE_ORDER.map((phase, idx) => {
+          const isCurrent = idx === currentPhaseIdx;
+          const isPast = idx < currentPhaseIdx;
+          const color = PHASE_COLORS[idx];
+          return (
+            <div
+              key={phase}
+              style={{
+                flex: 1, height: 8, borderRadius: 3,
+                background: isPast ? `${color}99` : isCurrent ? color : 'rgba(255,255,255,0.08)',
+                boxShadow: isCurrent ? `0 0 6px ${color}` : 'none',
+                transition: 'background 0.3s',
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Current phase label */}
+      <div style={{ fontSize: 11, color: PHASE_COLORS[currentPhaseIdx], fontWeight: 600, marginBottom: 10 }}>
+        {PHASE_LABELS[activePlan.currentPhase]}
+      </div>
+
+      {/* Task completion rate */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.08)' }}>
+          <div style={{ width: `${completionPct}%`, height: '100%', borderRadius: 3, background: '#2ED573', transition: 'width 0.4s' }} />
+        </div>
+        <span style={{ fontSize: 11, color: '#2ED573', flexShrink: 0 }}>{doneTasks}/{totalTasks} 任务完成</span>
+      </div>
+
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => setActiveModal('plan-detail')}
+          style={{
+            flex: 1, fontSize: 11, padding: '5px 0', borderRadius: 4,
+            background: 'rgba(0,208,233,0.12)', border: '1px solid rgba(0,208,233,0.3)',
+            color: '#00D0E9', cursor: 'pointer', fontWeight: 600,
+          }}
+        >查看详情</button>
+        <button
+          onClick={() => setActiveModal('plan-library')}
+          style={{
+            flex: 1, fontSize: 11, padding: '5px 0', borderRadius: 4,
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
+            color: '#94A3B8', cursor: 'pointer', fontWeight: 600,
+          }}
+        >切换预案</button>
       </div>
     </div>
   );

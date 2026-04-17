@@ -1,4 +1,4 @@
-import type { EmergencyLevel, EmergencyPhase, EmergencyTimelinePoint } from '../store/dashboardStore';
+import type { EmergencyLevel, EmergencyPhase, EmergencyTimelinePoint, EmergencyTask, PlanStep } from '../store/dashboardStore';
 
 export function getEmergencyLevel(peakVehicles: number, shutdownHours: number): EmergencyLevel {
   if (peakVehicles > 3000 || shutdownHours > 72) return 'I';
@@ -28,6 +28,26 @@ export const PHASE_LABELS: Record<EmergencyPhase, string> = {
   recovery_prepare: '阶段4：复航准备',
   recovery: '阶段5：复航消化',
 };
+
+export const PHASE_ORDER: EmergencyPhase[] = ['warning', 'shutdown_start', 'peak', 'recovery_prepare', 'recovery'];
+
+export function generateTasksFromPlan(steps: PlanStep[], phase: EmergencyPhase): EmergencyTask[] {
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  return steps
+    .filter(step => step.phase === phase)
+    .sort((a, b) => a.order - b.order)
+    .map(step => ({
+      id: step.id,
+      department: step.department,
+      title: step.title,
+      priority: step.priority,
+      status: 'pending' as const,
+      owner: step.owner,
+      updatedAt: timeStr,
+    }));
+}
 
 export function buildEmergencyTimeline(current: number, peak: number): EmergencyTimelinePoint[] {
   return [

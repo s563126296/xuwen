@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { computeCauses, recommendStrategies } from '../utils/commandEngine';
-import { getEmergencyLevel, buildEmergencyTimeline } from '../utils/emergencyEngine';
+import { getEmergencyLevel, buildEmergencyTimeline, PHASE_LABELS, generateTasksFromPlan } from '../utils/emergencyEngine';
+import { getPlanById } from '../data/emergencyPlans';
 
 export type PortType = 'xuwen' | 'haian' | 'overview';
 export type DirectionType = 'inbound' | 'outbound';
@@ -373,6 +374,38 @@ export interface CommandState {
 export type EmergencyLevel = 'IV' | 'III' | 'II' | 'I';
 export type EmergencyPhase = 'warning' | 'shutdown_start' | 'peak' | 'recovery_prepare' | 'recovery';
 
+export type PlanId = 'typhoon' | 'fog' | 'spring_rush' | 'major_accident' | 'extreme_stranding' | 'cross_dept';
+
+export interface PlanStep {
+  id: string;
+  phase: EmergencyPhase;
+  department: EmergencyTask['department'];
+  title: string;
+  detail: string;
+  priority: 'high' | 'medium' | 'low';
+  owner: string;
+  timeLimitMinutes: number;
+  completionCriteria: string;
+  order: number;
+}
+
+export interface EmergencyPlan {
+  id: PlanId;
+  name: string;
+  scenario: string;
+  triggerConditions: string[];
+  coreMeasures: string[];
+  responsibleDepts: string[];
+  steps: PlanStep[];
+}
+
+export interface ActivePlanExecution {
+  planId: PlanId;
+  activatedAt: string;
+  currentPhase: EmergencyPhase;
+  generatedTaskIds: string[];
+}
+
 export interface EmergencyForecast {
   currentStrandedVehicles: number;
   peakStrandedVehicles: number;
@@ -432,6 +465,7 @@ export interface EmergencyState {
   resourcePoints: EmergencyResourcePoint[];
   timeline: EmergencyTimelinePoint[];
   communications: EmergencyCommItem[];
+  activePlan: ActivePlanExecution | null;
   // 台风气象信息
   typhoon: {
     name: string;
@@ -559,6 +593,8 @@ interface DashboardState {
   // === Emergency Mode State ===
   emergencyState: EmergencyState;
   setEmergencyState: (data: Partial<EmergencyState>) => void;
+  activatePlan: (planId: PlanId) => void;
+  advancePlanPhase: (newPhase: EmergencyPhase) => void;
 }
 
 // === Original Default Data ===
@@ -1387,8 +1423,64 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       landingTime: '今晚 22:00',
       warningLevel: '橙色',
     },
+    activePlan: null,
   },
   setEmergencyState: (data) => set((state) => ({
     emergencyState: { ...state.emergencyState, ...data },
   })),
+
+  activatePlan: (planId) => {
+    const plan = getPlanById(planId);
+    if (!plan) return;
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const currentPhase = useDashboardStore.getState().emergencyState.forecast.strandedPhase;
+    const tasks = generateTasksFromPlan(plan.steps, currentPhase);
+    const generatedIds = tasks.map(t => t.id);
+    set((state) => ({
+      emergencyState: {
+        ...state.emergencyState,
+        activePlan: { planId, activatedAt: timeStr, currentPhase, generatedTaskIds: generatedIds },
+        tasks: [...state.emergencyState.tasks, ...tasks],
+        communications: [
+          ...state.emergencyState.communications,
+          { id: `ec-plan-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: `已启动《${plan.name}》，生成 ${tasks.length} 项任务`, urgent: true },
+        ],
+      },
+    }));
+  },
+
+  advancePlanPhase: (newPhase) => {
+    set((state) => {
+      const activePlan = state.emergencyState.activePlan;
+      if (!activePlan) return state;
+      const plan = getPlanById(activePlan.planId);
+      if (!plan) return state;
+      const newSteps = plan.steps.filter(
+        step => step.phase === newPhase && !activePlan.generatedTaskIds.includes(step.id)
+      );
+      if (newSteps.length === 0) return state;
+      const tasks = generateTasksFromPlan(newSteps, newPhase);
+      const newGeneratedIds = tasks.map(t => t.id);
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      return {
+        emergencyState: {
+          ...state.emergencyState,
+          activePlan: {
+            ...activePlan,
+            currentPhase: newPhase,
+            generatedTaskIds: [...activePlan.generatedTaskIds, ...newGeneratedIds],
+          },
+          forecast: { ...state.emergencyState.forecast, strandedPhase: newPhase },
+          phaseLabel: PHASE_LABELS[newPhase],
+          tasks: [...state.emergencyState.tasks, ...tasks],
+          communications: [
+            ...state.emergencyState.communications,
+            { id: `ec-phase-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: `阶段推进至「${PHASE_LABELS[newPhase]}」，追加 ${tasks.length} 项新任务`, urgent: true },
+          ],
+        },
+      };
+    });
+  },
 }));
