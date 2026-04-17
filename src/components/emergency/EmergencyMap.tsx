@@ -119,6 +119,11 @@ export default function EmergencyMap() {
         });
 
         marker.on('click', () => {
+          // Close any existing info window first
+          if ((map as any)._currentInfoWindow) {
+            (map as any)._currentInfoWindow.close();
+          }
+
           // Build parking usage bar for parking type
           const parkingBar = point.type === 'parking'
             ? `<div style="margin-top:8px;">
@@ -153,7 +158,9 @@ export default function EmergencyMap() {
           const statusBg = point.status === 'critical' ? '#FF475722' : point.status === 'warning' ? '#F5A62322' : '#00D0E922';
           const statusTextColor = point.status === 'critical' ? '#FF4757' : point.status === 'warning' ? '#F5A623' : '#00D0E9';
 
-          const infoContent = `
+          // Create content element with working close button
+          const contentDiv = document.createElement('div');
+          contentDiv.innerHTML = `
             <div style="
               padding:12px 14px;
               background:rgba(10,15,25,0.95);
@@ -173,22 +180,31 @@ export default function EmergencyMap() {
               </div>
               <div style="font-size:11px;color:#94A3B8;line-height:1.5;">${point.detail}</div>
               ${parkingBar}
-              <div id="close-info-btn" style="
+              <div class="em-info-close" style="
                 position:absolute;top:8px;right:8px;
-                width:16px;height:16px;
+                width:18px;height:18px;
                 display:flex;align-items:center;justify-content:center;
-                cursor:pointer;color:#64748B;font-size:12px;
-                border-radius:3px;
-              " onclick="this.closest('.amap-info-content-wrapper')?.querySelector('.amap-info-close')?.click()">✕</div>
+                cursor:pointer;color:#94A3B8;font-size:14px;
+                border-radius:4px;background:rgba(255,255,255,0.06);
+              ">✕</div>
             </div>
           `;
 
           const info = new AMap.InfoWindow({
-            content: infoContent,
+            content: contentDiv,
             offset: new AMap.Pixel(0, -32),
             isCustom: true,
           });
           info.open(map, point.position);
+          (map as any)._currentInfoWindow = info;
+
+          // Bind close button after DOM is ready
+          setTimeout(() => {
+            const closeBtn = contentDiv.querySelector('.em-info-close');
+            if (closeBtn) {
+              closeBtn.addEventListener('click', () => info.close());
+            }
+          }, 50);
         });
 
         map.add(marker);
