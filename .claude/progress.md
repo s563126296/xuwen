@@ -104,6 +104,15 @@
 
 ---
 
+### Git 仓库
+
+**已完成（2026-04-17）：**
+- ✅ Git 仓库初始化（main 分支）
+- ✅ .gitignore 配置（忽略 node_modules、dist、.DS_Store、对话记录等）
+- ✅ 首次提交（commit 4dcdcb6）
+
+---
+
 ## 二、待办事项
 
 ### P0 — 指挥模式

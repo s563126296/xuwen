@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { computeCauses, recommendStrategies } from '../utils/commandEngine';
+import { getEmergencyLevel, buildEmergencyTimeline } from '../utils/emergencyEngine';
 
 export type PortType = 'xuwen' | 'haian' | 'overview';
 export type DirectionType = 'inbound' | 'outbound';
@@ -75,6 +76,68 @@ export interface CommandResourceStatus {
   policeAvailable: number;
   dronesAvailable: number;
   towTrucksAvailable: number;
+}
+
+// Emergency Mode Types
+export type EmergencyLevel = 'IV' | 'III' | 'II' | 'I';
+export type EmergencyPhase = 'warning' | 'shutdown_start' | 'peak' | 'recovery_prepare' | 'recovery';
+
+export interface EmergencyForecast {
+  currentStrandedVehicles: number;
+  peakStrandedVehicles: number;
+  strandedGrowthPerHour: number;
+  estimatedResumeTime: string;
+  estimatedRecoveryHours: number;
+  estimatedShutdownHours: number;
+  coldChainVehicles: number;
+  hazardousVehicles: number;
+  strandedPhase: EmergencyPhase;
+}
+
+export interface EmergencyTask {
+  id: string;
+  department: '公安交警' | '民政局' | '交通运输局' | '港口管理方' | '城管局' | '应急管理局';
+  title: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'pending' | 'received' | 'executing' | 'done';
+  owner: string;
+  updatedAt: string;
+}
+
+export interface EmergencyResourcePoint {
+  id: string;
+  type: 'parking' | 'supply' | 'personnel' | 'drone' | 'fuel';
+  name: string;
+  position: [number, number];
+  status: 'normal' | 'warning' | 'critical';
+  detail: string;
+}
+
+export interface EmergencyTimelinePoint {
+  time: string;
+  value: number;
+  label: string;
+  phase: EmergencyPhase;
+}
+
+export interface EmergencyCommItem {
+  id: string;
+  time: string;
+  from: string;
+  to: string;
+  content: string;
+  type: 'call' | 'message' | 'report';
+}
+
+export interface EmergencyState {
+  isShutdown: boolean;
+  shutdownStartTime: string;
+  emergencyLevel: EmergencyLevel;
+  forecast: EmergencyForecast;
+  tasks: EmergencyTask[];
+  resourcePoints: EmergencyResourcePoint[];
+  timeline: EmergencyTimelinePoint[];
+  commLog: EmergencyCommItem[];
 }
 
 export interface CommandFocusRoad {
@@ -366,6 +429,74 @@ export interface CommandState {
 }
 
 // === End Command Mode Interfaces ===
+
+// === Emergency Mode Interfaces ===
+
+export type EmergencyLevel = 'IV' | 'III' | 'II' | 'I';
+export type EmergencyPhase = 'warning' | 'shutdown_start' | 'peak' | 'recovery_prepare' | 'recovery';
+
+export interface EmergencyForecast {
+  currentStrandedVehicles: number;
+  peakStrandedVehicles: number;
+  strandedGrowthPerHour: number;
+  estimatedResumeTime: string;
+  estimatedRecoveryHours: number;
+  estimatedShutdownHours: number;
+  coldChainVehicles: number;
+  hazardousVehicles: number;
+  strandedPhase: EmergencyPhase;
+}
+
+export interface EmergencyTask {
+  id: string;
+  department: '公安交警' | '民政局' | '交通运输局' | '港口管理方' | '城管局' | '应急管理局';
+  title: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'pending' | 'received' | 'executing' | 'done';
+  owner: string;
+  updatedAt: string;
+}
+
+export interface EmergencyResourcePoint {
+  id: string;
+  type: 'parking' | 'supply' | 'personnel' | 'drone' | 'fuel';
+  name: string;
+  position: [number, number];
+  status: 'normal' | 'warning' | 'critical';
+  detail: string;
+}
+
+export interface EmergencyTimelinePoint {
+  time: string;
+  value: number;
+  isPredicted?: boolean;
+  isCurrent?: boolean;
+}
+
+export interface EmergencyCommItem {
+  id: string;
+  type: 'system' | 'department' | 'port' | 'alert';
+  source: string;
+  time: string;
+  content: string;
+  urgent?: boolean;
+}
+
+export interface EmergencyState {
+  portShutdown: boolean;
+  shutdownStartTime: string;
+  emergencyLevel: EmergencyLevel;
+  bannerTitle: string;
+  bannerSubtitle: string;
+  phaseLabel: string;
+  forecast: EmergencyForecast;
+  tasks: EmergencyTask[];
+  resourcePoints: EmergencyResourcePoint[];
+  timeline: EmergencyTimelinePoint[];
+  communications: EmergencyCommItem[];
+}
+
+// === End Emergency Mode Interfaces ===
 
 interface DashboardState {
   // System mode
