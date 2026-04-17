@@ -1,5 +1,8 @@
 import { AlertTriangle, Wind, CloudRain, Eye, Navigation } from 'lucide-react';
 import { useDashboardStore } from '../../store/dashboardStore';
+import type { EmergencyPhase } from '../../store/dashboardStore';
+import { PHASE_LABELS } from '../../utils/emergencyEngine';
+import { playClickSound } from '../../utils/soundEffects';
 
 const levelColorMap = {
   I: '#FF4757',
@@ -15,11 +18,65 @@ const warningColorMap = {
   '蓝色': '#00D0E9',
 } as const;
 
+const PHASE_ORDER: EmergencyPhase[] = ['warning', 'shutdown_start', 'peak', 'recovery_prepare', 'recovery'];
+
+const PHASE_VEHICLES: Record<EmergencyPhase, number> = {
+  warning: 500,
+  shutdown_start: 1200,
+  peak: 3100,
+  recovery_prepare: 2400,
+  recovery: 800,
+};
+
+const PHASE_BANNER_COLOR: Record<EmergencyPhase, string> = {
+  warning: '#F5A623',
+  shutdown_start: '#FF4757',
+  peak: '#FF4757',
+  recovery_prepare: '#00D0E9',
+  recovery: '#2ED573',
+};
+
 export default function EmergencyBanner() {
   const emergency = useDashboardStore((s) => s.emergencyState);
-  const color = levelColorMap[emergency.emergencyLevel];
+  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
+  const levelColor = levelColorMap[emergency.emergencyLevel];
+  const phaseColor = PHASE_BANNER_COLOR[emergency.forecast.strandedPhase];
+  const color = phaseColor ?? levelColor;
   const typhoon = emergency.typhoon;
   const warnColor = warningColorMap[typhoon.warningLevel];
+
+  const currentPhase = emergency.forecast.strandedPhase;
+  const currentPhaseIdx = PHASE_ORDER.indexOf(currentPhase);
+  const canAdvance = currentPhaseIdx < PHASE_ORDER.length - 1;
+
+  const handleAdvancePhase = () => {
+    if (!canAdvance) return;
+    playClickSound();
+    const nextPhase = PHASE_ORDER[currentPhaseIdx + 1];
+    const nextVehicles = PHASE_VEHICLES[nextPhase];
+    const nextLabel = PHASE_LABELS[nextPhase];
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    setEmergencyState({
+      phaseLabel: nextLabel,
+      forecast: {
+        ...emergency.forecast,
+        strandedPhase: nextPhase,
+        currentStrandedVehicles: nextVehicles,
+      },
+      communications: [
+        {
+          id: `phase-${Date.now()}`,
+          type: 'system',
+          source: '系统',
+          time: timeStr,
+          content: `应急阶段推进：${PHASE_LABELS[currentPhase]} → ${nextLabel}，当前滞留 ${nextVehicles} 辆`,
+          urgent: nextPhase === 'peak',
+        },
+        ...emergency.communications,
+      ],
+    });
+  };
 
   return (
     <div style={{ margin: '0 20px' }}>
@@ -107,6 +164,36 @@ export default function EmergencyBanner() {
           <span style={{ fontSize: 11, color: '#64748B' }}>·</span>
           <span style={{ fontSize: 11, color: '#FF6B35', fontWeight: 600 }}>预计{typhoon.landingTime}登陆</span>
         </div>
+
+        {/* 模拟推进按钮 */}
+        <button
+          onClick={handleAdvancePhase}
+          disabled={!canAdvance}
+          style={{
+            marginLeft: 16,
+            padding: '3px 10px',
+            fontSize: 10,
+            color: canAdvance ? '#00D0E9' : '#64748B',
+            background: 'transparent',
+            border: `1px solid ${canAdvance ? '#00D0E944' : '#64748B44'}`,
+            borderRadius: 4,
+            cursor: canAdvance ? 'pointer' : 'not-allowed',
+            opacity: canAdvance ? 1 : 0.5,
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            if (canAdvance) {
+              e.currentTarget.style.background = '#00D0E911';
+              e.currentTarget.style.borderColor = '#00D0E9';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.borderColor = canAdvance ? '#00D0E944' : '#64748B44';
+          }}
+        >
+          模拟推进
+        </button>
       </div>
     </div>
   );

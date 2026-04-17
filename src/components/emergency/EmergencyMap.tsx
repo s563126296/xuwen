@@ -2,6 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import AMapLoader from '@amap/amap-jsapi-loader';
 import { useDashboardStore } from '../../store/dashboardStore';
 
+// 进港公路坐标（与指挥模式一致）
+const JINGANG_ROAD: [number, number][] = [
+  [110.160745, 20.306732],
+  [110.157380, 20.291170],
+  [110.153524, 20.278910],
+  [110.150478, 20.264358],
+  [110.147502, 20.250149],
+  [110.143228, 20.245138],
+  [110.141114, 20.233385],
+];
+
 export default function EmergencyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
@@ -67,12 +78,73 @@ export default function EmergencyMap() {
         });
 
         marker.on('click', () => {
+          // Build parking usage bar for parking type
+          const parkingBar = point.type === 'parking'
+            ? `<div style="margin-top:8px;">
+                <div style="font-size:10px;color:#64748B;margin-bottom:4px;">停车区使用率</div>
+                ${point.id === 'p1'
+                  ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                      <span style="font-size:10px;color:#94A3B8;width:28px;">P-1</span>
+                      <div style="flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden;">
+                        <div style="width:82%;height:100%;background:#F5A623;border-radius:3px;"></div>
+                      </div>
+                      <span style="font-size:10px;color:#F5A623;width:28px;">82%</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                      <span style="font-size:10px;color:#94A3B8;width:28px;">P-2</span>
+                      <div style="flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden;">
+                        <div style="width:46%;height:100%;background:#00D0E9;border-radius:3px;"></div>
+                      </div>
+                      <span style="font-size:10px;color:#00D0E9;width:28px;">46%</span>
+                    </div>`
+                  : `<div style="display:flex;align-items:center;gap:6px;">
+                      <span style="font-size:10px;color:#94A3B8;width:28px;">P-2</span>
+                      <div style="flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden;">
+                        <div style="width:46%;height:100%;background:#00D0E9;border-radius:3px;"></div>
+                      </div>
+                      <span style="font-size:10px;color:#00D0E9;width:28px;">46%</span>
+                    </div>`
+                }
+              </div>`
+            : '';
+
+          const statusLabel = point.status === 'critical' ? '严重' : point.status === 'warning' ? '告警' : '正常';
+          const statusBg = point.status === 'critical' ? '#FF475722' : point.status === 'warning' ? '#F5A62322' : '#00D0E922';
+          const statusTextColor = point.status === 'critical' ? '#FF4757' : point.status === 'warning' ? '#F5A623' : '#00D0E9';
+
+          const infoContent = `
+            <div style="
+              padding:12px 14px;
+              background:rgba(10,15,25,0.95);
+              border:1px solid ${color}55;
+              border-radius:8px;
+              min-width:200px;
+              max-width:240px;
+              box-shadow:0 4px 20px rgba(0,0,0,0.6);
+              position:relative;
+            ">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <div style="font-size:13px;font-weight:700;color:#E2E8F0;">${point.name}</div>
+                <div style="
+                  font-size:10px;padding:2px 7px;border-radius:3px;
+                  background:${statusBg};color:${statusTextColor};font-weight:600;
+                ">${statusLabel}</div>
+              </div>
+              <div style="font-size:11px;color:#94A3B8;line-height:1.5;">${point.detail}</div>
+              ${parkingBar}
+              <div id="close-info-btn" style="
+                position:absolute;top:8px;right:8px;
+                width:16px;height:16px;
+                display:flex;align-items:center;justify-content:center;
+                cursor:pointer;color:#64748B;font-size:12px;
+                border-radius:3px;
+              " onclick="this.closest('.amap-info-content-wrapper')?.querySelector('.amap-info-close')?.click()">✕</div>
+            </div>
+          `;
+
           const info = new AMap.InfoWindow({
-            content: `<div style="padding:8px 10px;color:#E2E8F0;background:#0D1B2A;border:1px solid ${color}44;border-radius:6px;min-width:200px;">
-              <div style="font-size:13px;font-weight:700;margin-bottom:6px;">${point.name}</div>
-              <div style="font-size:12px;color:#94A3B8;">${point.detail}</div>
-            </div>`,
-            offset: new AMap.Pixel(0, -28),
+            content: infoContent,
+            offset: new AMap.Pixel(0, -32),
             isCustom: true,
           });
           info.open(map, point.position);
@@ -91,6 +163,18 @@ export default function EmergencyMap() {
         offset: new AMap.Pixel(-60, -16),
         zIndex: 250,
       }));
+
+      // 滞留车辆队列可视化（进港公路红色折线）
+      const strandedLine = new AMap.Polyline({
+        path: JINGANG_ROAD,
+        strokeColor: '#FF4757',
+        strokeWeight: 10,
+        strokeOpacity: 0.6,
+        zIndex: 150,
+        lineJoin: 'round',
+        lineCap: 'round',
+      });
+      map.add(strandedLine);
 
       setMapReady(true);
     }).catch((e: any) => {
