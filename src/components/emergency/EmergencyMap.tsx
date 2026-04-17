@@ -13,19 +13,19 @@ const JINGANG_ROAD: [number, number][] = [
   [110.141114, 20.233385],
 ];
 
-// 台风"摩羯"路径（历史 + 当前 + 预测）
+// 台风"摩羯"路径（历史 + 当前 + 预测，坐标在地图可视范围内）
 const TYPHOON_PATH = {
-  // 历史轨迹（过去24小时）
+  // 历史轨迹（从东南方向接近）
   history: [
-    [110.45, 20.55],
-    [110.40, 20.50],
-    [110.35, 20.45],
-    [110.30, 20.40],
+    [110.28, 20.38],
+    [110.25, 20.36],
+    [110.22, 20.34],
+    [110.20, 20.32],
   ] as [number, number][],
-  // 预测路径（未来登陆）
+  // 预测路径（继续向西北移动到徐闻港）
   forecast: [
-    [110.20, 20.30],
-    [110.15, 20.25],
+    [110.18, 20.30],
+    [110.16, 20.27],
     [110.141114, 20.233385], // 徐闻港
   ] as [number, number][],
 };
@@ -64,8 +64,8 @@ export default function EmergencyMap() {
       if (destroyed || !mapRef.current) return;
 
       const map = new AMap.Map(mapRef.current, {
-        zoom: 12.8,
-        center: [110.15, 20.265],
+        zoom: 11.5,
+        center: [110.18, 20.28],
         mapStyle: 'amap://styles/normal',
         viewMode: '2D',
         features: ['bg', 'road', 'building'],
