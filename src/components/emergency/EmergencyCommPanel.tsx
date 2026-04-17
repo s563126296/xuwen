@@ -11,7 +11,7 @@ export default function EmergencyCommPanel() {
   const communications = useDashboardStore((s) => s.emergencyState.communications);
 
   return (
-    <div className="card" style={{ padding: 14, flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+    <div className="card" style={{ padding: 14, flex: '30 0 0', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 12, flexShrink: 0 }}>H. 通信记录</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1, minHeight: 0 }}>
         {communications.map((item) => (
