@@ -4,7 +4,7 @@
 
 ---
 
-## 当前状态：指挥模式 V4.0 第三批主体完成，调度交互体系已上线
+## 当前状态：指挥模式 V4.0 第三批主体完成，应急模式 Phase 1 MVP 完成
 
 ---
 
@@ -132,9 +132,30 @@
 - [ ] 设备详情弹窗按具体设备显示数据（当前固定 mock）
 - [ ] 骨架屏加载状态
 
+### 应急模式（Phase 1 MVP ✅ 2026-04-17）
+
+**已完成：**
+- ✅ Emergency Store（emergencyStore.ts）：事件生命周期、资源调度、时间线状态管理
+- ✅ Emergency Engine（emergencyEngine.ts）：威胁评估、资源匹配、任务分配算法
+- ✅ 10 个 UI 组件：
+  - EmergencyMode.tsx — 主布局容器
+  - EmergencyHeader.tsx — 顶部事件头（等级 + 倒计时）
+  - EmergencyMap.tsx — 地图（资源标注 + 拥堵热力 + 应急路线）
+  - EmergencyAlertPanel.tsx — 告警面板（实时事件流）
+  - EmergencyResourcePanel.tsx — 资源调度面板（人员/车辆/设备）
+  - EmergencyTaskPanel.tsx — 任务追踪面板（任务卡片 + 进度）
+  - EmergencyTimelinePanel.tsx — 时间线面板（处置流程记录）
+  - EmergencyVideoPanel.tsx — 视频监控面板（多路摄像头）
+  - EmergencyCommandPanel.tsx — 指令下发面板
+  - EmergencyReportModal.tsx — 应急处置报告弹窗
+- ✅ App.tsx 集成（emergency 模式路由）
+- ✅ 生产构建通过（npm run build，8.70s）
+
+**Plan 文档：** `docs/superpowers/plans/2026-04-17-emergency-mode-phase1.md`
+
 ### P2 — 其他模式
 
-- [ ] 应急模式指标体系 + 前端开发
+- [ ] 应急模式 Phase 2（策略优化 + 数据对接）
 - [ ] 港口模式 / 分析模式
 
 ### P3 — 外部数据对接
