@@ -61,8 +61,8 @@ export default function SupplyDemandPanel() {
   };
 
   return (
-    <div className="card" style={{ padding: 14, minHeight: 0 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+    <div className="card" style={{ padding: 14, flex: '35 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexShrink: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>C. 物资需求估算</div>
         <div style={{
           fontSize: 10, padding: '2px 8px', borderRadius: 3,
@@ -72,10 +72,10 @@ export default function SupplyDemandPanel() {
           综合充足率 {Math.round(overallRatio * 100)}%
         </div>
       </div>
-      <div style={{ fontSize: 11, color: '#64748B', marginBottom: 10 }}>
+      <div style={{ fontSize: 11, color: '#64748B', marginBottom: 10, flexShrink: 0 }}>
         滞留 {strandedPeople} 人 · 预计 {shutdownDays} 天
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1, minHeight: 0 }}>
         {items.map((item) => {
           const pct = Math.round(item.ratio * 100);
           const color = getBarColor(item.ratio);

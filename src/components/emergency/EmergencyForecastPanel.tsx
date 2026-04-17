@@ -9,7 +9,7 @@ export default function EmergencyForecastPanel() {
   const sparkData = timeline.slice(-8).map((pt) => ({ value: pt.value }));
 
   return (
-    <div className="card" style={{ padding: 14, minHeight: 220 }}>
+    <div className="card" style={{ padding: 14, flex: '35 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 12 }}>A. 滞留预测</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <div>

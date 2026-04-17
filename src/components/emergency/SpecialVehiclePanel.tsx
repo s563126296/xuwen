@@ -41,7 +41,7 @@ export default function SpecialVehiclePanel() {
   }, [shutdownStartTime]);
 
   return (
-    <div className="card" style={{ padding: 14, minHeight: 170 }}>
+    <div className="card" style={{ padding: 14, flex: '30 0 0', minHeight: 0, overflow: 'hidden' }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 12 }}>B. 特殊车辆追踪</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
