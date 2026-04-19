@@ -446,11 +446,22 @@ export interface EmergencyTimelinePoint {
 
 export interface EmergencyCommItem {
   id: string;
-  type: 'system' | 'department' | 'port' | 'alert';
+  type: 'system' | 'department' | 'port' | 'alert' | 'command';
   source: string;
+  target?: string;          // recipient department (optional, null = broadcast)
   time: string;
   content: string;
   urgent?: boolean;
+  mentions?: string[];      // @mentioned departments
+}
+
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  role: string;
+  department: EmergencyTask['department'];
+  phone: string;
+  status: 'online' | 'busy' | 'offline';
 }
 
 export interface EmergencyState {
@@ -465,6 +476,7 @@ export interface EmergencyState {
   resourcePoints: EmergencyResourcePoint[];
   timeline: EmergencyTimelinePoint[];
   communications: EmergencyCommItem[];
+  contacts: EmergencyContact[];
   activePlan: ActivePlanExecution | null;
   // 台风气象信息
   typhoon: {
@@ -1410,6 +1422,20 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       { id: 'ec-1', type: 'system', source: '系统', time: '14:30', content: '收到港口停航通知，自动切换应急模式', urgent: true },
       { id: 'ec-2', type: 'port', source: '港口管理方', time: '14:36', content: '预计停航 48 小时，复航时间待气象确认' },
       { id: 'ec-3', type: 'department', source: '公安交警', time: '15:02', content: '首批交警已到进港大道执勤点位' },
+    ],
+    contacts: [
+      { id: 'c1', name: '张队长', role: '队长', department: '公安交警', phone: '13800138001', status: 'online' },
+      { id: 'c2', name: '李警官', role: '执勤', department: '公安交警', phone: '13800138002', status: 'online' },
+      { id: 'c3', name: '王局长', role: '局长', department: '民政局', phone: '13800138003', status: 'online' },
+      { id: 'c4', name: '赵科长', role: '应急科', department: '民政局', phone: '13800138004', status: 'online' },
+      { id: 'c5', name: '刘局长', role: '局长', department: '交通运输局', phone: '13800138005', status: 'online' },
+      { id: 'c6', name: '陈主任', role: '运管所', department: '交通运输局', phone: '13800138006', status: 'online' },
+      { id: 'c7', name: '周经理', role: '调度中心', department: '港口管理方', phone: '13800138007', status: 'online' },
+      { id: 'c8', name: '吴主管', role: '工程部', department: '港口管理方', phone: '13800138008', status: 'online' },
+      { id: 'c9', name: '郑队长', role: '执法大队', department: '城管局', phone: '13800138009', status: 'online' },
+      { id: 'c10', name: '孙队员', role: '现场', department: '城管局', phone: '13800138010', status: 'online' },
+      { id: 'c11', name: '马主任', role: '指挥中心', department: '应急管理局', phone: '13800138011', status: 'online' },
+      { id: 'c12', name: '钱专员', role: '协调', department: '应急管理局', phone: '13800138012', status: 'online' },
     ],
     typhoon: {
       name: '摩羯',
