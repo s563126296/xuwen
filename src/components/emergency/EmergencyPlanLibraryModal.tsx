@@ -56,7 +56,7 @@ export default function EmergencyPlanLibraryModal({ onClose }: Props) {
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: 'auto', padding: '16px 18px' }}>
+        <div style={{ overflowY: 'auto', padding: '16px 26px 16px 18px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {EMERGENCY_PLANS.map((plan) => (
               <div

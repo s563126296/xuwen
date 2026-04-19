@@ -38,12 +38,12 @@ export default function EmergencyTimeline() {
         left: 16,
         right: 16,
         bottom: 12,
-        height: 160,
+        height: 120,
         padding: 14,
       }}
     >
       <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 8 }}>I. 滞留趋势时间轴</div>
-      <div style={{ width: '100%', height: 110 }}>
+      <div style={{ width: '100%', height: 70 }}>
         <ResponsiveContainer>
           <AreaChart data={chartData}>
             <defs>

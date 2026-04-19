@@ -8,12 +8,14 @@ import RightPanel from './components/RightPanel';
 import ModeSwitcher from './components/ModeSwitcher';
 import CommandMode from './components/command/CommandMode';
 import EmergencyMode from './components/emergency/EmergencyMode';
+import AnalysisMode from './components/analysis/AnalysisMode';
 import CheckpointModal from './components/CheckpointModal';
 import CongestionPredictionModal from './components/CongestionPredictionModal';
 import StrategyModal from './components/StrategyModal';
 import ResilienceInfoModal from './components/overview/ResilienceInfoModal';
 import Modal from './components/Modal';
 import { useDashboardStore } from './store/dashboardStore';
+import { computeAiSummary } from './utils/aiSummaryEngine';
 import './App.css';
 
 interface DeviceData {
@@ -51,7 +53,53 @@ function App() {
   const [scale, setScale] = useState(1);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
-  const { systemMode } = useDashboardStore();
+  const {
+    systemMode,
+    portDigestion,
+    tidalEffect,
+    corridorPressure,
+    systemResilience,
+    shutdownProbability,
+    urbanHealth,
+    pressureTransmission,
+    weatherCoupling,
+    specialEvents,
+    setAiSummary,
+  } = useDashboardStore();
+
+  // Auto-compute AI summary when indicators change (overview mode only)
+  useEffect(() => {
+    if (systemMode !== 'overview') return;
+
+    const summary = computeAiSummary({
+      portDigestion: portDigestion.xuwen,
+      tidalEffect,
+      corridorPressure: Object.values(corridorPressure),
+      systemResilience,
+      shutdownProbability,
+      urbanHealth,
+      pressureTransmission,
+      weatherCoupling,
+      specialEvents,
+      inboundFlow: 12847,
+      outboundFlow: 11235,
+      violationCount: 356,
+    });
+
+    setAiSummary(summary);
+  }, [
+    systemMode,
+    portDigestion,
+    tidalEffect,
+    corridorPressure,
+    systemResilience,
+    shutdownProbability,
+    urbanHealth,
+    pressureTransmission,
+    weatherCoupling,
+    specialEvents,
+    setAiSummary,
+  ]);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -152,6 +200,7 @@ function App() {
 
         {systemMode === 'command' && <CommandMode />}
         {systemMode === 'emergency' && <EmergencyMode />}
+        {systemMode === 'analysis' && <AnalysisMode />}
 
         {/* Modals */}
         <CheckpointModal />

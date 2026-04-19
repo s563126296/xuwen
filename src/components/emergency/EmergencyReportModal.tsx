@@ -1,5 +1,6 @@
 import { useDashboardStore } from '../../store/dashboardStore';
 import { estimateSupplyDemand } from '../../utils/emergencyEngine';
+import { playClickSound } from '../../utils/soundEffects';
 
 interface Props {
   onClose: () => void;
@@ -7,6 +8,7 @@ interface Props {
 
 export default function EmergencyReportModal({ onClose }: Props) {
   const emergency = useDashboardStore((s) => s.emergencyState);
+  const setSystemMode = useDashboardStore((s) => s.setSystemMode);
   const { forecast, tasks, communications } = emergency;
   const { strandedPeople, boxedMeals, waterBoxes } = estimateSupplyDemand(forecast.currentStrandedVehicles);
 
@@ -66,7 +68,7 @@ export default function EmergencyReportModal({ onClose }: Props) {
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: 'auto', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ overflowY: 'auto', padding: '16px 26px 16px 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* 事件概况 */}
           <section>
@@ -161,6 +163,70 @@ export default function EmergencyReportModal({ onClose }: Props) {
               ))}
             </div>
           </section>
+        </div>
+
+        {/* Footer: export */}
+        <div style={{ padding: '12px 18px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'flex-end', gap: 10, flexShrink: 0 }}>
+          <button
+            onClick={() => {
+              const lines: string[] = [];
+              lines.push('# 应急处置报告');
+              lines.push(`台风"${emergency.typhoon.name}" · ${emergency.emergencyLevel}级响应 · ${emergency.phaseLabel}`);
+              lines.push(`停航时间: ${emergency.shutdownStartTime} · 当前滞留: ${forecast.currentStrandedVehicles}辆 · 峰值: ${forecast.peakStrandedVehicles}辆`);
+              lines.push(`冷链车: ${forecast.coldChainVehicles}辆 · 危化品车: ${forecast.hazardousVehicles}辆`);
+              lines.push('');
+              lines.push('## 物资保障');
+              supplyItems.forEach((item) => {
+                const pct = Math.round(Math.min(item.available / Math.max(item.demand, 1), 1) * 100);
+                lines.push(`${item.label}: ${item.available.toLocaleString()}/${item.demand.toLocaleString()}${item.unit} (${pct}%)`);
+              });
+              lines.push('');
+              lines.push('## 任务执行');
+              Object.entries(deptMap).forEach(([dept, stat]) => {
+                lines.push(`${dept}: ${stat.done}/${stat.total} 完成`);
+              });
+              lines.push('');
+              lines.push('## 事件日志');
+              communications.forEach((c) => {
+                lines.push(`${c.time} [${c.source}] ${c.content}`);
+              });
+              const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `应急处置报告_${new Date().toISOString().slice(0, 10)}.txt`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            style={{
+              fontSize: 12, padding: '8px 20px', borderRadius: 6, cursor: 'pointer',
+              background: 'rgba(0,208,233,0.12)', border: '1px solid #00D0E9', color: '#00D0E9',
+            }}
+          >
+            导出事件日志
+          </button>
+          <button
+            onClick={() => {
+              playClickSound();
+              setSystemMode('overview');
+              onClose();
+            }}
+            style={{
+              fontSize: 12, padding: '8px 20px', borderRadius: 6, cursor: 'pointer',
+              background: 'rgba(46,213,115,0.12)', border: '1px solid #2ED573', color: '#2ED573',
+            }}
+          >
+            返回总览模式
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              fontSize: 12, padding: '8px 20px', borderRadius: 6, cursor: 'pointer',
+              background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.3)', color: '#94A3B8',
+            }}
+          >
+            关闭
+          </button>
         </div>
       </div>
     </div>

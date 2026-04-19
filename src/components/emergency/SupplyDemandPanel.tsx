@@ -75,7 +75,7 @@ export default function SupplyDemandPanel() {
       <div style={{ fontSize: 11, color: '#64748B', marginBottom: 10, flexShrink: 0 }}>
         滞留 {strandedPeople} 人 · 预计 {shutdownDays} 天
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', paddingRight: 8, flex: 1, minHeight: 0 }}>
         {items.map((item) => {
           const pct = Math.round(item.ratio * 100);
           const color = getBarColor(item.ratio);

@@ -10,6 +10,7 @@ const coldChainAlerts = [
 export default function SpecialVehiclePanel() {
   const forecast = useDashboardStore((s) => s.emergencyState.forecast);
   const shutdownStartTime = useDashboardStore((s) => s.emergencyState.shutdownStartTime);
+  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
   const [elapsed, setElapsed] = useState('');
   const [elapsedColor, setElapsedColor] = useState('#2ED573');
 
@@ -41,9 +42,21 @@ export default function SpecialVehiclePanel() {
   }, [shutdownStartTime]);
 
   return (
-    <div className="card" style={{ padding: 14, flex: '30 0 0', minHeight: 0, overflow: 'hidden' }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 12 }}>B. 特殊车辆追踪</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="card" style={{ padding: 14, flex: '30 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>B. 特殊车辆追踪</div>
+        <button
+          onClick={() => setActiveModal('special-vehicle-detail')}
+          style={{
+            fontSize: 10, padding: '3px 8px', background: 'transparent',
+            border: '1px solid rgba(0,208,233,0.4)', color: '#00D0E9',
+            borderRadius: 4, cursor: 'pointer', lineHeight: 1.4,
+          }}
+        >
+          查看明细
+        </button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, color: '#94A3B8' }}>冷链车</span>
           <span style={{ fontSize: 18, fontWeight: 700, color: '#00D0E9' }}>{forecast.coldChainVehicles} 辆</span>

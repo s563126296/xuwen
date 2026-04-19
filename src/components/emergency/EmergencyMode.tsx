@@ -2,6 +2,7 @@ import EmergencyBanner from './EmergencyBanner';
 import EmergencyForecastPanel from './EmergencyForecastPanel';
 import SpecialVehiclePanel from './SpecialVehiclePanel';
 import SupplyDemandPanel from './SupplyDemandPanel';
+import ResourceDispatchPanel from './ResourceDispatchPanel';
 import EmergencyMap from './EmergencyMap';
 import EmergencyTaskBoard from './EmergencyTaskBoard';
 import EmergencyPlanPanel from './EmergencyPlanPanel';
@@ -11,6 +12,8 @@ import EmergencySimulator from './EmergencySimulator';
 import EmergencyReportModal from './EmergencyReportModal';
 import EmergencyPlanLibraryModal from './EmergencyPlanLibraryModal';
 import EmergencyPlanDetailModal from './EmergencyPlanDetailModal';
+import SpecialVehicleDetailModal from './SpecialVehicleDetailModal';
+import EmergencyVideoConference from './EmergencyVideoConference';
 import { useDashboardStore } from '../../store/dashboardStore';
 
 export default function EmergencyMode() {
@@ -35,6 +38,10 @@ export default function EmergencyMode() {
       {activeModal === 'plan-detail' && (
         <EmergencyPlanDetailModal onClose={() => setActiveModal(null)} />
       )}
+      {activeModal === 'special-vehicle-detail' && (
+        <SpecialVehicleDetailModal onClose={() => setActiveModal(null)} />
+      )}
+      <EmergencyVideoConference />
       <div style={{ animation: 'emergencyFadeIn 0.5s ease-out' }}>
         {/* Top alert banner: below header (80px) */}
         <div style={{ position: 'absolute', top: 84, left: 0, right: 0, zIndex: 110 }}>
@@ -48,7 +55,7 @@ export default function EmergencyMode() {
             top: 184,
             left: 16,
             right: 16,
-            bottom: 184,
+            bottom: 144,
             display: 'flex',
             gap: 12,
           }}
@@ -68,6 +75,7 @@ export default function EmergencyMode() {
           {/* Right column */}
           <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
             <EmergencyTaskBoard />
+            <ResourceDispatchPanel />
             <EmergencyPlanPanel />
             <EmergencyCommPanel />
           </div>

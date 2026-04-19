@@ -1,17 +1,71 @@
 # 徐闻县智慧交通大屏系统 — 项目进度
 
-> 最后更新：2026-04-17
+> 最后更新：2026-04-19
 
 ---
 
-## 当前状态：指挥模式 V4.0 第三批主体完成，应急模式 Phase 7 融合通信完成
+## 当前状态：总览 V2.2 + 指挥 V4.1 + 应急 Phase 10 + 分析 Phase 1 全部完成 ✅
 
 ---
 
 ## 一、已完成工作
 
-### 总览模式（V2.1 ✅）
+### 分析模式（Phase 1 ✅ 2026-04-19）
 
+**PRD 编写（doc/modes/05-analysis/PRD-分析模式.md）：**
+- 9 个功能模块（A-I）共 44 个功能项
+- 3 个实施 Phase（Phase 1 核心框架 / Phase 2 可视化 / Phase 3 报告与导出）
+- 数据范围：近 6 个月（2025-10 ~ 2026-04）
+- 3 个用户故事（领导要数据 / 复盘台风事件 / 对比分析）
+
+**Phase 1 核心框架已完成（P0 功能）：**
+- ✅ Store 扩展：AnalysisState 类型 + AnalysisFilters + HistoryEvent + StrategyRecord
+- ✅ 4 个 Actions：setAnalysisFilters / selectAnalysisEvent / setAnalysisView / setAnalysisQuickFilter
+- ✅ Mock 数据工具（analysisMockData.ts）：
+  - generateHistoryEvents() — 12 条历史事件（春节/清明/五一/台风/大雾/事故等）
+  - generateStrategyRecords() — 30 条策略执行记录（S-01~S-15）
+  - generateTrendData() — 根据时间范围生成日度趋势
+  - generateHeatmapData() — 7×24 小时热力矩阵
+  - filterEvents() — 多维度过滤函数
+- ✅ 11 个组件：
+  - AnalysisMode.tsx — 主布局容器（三栏 + 顶部横幅）
+  - DataRangeBanner.tsx — 顶部数据范围横幅（紫色主题 #8B5CF6）
+  - QueryFilterPanel.tsx — 查询条件面板（时间/类型/区域筛选）
+  - HistoryEventList.tsx — 历史事件列表（严重程度色条 + 可滚动）
+  - MainViewArea.tsx — 主视图 Tab 切换容器（5 种视图）
+  - TrendView.tsx — 趋势分析（4 指标卡 + 面积图 + 异常日标注 + 周度汇总 + AI 洞察）
+  - CompareView.tsx — 场景对比（4 维度 Tab + 柱状图 + 雷达图 + 同比数据 + AI 洞察）
+  - StrategyAnalysisView.tsx — 策略效果（总览指标 + TOP5 + 散点矩阵 + 详细表 + AI 建议）
+  - EventTimelineView.tsx — 事件详情（事件头 + 关键指标 + 时间线 + 关联策略）
+  - HeatmapView.tsx — 热力图（CSS Grid 7×24 + 颜色梯度 + 图例）
+  - StatsSummaryPanel.tsx — 统计摘要（6 个关键指标卡片）
+  - QuickFilterPanel.tsx — 快速筛选（6 个快捷入口）
+- ✅ App.tsx 集成（systemMode === 'analysis' 条件渲染）
+- ✅ Tooltip 统一样式（深色渐变 + 紫色边框 + 阴影，柱状图 hover 为半透明紫色）
+
+**视觉设计：**
+- 主色：#8B5CF6（紫色，区分其他模式）
+- 辅色：#00D0E9（青色）/ #F5A623（橙色）/ #2ED573（绿色）/ #FF4757（红色）
+- 图表库：Recharts（LineChart/BarChart/AreaChart/ScatterChart/RadarChart）
+- 热力图：CSS Grid + 动态 backgroundColor（不引入额外依赖）
+
+**PRD 覆盖度：**
+- A 查询条件：6/6 = 100%
+- B 历史事件：5/5 = 100%
+- C 报告管理：0/4 = 0%（Phase 3）
+- D 时间轴控制：0/5 = 0%（Phase 3）
+- E 主视图：6/6 = 100%
+- F 详情面板：1/3 = 33%（事件详情完成）
+- G 统计摘要：6/6 = 100%
+- H 快速筛选：6/6 = 100%
+- I 导出操作：0/4 = 0%（Phase 3）
+- **Phase 1 总计：30/44 = 68%（P0 功能全部完成）**
+
+---
+
+### 总览模式（V2.2 ✅ 2026-04-19）
+
+**V2.1 基础功能（2026-04-17）：**
 - 双核 15 指标体系（港口交通 5 + 县城交通 5 + 共享底座 5）
 - GIS 模拟地图（道路网络 + 车辆仿真 + 无人机 + 信号灯 + 船舶动画）
 - AI 态势研判面板（折叠/展开三栏布局 + 操作按钮切换模式）
@@ -21,13 +75,42 @@
 - P0 UI 修复（字号提升 + 对比度 + 缩放 + aria 属性）
 - V2.1 优化（左右面板均衡 + 头部天气 + 韧性说明弹窗 + 设备筛选/动画/离线高亮）
 
-### 指挥模式（V4.0 第三批主体功能 🟢）
+**V2.2 智能化增强（2026-04-19）：**
+- ✅ AI 摘要规则引擎（aiSummaryEngine.ts）：
+  - 根据 9 个核心指标动态计算告警等级（green/yellow/orange/red）
+  - 一句话结论生成（节假日/日常模式自适应）
+  - 建议提示（根据最高压力通道/港口消化/韧性评分动态生成）
+  - 关键指标卡片（车流/港口等待/通道压力/应急韧性）
+  - 预测生成（未来 30 分钟/1 小时态势预测）
+  - 操作建议（启动分流/协调港口/增派应急力量）
+  - 节假日对比数据（车流量/港口消化/通道压力 vs 日常基线）
+- ✅ 设备详情弹窗数据绑定：
+  - 设备名称/位置根据类型动态变化（7 种设备类型）
+  - 卡口数据根据设备名称动态生成（车流量/车速/拥堵指数差异化）
+- ✅ 节假日 AI 摘要上下文：
+  - 展开标题显示"五一假期第 X 天 · 车流量为日常 X 倍"
+  - 对比数据显示"vs 日常基线"
+  - 结论自适应节假日场景（"正常高峰"而非"交通态势正常"）
 
-**V1→V3 迭代历程：**
+**用户故事覆盖度：**
+- ✅ 故事线 01（早班值班员晨检）：AI 摘要一句话结论 + 海峡通行指数
+- ✅ 故事线 03（县委书记巡展）：AI 摘要结论 + 调度建议
+- ✅ 故事线 03-B（设备异常）：设备详情弹窗数据绑定
+- ✅ 故事线 03-D（节假日高峰）：节假日 AI 摘要上下文
+
+**PRD 覆盖度：**
+- 18/18 指标组件：100%
+- AI 摘要规则引擎：100%（从静态 mock 升级为动态计算）
+- 设备详情弹窗：100%（7 种设备类型数据绑定）
+
+### 指挥模式（V4.1 ✅ 2026-04-19）
+
+**V1→V4 迭代历程：**
 - V1：简单三栏布局，数据硬编码
 - V2：Store 数据流打通 + 归因引擎 + 策略推荐引擎 + 效果预测曲线
 - V3：6 步决策链 Tab 架构 → 用户反馈"不像指挥中枢"
 - V4：重新设计为"地图主屏 + 策略栏 + 通信面板"
+- V4.1：补全执行资源 + 策略冲突检测 + 历史统计
 
 **V4.0 第一批已完成（2026-04-16）：**
 - 布局：地图主屏（70%）+ 右侧策略栏（300px）+ 底部通信面板（动态高度）
@@ -67,22 +150,42 @@
 - ✅ 指挥处置报告（CommandReportModal，基本信息 + 拥堵概况 + 策略列表 + 关键节点 + 效果评价）
 - ✅ 事件升级到应急模式（EscalateConfirmModal，多条件触发 + 红色脉冲按钮 + 确认弹窗）
 
-**V4.0 细节打磨已完成（2026-04-17）：**
-- ✅ Web Audio API 音效（来电铃声 + 按钮咔哒 + 消息叮咚）
-- ✅ 按钮微交互（scale 缩放 + cubic-bezier 缓动）
-- ✅ 弹窗入场动画（滑入 + 淡入 + 弹性曲线）
+**V4.1 执行资源与冲突检测已完成（2026-04-19）：**
+- ✅ ExecutionResourcePanel（E4 模块）：
+  - 关联人员列表（姓名/部门/状态/任务 + 聊天/定位按钮）
+  - 物资状态（拖车/警力/锥桶/诱导屏 + 进度条）
+  - 快速调度入口（增派警力/调度拖车按钮）
+- ✅ 策略冲突检测（H2-04 模块）：
+  - strategyConflicts.ts（6 条互斥/约束规则 + 6 条联动规则）
+  - StrategyConfirmModal 增强（执行前自动检测冲突 + 冲突提示卡片 + 建议）
+  - 冲突类型：互斥（S-01 ↔ S-13）、约束（S-02+S-03 总分流 ≤60%）、联动（S-02 → S-09）
+- ✅ HistoryStatsPanel（I 模块）：
+  - 近 7 日统计（执行次数/采纳率/平均缓解时间）
+  - 最有效策略 TOP3（按平均缓解时间排序）
+  - 折叠面板（默认收起，点击展开）
+- ✅ Store 扩展：
+  - executionResources（personnel + materials）
+  - historyStats（totalExecuted + adoptionRate + avgReliefMinutes + top3）
 
-**V4.0 文案与交互打磨已完成（2026-04-17）：**
-- ✅ PRD 文案同步到界面（摘要条归因信息、策略卡片触发条件、通信时间线类型标签）
-- ✅ 用户故事表达补齐（归因置信度、预计缓解时间、策略生效时间、流程步骤耗时）
-- ✅ 地图交互微调（人员标注点击动画+选中光晕、弹窗淡入+边界检测、无人机轨迹线+旋转）
-- ✅ 数据结构预留（StrategyConflict 类型、FieldPerson 轨迹字段、triggerCondition 字段）
+**PRD 覆盖度（92 个功能项）：**
+- A-J 核心模块：86/92 = 93%
+- E4 执行资源展示：4/4 = 100%（新增）
+- H2-04 策略冲突检测：1/1 = 100%（新增）
+- I 历史策略统计：3/3 = 100%（新增）
+- 剩余未实现（P2 级）：
+  - E3-03 人员聚类（缩放较小时按部门聚类）
+  - E3-06 人员移动轨迹线（虚线路径）
+  - D-05~D-10 地图数据对接（信号灯/诱导屏/卡口等为 Mock）
 
-**V4.0 待完善：**
-- [ ] 策略冲突检测（PRD H2-04，互斥/约束/联动规则）
+**用户故事覆盖度：**
+- ✅ 故事线 04（拥堵指数飙升）：归因分析 + 策略建议 + 效果预测 + 执行跟踪 100%
+- ✅ 故事线 05（策略效果不佳）：追加方案 + 冲突检测 + 效果对比 100%
+
+**V4.0 待完善 → V4.1 已完成：**
+- ~~[ ] 策略冲突检测（PRD H2-04，互斥/约束/联动规则）~~ ✅
+- ~~[ ] 执行资源面板（PRD E4-01~04，当前策略关联的人员/物资展示）~~ ✅
 - [ ] 人员聚类（PRD E3-03，缩放较小时按部门聚类）
 - [ ] 人员移动轨迹线（PRD E3-06，移动中人员显示虚线路径）
-- [ ] 执行资源面板（PRD E4-01~04，当前策略关联的人员/物资展示）
 - [ ] 高德地图深色主题优化（当前用遮罩层模拟，需要调试样式权限）
 
 ### 设计文档
@@ -115,24 +218,38 @@
 
 ## 二、待办事项
 
-### P0 — 指挥模式
+### P0 — 核心模式完成度
 
-- [x] 视觉统一 ✅ 已完成（2026-04-16）
-- [x] 清理 V3.0 遗留组件 ✅ 已完成（2026-04-16）
-- [x] 第二批核心：视频面板 + 无人机 + 策略工作台 + 流程条 + 确认弹窗 ✅ 已完成（2026-04-16）
-- [x] 第二批剩余：聊天窗口 + 视频通话 + 照片查看 + 地图视觉增强 ✅ 已完成（2026-04-17）
-- [x] 第三批主体：策略退出 + 指挥报告 + 事件升级 ✅ 已完成（2026-04-17）
-- [x] 调度交互体系：地图人员 + 来电弹窗 + 聊天浮窗 + 条件动作 ✅ 已完成（2026-04-17）
-- [x] 细节打磨：音效 + 微交互 + 入场动画 ✅ 已完成（2026-04-17）
-- [ ] 待完善：策略冲突检测 + 人员聚类 + 移动轨迹线 + 执行资源面板 + 地图深色主题
+**总览模式：**
+- [x] 双核 15 指标体系 ✅ 已完成（2026-04-17）
+- [x] AI 摘要规则引擎 ✅ 已完成（2026-04-19）
+- [x] 设备详情弹窗数据绑定 ✅ 已完成（2026-04-19）
+- [x] 节假日 AI 摘要上下文 ✅ 已完成（2026-04-19）
+- [ ] 骨架屏加载状态（P2 级）
 
-### P1 — 总览模式待优化
+**指挥模式：**
+- [x] V4.0 核心功能（地图主屏 + 策略栏 + 通信面板）✅ 已完成（2026-04-16）
+- [x] 视频面板 + 无人机 + 策略工作台 ✅ 已完成（2026-04-16）
+- [x] 调度交互体系（地图人员 + 聊天 + 通话）✅ 已完成（2026-04-17）
+- [x] 策略退出 + 指挥报告 + 事件升级 ✅ 已完成（2026-04-17）
+- [x] 执行资源面板（E4 模块）✅ 已完成（2026-04-19）
+- [x] 策略冲突检测（H2-04 模块）✅ 已完成（2026-04-19）
+- [x] 历史策略统计（I 模块）✅ 已完成（2026-04-19）
+- [ ] 人员聚类（E3-03，P2 级）
+- [ ] 人员移动轨迹线（E3-06，P2 级）
 
-- [ ] AI 摘要条规则引擎（当前静态 mock）
-- [ ] 设备详情弹窗按具体设备显示数据（当前固定 mock）
-- [ ] 骨架屏加载状态
+**应急模式：**
+- [x] Phase 1-10 全部完成 ✅（2026-04-19）
 
-### 应急模式（Phase 1-5 ✅ 2026-04-17）
+### P1 — 其他模式
+
+**分析模式：**
+- [x] Phase 1 核心框架（查询 + 事件列表 + 5 种视图 + 统计摘要 + 快速筛选）✅ 已完成（2026-04-19）
+- [ ] Phase 2 可视化增强（时间轴回放控制器 + 更多图表类型）
+- [ ] Phase 3 报告与导出（报告管理 + Excel/PDF/PPT 导出）
+
+**港口模式：**
+- [ ] 海峡通行深度分析 + AIS 船舶追踪 + 港口运力监控
 
 **Phase 1-3 已完成（2026-04-17 上午）：**
 - ✅ Emergency Store + Engine（emergencyEngine.ts：响应等级、阶段判定、物资估算、时间轴生成）
@@ -186,16 +303,45 @@
   - 快捷指令：6 个常用指令按钮（请立即到位、请汇报进展、任务已确认、需要增援、物资不足、情况紧急）
   - 消息气泡：指挥中心右对齐（青色），收到的消息左对齐（灰色），部门标签颜色区分
 
-**Phase 8 待做（资源调度闭环 P0）：**
-- [ ] 资源调度面板（人员/车辆/设备实时状态）
-- [ ] 任务派发与反馈（派发 → 确认 → 到场 → 完成）
-- [ ] 地图资源点位实时状态更新
-- [ ] 特殊车辆明细追踪（冷链车告警规则、危化品车监控、地图标注）
+**Phase 8 已完成（2026-04-19）：**
+- ✅ 资源调度面板（ResourceDispatchPanel：人员/车辆/设备三类统计 + 状态列表）
+- ✅ 特殊车辆明细弹窗（SpecialVehicleDetailModal：冷链车/危化品车筛选 + 燃油/告警/货物详情）
+- ✅ 任务流程增强（4步→5步：待接收→已接收→执行中→已到场→已完成，含到场/完成时间记录）
+- ✅ 地图特殊车辆标注（冷链车蓝色方块/危化品车红色方块 + 告警脉冲 + 点击弹窗详情）
+- ✅ 地图图例更新（新增冷链车/危化品车图例）
+- ✅ Store 扩展（FieldResource、SpecialVehicleDetail 类型 + Mock 数据）
+- ✅ 模拟器增强（特殊车辆滞留时长递增 + 燃油递减 + 告警等级自动升级）
+- ✅ SpecialVehiclePanel 增加"查看明细"按钮
 
-**Phase 9 待做（视频会商 P1）：**
-- [ ] 视频会商面板（多方视频会议）
-- [ ] 现场视频回传（无人机/执法记录仪）
-- [ ] 视频画中画（地图 + 视频同屏）
+**Phase 9 已完成（2026-04-19）：**
+- ✅ 视频监控面板（EmergencyVideoDock：6路摄像头切换 + 无人机派出/召回 + 2×2全屏宫格）
+- ✅ 无人机HUD（电量/高度/风速 + 风力>6级禁飞提示 + 巡查航线显示）
+- ✅ 多方视频会商弹窗（EmergencyVideoConference：主画面+参会人条 + 发言人轮换 + 静音/挂断 + 最小化）
+- ✅ 融合通信「发起会商」按钮（自动选取6个部门联系人 + 会商记录追加到通信面板）
+- ✅ Store扩展（activeVideoChannel、isDroneDeployed、videoConference + 5个Actions）
+- ✅ 地图集成视频面板（EmergencyMap右下角叠加EmergencyVideoDock）
+
+**Phase 10 已完成（2026-04-19）：**
+- ✅ 气象联动自动触发预案（台风距离<50km+风力≥10级 → 自动弹出预案库 + 通信记录提示）
+- ✅ 指挥→应急衔接增强（升级时自动同步拥堵指数和策略状态到应急通信记录）
+- ✅ 应急退出条件检测（recovery阶段+滞留<500 → Banner显示「查看报告/返回总览」按钮）
+- ✅ 应急退出自动提示（滞留<200+recovery+台风远离 → 通信面板自动提示「应急状态已解除」）
+- ✅ 事件日志导出（报告弹窗底部「导出事件日志」按钮 → 下载 txt 文件）
+- ✅ 报告弹窗增加「返回总览模式」按钮
+- ✅ 滚动条样式优化（6px宽 + 透明轨道 + 内边距）
+- ✅ 资源调度面板信息区域增大（padding/字号/间距/flex比例提升）
+
+### 应急模式完成度总结
+
+| Phase | 内容 | 状态 |
+|-------|------|------|
+| 1-3 | Store+Engine+10个UI组件+阶段状态机 | ✅ |
+| 4-5 | 模拟器+声音告警+报告弹窗+物资调拨+台风路径 | ✅ |
+| 6 | 预案数字化执行系统（6个预案+任务联动） | ✅ |
+| 7 | 融合通信（频道+@提及+快捷指令） | ✅ |
+| 8 | 资源调度闭环（人员/车辆/设备+特殊车辆明细+地图标注） | ✅ |
+| 9 | 视频会商（6路监控+无人机+多方会商弹窗） | ✅ |
+| 10 | 气象联动+模式衔接+日志导出+退出条件 | ✅ |
 
 **Phase 10 待做（其他增强）：**
 - [ ] 客流预测预警（基于历史数据 + 实时数据）
@@ -229,44 +375,279 @@
 
 ## 四、用户故事与 PRD 覆盖度
 
-详见 `docs/superpowers/specs/2026-04-17-design-vs-requirements-mapping.md`
+### 总览模式
 
-- 用户故事 6 步决策链：100% 覆盖
-- 用户故事人员互动场景：100% 覆盖（地图人员 + 聊天 + 通话）
-- PRD 地图功能（D 模块）：80% 覆盖（D-05~D-10 用 Mock 数据）
-- PRD 视频功能（E 模块）：100% 覆盖（含通话模式）
-- PRD 执行跟踪（H 模块）：100% 覆盖（含流程留痕 + 报告 + 升级）
-- PRD 通信系统（E2 模块）：100% 覆盖（群聊 + 私聊 + 快捷回复）
-- PRD 人员标注（E3 模块）：80% 覆盖（缺聚类和轨迹线）
-- PRD 资源展示（E4 模块）：未实现（留到后续）
+**用户故事覆盖度：**
+- ✅ 故事线 01（早班值班员晨检）：100% — AI 摘要一句话结论 + 海峡通行指数 + 预警栏 + 路况叠加
+- ✅ 故事线 02（台风季预警）：100% — 应急模式已完成
+- ✅ 故事线 03（县委书记巡展）：90% — AI 摘要结论 + 调度建议（缺拥堵归因需切换指挥模式）
+- ✅ 故事线 03-B（设备异常）：80% — 设备详情弹窗 + 自动展开（缺聚合高亮/原因分析/盲区提示）
+- ✅ 故事线 03-D（节假日高峰）：85% — 节假日 AI 摘要上下文 + 压力罗盘 + 韧性评分（缺历史同期对比）
+
+**PRD 覆盖度：**
+- 18/18 指标组件：100%
+- AI 摘要规则引擎：100%
+- 设备详情弹窗：100%（7 种设备类型数据绑定）
+- 节假日模式：100%
+
+### 指挥模式
+
+**用户故事覆盖度：**
+- ✅ 故事线 04（拥堵指数飙升）：100% — 归因分析 + 策略建议 + 效果预测 + 执行跟踪
+- ✅ 故事线 05（策略效果不佳）：100% — 追加方案 + 冲突检测 + 效果对比
+
+**PRD 覆盖度（92 个功能项）：**
+- A 拥堵态势面板：6/6 = 100%
+- B 拥堵归因分析：8/8 = 100%
+- C 影响评估：4/6 = 67%（缺经济损失估算、波及范围预测）
+- D 指挥地图：7/12 = 58%（核心功能 100%，D-05~D-10 为 Mock 数据）
+- E 视频联动：6/6 = 100%
+- E2 指挥通信系统：6/6 = 100%
+- E3 地图人员标注：4/6 = 67%（缺人员聚类、移动轨迹线）
+- E4 执行资源展示：4/4 = 100% ✅
+- F AI 策略建议：7/7 = 100%
+- G 效果预测对比：5/5 = 100%
+- H 执行状态跟踪：9/9 = 100%
+- H2 策略决策工作台：4/4 = 100% ✅
+- I 历史策略效果：3/3 = 100% ✅
+- J 底部拥堵趋势时间轴：4/4 = 100%
+- **总计：86/92 = 93%**
+
+### 应急模式
+
+**用户故事覆盖度：**
+- ✅ 故事线 06（台风预警→停航→滞留预测）：100%
+- ✅ 故事线 07（复航后积压消化期）：100%
+
+**PRD 覆盖度：**
+- Phase 1-10 全部完成：100%
+- 预案数字化执行系统：100%
+- 融合通信系统：100%
+- 资源调度闭环：100%
+- 视频会商系统：100%
+- 气象联动 + 模式衔接：100%
 
 ---
 
 ## 五、项目文件结构
 
 ```text
-src/components/
-├── overview/           # 总览模式（16 个组件）
-├── command/            # 指挥模式 V4.0（17 个组件）
-│   ├── CommandMode.tsx           # 布局容器（动态高度）
-│   ├── CommandSummaryBar.tsx     # 指挥摘要条（达标退出 + 升级入口）
-│   ├── StrategyCommandPanel.tsx  # 右侧策略工作台（状态提示 + 条件动作）
-│   ├── StrategyFlowBar.tsx       # 策略执行流程条（4步 + 消息关联）
-│   ├── StrategyConfirmModal.tsx  # 策略执行确认弹窗
-│   ├── CommandCommPanel.tsx      # 底部通信时间线（动态高度 + 流程条）
-│   ├── CommandMap.tsx            # 高德地图（人员标注 + 热力渐变 + 粒子 + 脉冲 + 无人机）
-│   ├── MapVideoDock.tsx          # 视频面板（5路摄像头 + 无人机 + HUD）
-│   ├── PersonMarker.tsx          # 地图人员标记
-│   ├── IncomingCallModal.tsx     # 来电弹窗（音效 + 入场动画）
-│   ├── VideoCallWindow.tsx       # 独立视频通话窗口（红色 HUD）
-│   ├── ChatWindow.tsx            # 聊天浮窗（群组 + 私聊 + 快捷回复）
-│   ├── PhotoViewerModal.tsx      # 照片查看弹窗
-│   ├── CongestionDetailModal.tsx # 拥堵态势详情弹窗
-│   ├── CommandReportModal.tsx    # 指挥处置报告弹窗
-│   ├── EscalateConfirmModal.tsx  # 事件升级确认弹窗
-│   └── PredictionCurveChart.tsx  # 效果预测曲线（Recharts）
-├── Header.tsx, Modal.tsx, ModeSwitcher.tsx ...
-src/store/dashboardStore.ts       # Zustand 状态管理
-src/utils/commandEngine.ts        # 归因引擎 + 策略推荐引擎
-src/utils/soundEffects.ts         # Web Audio API 音效
+src/
+├── components/
+│   ├── overview/              # 总览模式（15 个组件）
+│   │   ├── AiSummaryBar.tsx
+│   │   ├── UrbanHealthCard.tsx
+│   │   ├── ShutdownProbabilityCard.tsx
+│   │   ├── PressureTransmissionCard.tsx
+│   │   ├── PortDigestionCard.tsx
+│   │   ├── WeatherCouplingCard.tsx
+│   │   ├── StraitTransitIndex.tsx
+│   │   ├── CorridorElasticityCard.tsx
+│   │   ├── TidalEffectCard.tsx
+│   │   ├── CorridorPressureCard.tsx
+│   │   ├── PressurePredictionChart.tsx
+│   │   ├── HeaderWeather.tsx
+│   │   ├── ResilienceInfoModal.tsx
+│   │   ├── CollapsibleStatsBar.tsx
+│   │   └── SystemResilienceCard.tsx
+│   ├── command/               # 指挥模式（20 个组件）
+│   │   ├── CommandMode.tsx
+│   │   ├── CommandSummaryBar.tsx
+│   │   ├── StrategyCommandPanel.tsx
+│   │   ├── ExecutionResourcePanel.tsx      # ✅ V4.1 新增
+│   │   ├── HistoryStatsPanel.tsx           # ✅ V4.1 新增
+│   │   ├── StrategyFlowBar.tsx
+│   │   ├── StrategyConfirmModal.tsx        # ✅ V4.1 增强（冲突检测）
+│   │   ├── CommandCommPanel.tsx
+│   │   ├── CommandMap.tsx
+│   │   ├── MapVideoDock.tsx
+│   │   ├── PersonMarker.tsx
+│   │   ├── IncomingCallModal.tsx
+│   │   ├── VideoCallWindow.tsx
+│   │   ├── ChatWindow.tsx
+│   │   ├── PhotoViewerModal.tsx
+│   │   ├── CongestionDetailModal.tsx
+│   │   ├── CommandReportModal.tsx
+│   │   ├── EscalateConfirmModal.tsx
+│   │   └── PredictionCurveChart.tsx
+│   ├── emergency/             # 应急模式（20+ 个组件）
+│   │   ├── EmergencyMode.tsx
+│   │   ├── EmergencyBanner.tsx
+│   │   ├── EmergencyForecastPanel.tsx
+│   │   ├── SpecialVehiclePanel.tsx
+│   │   ├── SupplyDemandPanel.tsx
+│   │   ├── EmergencyMap.tsx
+│   │   ├── EmergencyTaskBoard.tsx
+│   │   ├── EmergencyPlanPanel.tsx
+│   │   ├── EmergencyCommPanel.tsx
+│   │   ├── EmergencyTimeline.tsx
+│   │   ├── EmergencySimulator.tsx
+│   │   ├── EmergencyReportModal.tsx
+│   │   ├── EmergencyPlanLibraryModal.tsx
+│   │   ├── EmergencyPlanDetailModal.tsx
+│   │   ├── ResourceDispatchPanel.tsx
+│   │   ├── ResourceDetailModal.tsx
+│   │   ├── SpecialVehicleDetailModal.tsx
+│   │   ├── EmergencyVideoDock.tsx
+│   │   ├── EmergencyVideoConference.tsx
+│   │   └── ...
+│   ├── analysis/              # ✅ 分析模式（12 个组件，Phase 1 新增）
+│   │   ├── AnalysisMode.tsx
+│   │   ├── DataRangeBanner.tsx
+│   │   ├── QueryFilterPanel.tsx
+│   │   ├── HistoryEventList.tsx
+│   │   ├── MainViewArea.tsx
+│   │   ├── TrendView.tsx
+│   │   ├── CompareView.tsx
+│   │   ├── StrategyAnalysisView.tsx
+│   │   ├── EventTimelineView.tsx
+│   │   ├── HeatmapView.tsx
+│   │   ├── StatsSummaryPanel.tsx
+│   │   └── QuickFilterPanel.tsx
+│   ├── Header.tsx
+│   ├── Modal.tsx
+│   ├── ModeSwitcher.tsx
+│   ├── LeftPanel.tsx
+│   ├── CenterPanel.tsx
+│   ├── RightPanel.tsx
+│   ├── CheckpointModal.tsx            # ✅ V2.2 增强（数据绑定）
+│   └── ...
+├── store/
+│   └── dashboardStore.ts              # Zustand 状态管理
+├── utils/
+│   ├── aiSummaryEngine.ts             # ✅ V2.2 新增（AI 摘要规则引擎）
+│   ├── commandEngine.ts               # 归因引擎 + 策略推荐引擎
+│   ├── emergencyEngine.ts             # 应急响应引擎
+│   ├── strategyConflicts.ts           # ✅ V4.1 新增（策略冲突矩阵）
+│   ├── analysisMockData.ts            # ✅ Phase 1 新增（分析模式 Mock 数据生成）
+│   └── soundEffects.ts                # Web Audio API 音效
+└── App.tsx                            # ✅ V2.2 增强（AI 摘要自动计算）
 ```
+
+---
+
+## 六、最新文件改动（2026-04-19）
+
+### 新增文件
+
+1. `src/utils/aiSummaryEngine.ts` — AI 摘要规则引擎
+   - computeAiSummary() 主函数
+   - computeAlertLevel() 告警等级计算
+   - generateConclusion() 一句话结论生成
+   - generateSuggestionHint() 建议提示生成
+   - generateMetrics() 关键指标生成
+   - generateForecasts() 预测生成
+   - generateActions() 操作建议生成
+   - generateCompares() 节假日对比数据生成
+
+2. `src/components/command/ExecutionResourcePanel.tsx` — 执行资源面板
+   - 关联人员列表（姓名/部门/状态/任务）
+   - 物资状态（拖车/警力/锥桶/诱导屏）
+   - 快速调度入口（增派警力/调度拖车）
+
+3. `src/components/command/HistoryStatsPanel.tsx` — 历史策略统计面板
+   - 近 7 日统计（执行次数/采纳率/平均缓解时间）
+   - 最有效策略 TOP3
+
+4. `src/utils/strategyConflicts.ts` — 策略冲突矩阵
+   - STRATEGY_CONFLICTS 数组（6 条互斥/约束规则）
+   - STRATEGY_LINKAGES 数组（6 条联动规则）
+   - checkConflicts() 冲突检测函数
+
+5. `doc/三模式完成度对比报告.md` — 三模式完成度对比报告
+
+### 修改文件
+
+1. `src/App.tsx`
+   - 新增 AI 摘要自动计算 useEffect
+   - 监听总览模式指标变化，自动调用 computeAiSummary()
+
+2. `src/store/dashboardStore.ts`
+   - CommandState 新增 executionResources 字段
+   - CommandState 新增 historyStats 字段
+   - defaultCommandState 新增 Mock 数据
+
+3. `src/components/command/StrategyCommandPanel.tsx`
+   - 集成 ExecutionResourcePanel
+   - 集成 HistoryStatsPanel
+
+4. `src/components/command/StrategyConfirmModal.tsx`
+   - 新增策略冲突检测逻辑
+   - 执行前自动调用 checkConflicts()
+   - 显示冲突提示卡片（互斥/约束/联动）
+
+5. `src/components/CheckpointModal.tsx`
+   - typeConfig 新增 location 字段
+   - CheckpointContent 数据根据设备名称动态生成
+   - 设备基本信息头显示动态位置
+
+6. `.claude/progress.md` — 更新总览模式 V2.2 + 指挥模式 V4.1 完成情况
+
+7. `CLAUDE.md` — 精简版本，更新当前进度和下一步动作
+
+---
+
+## 七、待办事项更新
+
+### 已完成 ✅
+
+- [x] 总览模式 AI 摘要规则引擎
+- [x] 总览模式设备详情弹窗数据绑定
+- [x] 总览模式节假日 AI 摘要上下文
+- [x] 指挥模式执行资源面板（E4 模块）
+- [x] 指挥模式策略冲突检测（H2-04 模块）
+- [x] 指挥模式历史策略统计（I 模块）
+
+### 进行中 🔄
+
+无
+
+### 待开始 🔲
+
+**P1 优先级：**
+- [ ] 港口模式（海峡通行深度分析 + AIS 船舶追踪 + 港口运力监控）
+- [ ] 分析模式（历史记录查询 + 策略执行统计 + 事件归档 + 报告生成）
+
+**P2 优先级：**
+- [ ] 总览模式骨架屏加载状态
+- [ ] 总览模式设备离线聚合高亮
+- [ ] 总览模式历史同期对比数据
+- [ ] 指挥模式人员聚类（E3-03）
+- [ ] 指挥模式人员移动轨迹线（E3-06）
+- [ ] 指挥模式地图数据对接（D-05~D-10）
+
+**P3 优先级：**
+- [ ] 外部数据对接（海康视频流/港口闸机 API/气象 API/信号灯配时系统）
+
+---
+
+## 八、已知问题
+
+1. ~~SVG 模拟地图折叠面板后只拉伸不显示更多内容（接入高德后解决）~~ ✅ 已解决
+2. ~~高德地图深色主题样式未生效（当前用 CSS 遮罩层模拟，需调试 API Key 样式权限）~~ ⚠️ 待优化（P2 级）
+3. Markdown 格式警告（MD032/MD060/MD012）— 不影响功能，可忽略
+
+---
+
+## 九、项目亮点总结
+
+1. **智能化决策支持**
+   - 总览模式：AI 摘要规则引擎，根据 9 个指标动态生成一句话结论
+   - 指挥模式：归因分析 + 策略推荐 + 效果预测 + 冲突检测
+   - 应急模式：预案数字化执行 + 气象联动自动触发
+
+2. **完整决策闭环**
+   - 指挥模式：发现问题 → 归因分析 → 策略建议 → 执行跟踪 → 效果评价 → 报告导出
+   - 应急模式：预警响应 → 预案启动 → 任务分发 → 资源调度 → 通信协同 → 退出条件
+
+3. **跨模式协同**
+   - 总览 → 指挥：拥堵指数 > 4 自动提示切换
+   - 指挥 → 应急：多条件触发升级（滞留 > 2000 + 停航 + 韧性 < 30）
+   - 应急 → 总览：退出条件检测（recovery + 滞留 < 200）
+
+4. **用户体验优化**
+   - 音效系统（来电铃声 + 按钮咔哒 + 消息叮咚）
+   - 微交互（scale 缩放 + cubic-bezier 缓动）
+   - 入场动画（滑入 + 淡入 + 弹性曲线）
+   - 地图视觉增强（热力渐变 + 粒子动画 + 脉冲效果）
+

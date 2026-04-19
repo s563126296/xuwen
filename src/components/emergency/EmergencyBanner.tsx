@@ -39,6 +39,7 @@ const PHASE_BANNER_COLOR: Record<EmergencyPhase, string> = {
 export default function EmergencyBanner() {
   const emergency = useDashboardStore((s) => s.emergencyState);
   const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
+  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
   const levelColor = levelColorMap[emergency.emergencyLevel];
   const phaseColor = PHASE_BANNER_COLOR[emergency.forecast.strandedPhase];
   const color = phaseColor ?? levelColor;
@@ -112,6 +113,20 @@ export default function EmergencyBanner() {
             <div style={{ fontSize: 11, color: '#94A3B8' }}>当前阶段</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#E2E8F0' }}>{emergency.phaseLabel}</div>
           </div>
+          {currentPhase === 'recovery' && emergency.forecast.currentStrandedVehicles < 500 && (
+            <button
+              onClick={() => {
+                playClickSound();
+                setActiveModal('emergency-report');
+              }}
+              style={{
+                padding: '6px 14px', fontSize: 11, fontWeight: 600, borderRadius: 6, cursor: 'pointer',
+                background: 'rgba(46,213,115,0.15)', border: '1px solid #2ED573', color: '#2ED573',
+              }}
+            >
+              查看报告 / 返回总览
+            </button>
+          )}
         </div>
       </div>
 

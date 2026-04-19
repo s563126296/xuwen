@@ -7,9 +7,18 @@ export default function EscalateConfirmModal() {
   const { congestionIndex } = commandState;
 
   const handleConfirm = () => {
-    // Add escalation message to feed
     addCommandFeedItem('事件已升级为应急模式，正在启动应急预案...');
-    // Switch to emergency mode
+
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const emergencyState = useDashboardStore.getState().emergencyState;
+    const syncComms = [
+      ...emergencyState.communications,
+      { id: `ec-esc-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: `从指挥模式升级：拥堵指数 ${congestionIndex.toFixed(1)}，策略效果不足`, urgent: true },
+      { id: `ec-esc2-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: '指挥模式策略已保持执行，应急模式已接管调度', urgent: false },
+    ];
+    useDashboardStore.getState().setEmergencyState({ communications: syncComms });
+
     setSystemMode('emergency');
     setActiveModal(null);
   };

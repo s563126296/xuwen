@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import AMapLoader from '@amap/amap-jsapi-loader';
 import { useDashboardStore } from '../../store/dashboardStore';
+import EmergencyVideoDock from './EmergencyVideoDock';
 
 // 进港公路坐标（与指挥模式一致）
 const JINGANG_ROAD: [number, number][] = [
@@ -34,8 +35,11 @@ export default function EmergencyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const typhoonMarkerRef = useRef<any>(null);
+  const droneMarkerRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
   const points = useDashboardStore((s) => s.emergencyState.resourcePoints);
+  const specialVehicles = useDashboardStore((s) => s.emergencyState.specialVehicles);
+  const isDroneDeployed = useDashboardStore((s) => s.emergencyState.isDroneDeployed);
   const typhoon = useDashboardStore((s) => s.emergencyState.typhoon);
   const currentStranded = useDashboardStore((s) => s.emergencyState.forecast.currentStrandedVehicles);
 
@@ -172,21 +176,20 @@ export default function EmergencyMap() {
               position:relative;
             ">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                <div style="font-size:13px;font-weight:700;color:#E2E8F0;">${point.name}</div>
+                <div style="font-size:13px;font-weight:700;color:#E2E8F0;flex:1;margin-right:8px;">${point.name}</div>
                 <div style="
                   font-size:10px;padding:2px 7px;border-radius:3px;
-                  background:${statusBg};color:${statusTextColor};font-weight:600;
+                  background:${statusBg};color:${statusTextColor};font-weight:600;flex-shrink:0;
                 ">${statusLabel}</div>
+                <div class="em-info-close" style="
+                  width:20px;height:20px;margin-left:6px;flex-shrink:0;
+                  display:flex;align-items:center;justify-content:center;
+                  cursor:pointer;color:#94A3B8;font-size:14px;
+                  border-radius:4px;background:rgba(255,255,255,0.06);
+                ">✕</div>
               </div>
               <div style="font-size:11px;color:#94A3B8;line-height:1.5;">${point.detail}</div>
               ${parkingBar}
-              <div class="em-info-close" style="
-                position:absolute;top:8px;right:8px;
-                width:18px;height:18px;
-                display:flex;align-items:center;justify-content:center;
-                cursor:pointer;color:#94A3B8;font-size:14px;
-                border-radius:4px;background:rgba(255,255,255,0.06);
-              ">✕</div>
             </div>
           `;
 
@@ -313,6 +316,49 @@ export default function EmergencyMap() {
         lineJoin: 'round',
       }));
 
+      // === 特殊车辆标注 ===
+      specialVehicles.forEach((v) => {
+        const isCold = v.type === 'cold_chain';
+        const vColor = v.alertLevel === 'red' ? '#FF4757' : v.alertLevel === 'orange' ? '#FF6B35' : v.alertLevel === 'yellow' ? '#F5A623' : (isCold ? '#00D0E9' : '#FF4757');
+        const vLabel = isCold ? '冷' : '危';
+        const pulseAnim = v.alertLevel === 'red' || v.alertLevel === 'orange' ? 'animation:svPulse 1.5s infinite;' : '';
+
+        const marker = new AMap.Marker({
+          position: v.position,
+          content: `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+            <div style="width:22px;height:22px;border-radius:4px;background:${vColor};display:flex;align-items:center;justify-content:center;color:#0A0F19;font-size:10px;font-weight:700;box-shadow:0 0 8px ${vColor}66;${pulseAnim}">${vLabel}</div>
+            <div style="padding:1px 4px;border-radius:2px;background:rgba(10,15,25,0.9);font-size:8px;color:${vColor};white-space:nowrap;">${v.plateNumber.slice(-5)}</div>
+          </div>`,
+          offset: new AMap.Pixel(-11, -26),
+          zIndex: 180,
+        });
+
+        marker.on('click', () => {
+          if ((map as any)._currentInfoWindow) (map as any)._currentInfoWindow.close();
+          const fuelBar = v.fuelLevel !== undefined
+            ? `<div style="margin-top:6px;"><span style="font-size:10px;color:#64748B;">燃油: </span><span style="font-size:10px;color:${v.fuelLevel < 30 ? '#FF4757' : '#E2E8F0'};font-weight:600;">${v.fuelLevel}%</span></div>`
+            : '';
+          const noteHtml = v.notes ? `<div style="margin-top:6px;padding:4px 6px;border-radius:3px;background:rgba(255,71,87,0.1);font-size:10px;color:#FF4757;">⚠ ${v.notes}</div>` : '';
+          const contentDiv = document.createElement('div');
+          contentDiv.innerHTML = `<div style="padding:10px 12px;background:rgba(10,15,25,0.95);border:1px solid ${vColor}55;border-radius:8px;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,0.6);position:relative;">
+            <div style="font-size:12px;font-weight:700;color:#E2E8F0;">${v.plateNumber}</div>
+            <div style="font-size:10px;color:${vColor};margin-top:2px;">${isCold ? '冷链车' : '危化品车'} · ${v.cargoType || ''}</div>
+            <div style="margin-top:6px;font-size:10px;color:#94A3B8;">滞留 ${v.strandedHours}h · 起始 ${v.strandedSince}</div>
+            ${fuelBar}${noteHtml}
+            <div class="em-info-close" style="position:absolute;top:6px;right:6px;width:16px;height:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94A3B8;font-size:12px;border-radius:3px;background:rgba(255,255,255,0.06);">✕</div>
+          </div>`;
+          const info = new AMap.InfoWindow({ content: contentDiv, offset: new AMap.Pixel(0, -28), isCustom: true });
+          info.open(map, v.position);
+          (map as any)._currentInfoWindow = info;
+          setTimeout(() => {
+            const closeBtn = contentDiv.querySelector('.em-info-close');
+            if (closeBtn) closeBtn.addEventListener('click', () => info.close());
+          }, 50);
+        });
+
+        map.add(marker);
+      });
+
       setMapReady(true);
     }).catch((e: any) => {
       console.error('高德地图加载失败:', e);
@@ -346,6 +392,43 @@ export default function EmergencyMap() {
     `);
   }, [typhoon.distance, typhoon.name]);
 
+  // 无人机飞行动画
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map) return;
+    if (isDroneDeployed) {
+      const droneContent = `<div style="display:flex;flex-direction:column;align-items:center;">
+        <svg width="32" height="32" viewBox="0 0 32 32" style="animation:droneSpin 3s linear infinite;filter:drop-shadow(0 0 8px #00D0E9);">
+          <line x1="6" y1="6" x2="26" y2="26" stroke="#00D0E9" stroke-width="2"/>
+          <line x1="26" y1="6" x2="6" y2="26" stroke="#00D0E9" stroke-width="2"/>
+          <circle cx="16" cy="16" r="4" fill="#00D0E9"/>
+          <circle cx="6" cy="6" r="3" fill="none" stroke="#00D0E9" stroke-width="1.5"/>
+          <circle cx="26" cy="6" r="3" fill="none" stroke="#00D0E9" stroke-width="1.5"/>
+          <circle cx="6" cy="26" r="3" fill="none" stroke="#00D0E9" stroke-width="1.5"/>
+          <circle cx="26" cy="26" r="3" fill="none" stroke="#00D0E9" stroke-width="1.5"/>
+        </svg>
+        <div style="margin-top:4px;padding:2px 6px;border-radius:3px;background:rgba(10,15,25,0.92);border:1px solid #00D0E955;font-size:9px;color:#00D0E9;white-space:nowrap;">UAV-01 巡查中</div>
+      </div>`;
+      if (droneMarkerRef.current) {
+        droneMarkerRef.current.show();
+      } else {
+        const AMap = (window as any).AMap;
+        if (AMap) {
+          const marker = new AMap.Marker({
+            position: [110.1574, 20.2911],
+            content: droneContent,
+            offset: new AMap.Pixel(-16, -16),
+            zIndex: 350,
+          });
+          map.add(marker);
+          droneMarkerRef.current = marker;
+        }
+      }
+    } else {
+      if (droneMarkerRef.current) droneMarkerRef.current.hide();
+    }
+  }, [isDroneDeployed]);
+
   return (
     <div className="card" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
       <div ref={mapRef} style={{ position: 'absolute', inset: 0 }} />
@@ -364,7 +447,7 @@ export default function EmergencyMap() {
       {/* 左上角标题 */}
       <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 20, padding: '8px 12px', borderRadius: 6, background: 'rgba(10,15,25,0.92)', border: '1px solid rgba(255,71,87,0.18)' }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>应急资源部署地图</div>
-        <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>停车区 / 物资点 / 交警 / 无人机</div>
+        <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>停车区 / 物资点 / 交警 / 无人机 / 特殊车辆</div>
       </div>
 
       {/* 右上角图例 */}
@@ -374,17 +457,21 @@ export default function EmergencyMap() {
           { label: '物资点', color: '#00D0E9', char: '物' },
           { label: '交警', color: '#00D0E9', char: '警' },
           { label: '无人机', color: '#00D0E9', char: '机' },
+          { label: '冷链车', color: '#00D0E9', char: '冷' },
+          { label: '危化品', color: '#FF4757', char: '危' },
           { label: '告警', color: '#F5A623', char: '!' },
         ].map((item) => (
           <div key={item.char} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <div style={{ width: 14, height: 14, borderRadius: '50%', background: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#0A0F19' }}>{item.char}</div>
+            <div style={{ width: 14, height: 14, borderRadius: item.char === '冷' || item.char === '危' ? '3px' : '50%', background: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#0A0F19' }}>{item.char}</div>
             <span style={{ fontSize: 10, color: '#94A3B8' }}>{item.label}</span>
           </div>
         ))}
       </div>
 
+      {/* 视频监控面板 */}
+      <EmergencyVideoDock />
+
       <style>{`
-        @keyframes portPulse {
           0%, 100% { opacity: 1; box-shadow: 0 0 4px #FF4757; }
           50% { opacity: 0.5; box-shadow: 0 0 12px #FF4757; }
         }
@@ -395,6 +482,14 @@ export default function EmergencyMap() {
         @keyframes typhoonPulse {
           0%, 100% { opacity: 0.6; transform: scale(1); }
           50% { opacity: 0.3; transform: scale(1.1); }
+        }
+        @keyframes svPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.15); }
+        }
+        @keyframes droneSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>

@@ -39,7 +39,9 @@ function renderContent(content: string) {
 
 export default function EmergencyCommPanel() {
   const communications = useDashboardStore((s) => s.emergencyState.communications);
+  const contacts = useDashboardStore((s) => s.emergencyState.contacts);
   const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
+  const startVideoConference = useDashboardStore((s) => s.startVideoConference);
 
   const [selectedChannel, setSelectedChannel] = useState<string>('全部');
   const [inputText, setInputText] = useState('');
@@ -118,7 +120,7 @@ export default function EmergencyCommPanel() {
     <div
       className="card"
       style={{
-        flex: '30 0 0',
+        flex: '50 0 0',
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
@@ -127,8 +129,21 @@ export default function EmergencyCommPanel() {
       }}
     >
       {/* Header */}
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', padding: '10px 14px 8px', flexShrink: 0 }}>
-        H. 融合通信
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px 8px', flexShrink: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>H. 融合通信</div>
+        <button
+          onClick={() => {
+            const allContactIds = contacts.map((c) => c.id).slice(0, 6);
+            startVideoConference(allContactIds);
+          }}
+          style={{
+            fontSize: 10, padding: '3px 8px', background: 'transparent',
+            border: '1px solid rgba(0,208,233,0.4)', color: '#00D0E9',
+            borderRadius: 4, cursor: 'pointer', lineHeight: 1.4,
+          }}
+        >
+          发起会商
+        </button>
       </div>
 
       {/* Body: channel list + message area */}
@@ -142,7 +157,7 @@ export default function EmergencyCommPanel() {
             flexDirection: 'column',
             gap: 2,
             padding: '0 4px 4px',
-            overflowY: 'auto',
+            overflowY: 'auto', paddingRight: 8,
             borderRight: '1px solid rgba(148,163,184,0.1)',
           }}
         >
@@ -227,7 +242,7 @@ export default function EmergencyCommPanel() {
           <div
             style={{
               flex: 1,
-              overflowY: 'auto',
+              overflowY: 'auto', paddingRight: 8,
               padding: '6px 10px',
               display: 'flex',
               flexDirection: 'column',

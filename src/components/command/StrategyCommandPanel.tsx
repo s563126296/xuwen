@@ -3,6 +3,8 @@ import { Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useDashboardStore } from '../../store/dashboardStore';
 import type { CommandFeedItem, CommandStrategy, StrategyPermission } from '../../store/dashboardStore';
 import { playClickSound } from '../../utils/soundEffects';
+import ExecutionResourcePanel from './ExecutionResourcePanel';
+import HistoryStatsPanel from './HistoryStatsPanel';
 
 const cornerStyles = `
 .cmd-panel-section { position: relative; }
@@ -613,6 +615,12 @@ export default function StrategyCommandPanel() {
         </div>
         <CustomStrategyGrid />
       </div>
+
+      {/* E4. Execution Resources */}
+      <ExecutionResourcePanel />
+
+      {/* I. History Stats */}
+      <HistoryStatsPanel />
     </div>
   );
 }

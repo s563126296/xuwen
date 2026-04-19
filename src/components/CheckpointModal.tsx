@@ -63,17 +63,23 @@ function MetricCard({ icon: IconComp, label, value, unit, color }: { icon: any; 
 
 // ============ 卡口设备详情 ============
 function CheckpointContent({ name, videoOpen, setVideoOpen }: { name: string; videoOpen: boolean; setVideoOpen: (v: boolean) => void }) {
+  // 根据设备名称生成不同的数据
+  const isA1 = name.includes('A1');
   const weekData = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-  const weekValues = [3200, 2800, 3100, 2950, 3400, 5800, 6200];
+  const weekValues = isA1 ? [3200, 2800, 3100, 2950, 3400, 5800, 6200] : [2100, 1900, 2300, 2200, 2600, 4200, 4800];
   const maxVal = Math.max(...weekValues);
+
+  const todayFlow = isA1 ? 6247 : 4532;
+  const avgSpeed = isA1 ? 42 : 38;
+
   return (
     <>
       {videoOpen ? <MockVideoFeed title={name} onClose={() => setVideoOpen(false)} /> : <VideoPlaceholder onOpen={() => setVideoOpen(true)} />}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-        <MetricCard icon={TrendingUp} label="今日车流" value="4,862" unit="辆" color="#00D0E9" />
-        <MetricCard icon={Gauge} label="平均车速" value="35" unit="km/h" color="#C9CDD4" />
-        <MetricCard icon={Clock} label="拥堵时长" value="8" unit="分钟" color="#F5A623" />
-        <MetricCard icon={BarChart3} label="拥堵指数" value="2.8" color="#F5A623" />
+        <MetricCard icon={TrendingUp} label="今日车流" value={todayFlow.toLocaleString()} unit="辆" color="#00D0E9" />
+        <MetricCard icon={Gauge} label="平均车速" value={avgSpeed} unit="km/h" color="#C9CDD4" />
+        <MetricCard icon={Clock} label="拥堵时长" value={isA1 ? "8" : "5"} unit="分钟" color="#F5A623" />
+        <MetricCard icon={BarChart3} label="拥堵指数" value={isA1 ? "2.8" : "2.1"} color="#F5A623" />
       </div>
       {/* 车型分布 */}
       <div style={{ padding: 14, background: 'rgba(0,0,0,0.2)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -329,14 +335,14 @@ export default function CheckpointModal() {
   const { selectedDeviceType } = useDashboardStore();
   const [videoOpen, setVideoOpen] = useState(false);
 
-  const typeConfig: Record<string, { title: string; name: string }> = {
-    drone: { title: '无人机详情', name: '无人机-01' },
-    screen: { title: '发布屏详情', name: '发布屏01' },
-    signal: { title: '信号灯详情', name: '信号灯01' },
-    checkpoint: { title: '卡口详情', name: '卡口A1' },
-    parking: { title: '违停抓拍详情', name: '违停01' },
-    police: { title: '电子警察详情', name: '警察01' },
-    speed: { title: '超速抓拍详情', name: '测速01' },
+  const typeConfig: Record<string, { title: string; name: string; location: string }> = {
+    drone: { title: '无人机详情', name: 'DJI M300 RTK', location: '徐闻港上空' },
+    screen: { title: '诱导屏详情', name: '进港大道诱导屏', location: '进港大道与S376交叉口' },
+    signal: { title: '信号灯详情', name: '进港大道信号灯', location: '进港大道与城区主干道交叉口' },
+    checkpoint: { title: '卡口详情', name: '进港大道卡口', location: 'G207国道与X699县道交叉口' },
+    parking: { title: '违停抓拍详情', name: '港口入口违停抓拍', location: '港口入口广场' },
+    police: { title: '电子警察详情', name: '城区路口电子警察', location: '徐闻县城主干道路口' },
+    speed: { title: '超速抓拍详情', name: '进港大道测速点', location: '进港大道K5+200' },
   };
   const cfg = typeConfig[selectedDeviceType || 'checkpoint'] || typeConfig.checkpoint;
 
@@ -351,7 +357,7 @@ export default function CheckpointModal() {
               <span style={{ fontSize: 15, fontWeight: 600, color: '#FFF' }}>{cfg.name}</span>
               <span style={{ padding: '2px 8px', background: 'rgba(46,213,115,0.15)', borderRadius: 4, fontSize: 11, color: '#2ED573' }}>在线</span>
             </div>
-            <div style={{ fontSize: 12, color: '#A0A8B4' }}>G207国道与X699县道交叉口</div>
+            <div style={{ fontSize: 12, color: '#A0A8B4' }}>{cfg.location}</div>
           </div>
         )}
 

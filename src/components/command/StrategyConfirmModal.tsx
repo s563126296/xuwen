@@ -1,7 +1,8 @@
 import Modal from '../Modal';
 import { useDashboardStore } from '../../store/dashboardStore';
 import type { StrategyPermission } from '../../store/dashboardStore';
-import { ShieldAlert, ShieldCheck } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { checkConflicts } from '../../utils/strategyConflicts';
 
 function PermissionBadge({ permission }: { permission: StrategyPermission }) {
   if (permission === 'approve') {
@@ -44,6 +45,11 @@ export default function StrategyConfirmModal() {
 
   const strategy = commandState.strategies.find(s => s.id === pendingStrategyId);
   if (!strategy) return null;
+
+  const executingIds = commandState.strategies
+    .filter(s => s.status === 'executing')
+    .map(s => s.id);
+  const conflicts = checkConflicts(executingIds, pendingStrategyId);
 
   const handleConfirm = () => {
     executeStrategy(pendingStrategyId);
@@ -116,6 +122,37 @@ export default function StrategyConfirmModal() {
             }}>
               <div style={{ fontSize: 11, color: '#F5A623', marginBottom: 4, fontWeight: 600 }}>⚠️ 风险提示</div>
               <div style={{ fontSize: 12, color: '#FCD34D' }}>{strategy.risk}</div>
+            </div>
+          )}
+
+          {/* Conflict detection */}
+          {conflicts.length > 0 && (
+            <div style={{
+              padding: 10,
+              background: conflicts.some(c => c.type === 'exclusive') ? 'rgba(255,71,87,0.1)' : 'rgba(245,166,35,0.1)',
+              border: `1px solid ${conflicts.some(c => c.type === 'exclusive') ? 'rgba(255,71,87,0.3)' : 'rgba(245,166,35,0.3)'}`,
+              borderRadius: 4,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <AlertTriangle size={14} color={conflicts.some(c => c.type === 'exclusive') ? '#FF4757' : '#F5A623'} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: conflicts.some(c => c.type === 'exclusive') ? '#FF4757' : '#F5A623' }}>
+                  策略冲突检测
+                </span>
+              </div>
+              {conflicts.map((c, i) => (
+                <div key={i} style={{ marginBottom: i < conflicts.length - 1 ? 8 : 0 }}>
+                  <div style={{ fontSize: 11, color: '#E2E8F0', marginBottom: 2 }}>
+                    <span style={{ color: c.type === 'exclusive' ? '#FF4757' : '#F5A623', fontWeight: 600 }}>
+                      {c.type === 'exclusive' ? '互斥' : c.type === 'constraint' ? '约束' : '联动'}
+                    </span>
+                    {' '}{c.strategyA} ↔ {c.strategyB}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#94A3B8' }}>{c.description}</div>
+                  {c.suggestion && (
+                    <div style={{ fontSize: 10, color: '#00D0E9', marginTop: 2 }}>建议：{c.suggestion}</div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>

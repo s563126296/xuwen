@@ -13,13 +13,15 @@ const statusLabel = {
   pending: '待接收',
   received: '已接收',
   executing: '执行中',
+  arrived: '已到场',
   done: '已完成',
 } as const;
 
-const nextStatusConfig: Record<string, { label: string; next: 'received' | 'executing' | 'done'; color: string } | null> = {
+const nextStatusConfig: Record<string, { label: string; next: 'received' | 'executing' | 'arrived' | 'done'; color: string } | null> = {
   pending: { label: '确认接收', next: 'received', color: '#00D0E9' },
   received: { label: '开始执行', next: 'executing', color: '#F5A623' },
-  executing: { label: '标记完成', next: 'done', color: '#2ED573' },
+  executing: { label: '已到现场', next: 'arrived', color: '#2ED573' },
+  arrived: { label: '标记完成', next: 'done', color: '#2ED573' },
   done: null,
 };
 
@@ -28,7 +30,7 @@ export default function EmergencyTaskBoard() {
   const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
   const [showModal, setShowModal] = useState(false);
 
-  const handleStatusChange = (taskId: string, newStatus: 'received' | 'executing' | 'done') => {
+  const handleStatusChange = (taskId: string, newStatus: 'received' | 'executing' | 'arrived' | 'done') => {
     if (newStatus === 'done') {
       playMessageSound();
     } else {
@@ -36,9 +38,13 @@ export default function EmergencyTaskBoard() {
     }
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const updatedTasks = tasks.map((t) =>
-      t.id === taskId ? { ...t, status: newStatus, updatedAt: timeStr } : t
-    );
+    const updatedTasks = tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      const updates: Partial<typeof t> = { status: newStatus, updatedAt: timeStr };
+      if (newStatus === 'arrived') updates.arrivedAt = timeStr;
+      if (newStatus === 'done') updates.completedAt = timeStr;
+      return { ...t, ...updates };
+    });
     setEmergencyState({ tasks: updatedTasks });
   };
 
@@ -81,7 +87,7 @@ export default function EmergencyTaskBoard() {
             + 新增任务
           </button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', paddingRight: 8, flex: 1, minHeight: 0 }}>
           {tasks.map((task) => {
             const btnConfig = nextStatusConfig[task.status];
             return (

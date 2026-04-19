@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { computeCauses, recommendStrategies } from '../utils/commandEngine';
 import { getEmergencyLevel, buildEmergencyTimeline, PHASE_LABELS, generateTasksFromPlan } from '../utils/emergencyEngine';
 import { getPlanById } from '../data/emergencyPlans';
+import { generateHistoryEvents, generateStrategyRecords } from '../utils/analysisMockData';
 
 export type PortType = 'xuwen' | 'haian' | 'overview';
 export type DirectionType = 'inbound' | 'outbound';
@@ -359,12 +360,17 @@ export interface CommandState {
   resources: CommandResourceStatus;
   activeVideoChannel: number;
   isDroneDeployed: boolean;
-  fieldPersons: FieldPerson[];              // 现场人员列表
-  incomingCallPersonId: string | null;      // 来电人员 ID
-  isInCall: boolean;                        // 是否在通话中
-  callPersonId: string | null;              // 通话对象 ID
-  chatWindowOpen: boolean;                  // 聊天窗口是否打开
-  activeChatPersonId: string | null;        // 当前私聊人员 ID
+  fieldPersons: FieldPerson[];
+  incomingCallPersonId: string | null;
+  isInCall: boolean;
+  callPersonId: string | null;
+  chatWindowOpen: boolean;
+  activeChatPersonId: string | null;
+  executionResources: {
+    personnel: Array<{ id: string; name: string; dept: string; status: 'executing' | 'standby' | 'enroute'; task: string }>;
+    materials: Array<{ name: string; total: number; ready: number; unit: string }>;
+  };
+  historyStats: { totalExecuted: number; adoptionRate: number; avgReliefMinutes: number; top3: Array<{ name: string; avgMinutes: number }> };
 }
 
 // === End Command Mode Interfaces ===
@@ -423,9 +429,11 @@ export interface EmergencyTask {
   department: '公安交警' | '民政局' | '交通运输局' | '港口管理方' | '城管局' | '应急管理局';
   title: string;
   priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'received' | 'executing' | 'done';
+  status: 'pending' | 'received' | 'executing' | 'arrived' | 'done';
   owner: string;
   updatedAt: string;
+  arrivedAt?: string;  // 到场时间
+  completedAt?: string; // 完成时间
 }
 
 export interface EmergencyResourcePoint {
@@ -435,6 +443,34 @@ export interface EmergencyResourcePoint {
   position: [number, number];
   status: 'normal' | 'warning' | 'critical';
   detail: string;
+}
+
+// 现场资源（人员/车辆/设备）
+export interface FieldResource {
+  id: string;
+  type: 'personnel' | 'vehicle' | 'equipment';
+  name: string;
+  department: EmergencyTask['department'];
+  status: 'standby' | 'dispatched' | 'arrived' | 'working' | 'offline';
+  position?: [number, number];
+  assignedTask?: string; // 关联任务ID
+  lastUpdate: string;
+  detail: string;
+}
+
+// 特殊车辆明细
+export interface SpecialVehicleDetail {
+  id: string;
+  plateNumber: string;
+  type: 'cold_chain' | 'hazardous' | 'lithium_battery';
+  position: [number, number];
+  strandedSince: string; // 滞留开始时间
+  strandedHours: number;
+  alertLevel: 'normal' | 'yellow' | 'orange' | 'red';
+  cargoType?: string; // 货物类型
+  driverPhone?: string;
+  fuelLevel?: number; // 燃油百分比（冷链车）
+  notes?: string;
 }
 
 export interface EmergencyTimelinePoint {
@@ -474,10 +510,22 @@ export interface EmergencyState {
   forecast: EmergencyForecast;
   tasks: EmergencyTask[];
   resourcePoints: EmergencyResourcePoint[];
+  fieldResources: FieldResource[];
+  specialVehicles: SpecialVehicleDetail[];
   timeline: EmergencyTimelinePoint[];
   communications: EmergencyCommItem[];
   contacts: EmergencyContact[];
   activePlan: ActivePlanExecution | null;
+  // 视频监控
+  activeVideoChannel: number; // 0-4 摄像头，5 无人机
+  isDroneDeployed: boolean;
+  // 视频会商
+  videoConference: {
+    active: boolean;
+    participants: string[]; // contact IDs
+    startTime: string | null;
+    isMinimized: boolean;
+  } | null;
   // 台风气象信息
   typhoon: {
     name: string;
@@ -494,6 +542,63 @@ export interface EmergencyState {
 }
 
 // === End Emergency Mode Interfaces ===
+
+// === Analysis Mode Interfaces ===
+
+export type HistoryEventType = 'congestion' | 'typhoon' | 'fog' | 'spring_rush' | 'accident' | 'normal';
+export type HistoryEventSeverity = 'critical' | 'major' | 'minor' | 'info';
+export type HistoryEventStatus = 'archived' | 'active' | 'pending_review';
+
+export interface HistoryEvent {
+  id: string;
+  name: string;
+  type: HistoryEventType;
+  severity: HistoryEventSeverity;
+  startTime: string;
+  endTime: string | null;
+  status: HistoryEventStatus;
+  location: string;
+  peakCongestionIndex: number;
+  maxStrandedVehicles: number;
+  strategiesUsed: string[];
+  responseLevel: 'I' | 'II' | 'III' | 'IV' | null;
+  summary: string;
+  timeline: { time: string; action: string; actor: string; result: string }[];
+}
+
+export interface StrategyRecord {
+  id: string;
+  strategyId: string;
+  strategyName: string;
+  eventId: string;
+  executedAt: string;
+  completedAt: string | null;
+  preIndex: number;
+  postIndex: number;
+  reliefMinutes: number;
+  adopted: boolean;
+  executor: string;
+}
+
+export interface AnalysisFilters {
+  dateRange: { start: string; end: string };
+  eventTypes: HistoryEventType[];
+  strategyIds: string[];
+  region: 'all' | 'port_road' | 's376' | 'g207' | 'county' | 'port';
+  responseLevels: ('I' | 'II' | 'III' | 'IV')[];
+  searchKeyword: string;
+}
+
+export interface AnalysisState {
+  filters: AnalysisFilters;
+  events: HistoryEvent[];
+  strategyRecords: StrategyRecord[];
+  selectedEventId: string | null;
+  activeView: 'trend' | 'compare' | 'strategy' | 'event' | 'heatmap';
+  activeQuickFilter: string | null;
+}
+
+// === End Analysis Mode Interfaces ===
 
 interface DashboardState {
   // System mode
@@ -607,6 +712,18 @@ interface DashboardState {
   setEmergencyState: (data: Partial<EmergencyState>) => void;
   activatePlan: (planId: PlanId) => void;
   advancePlanPhase: (newPhase: EmergencyPhase) => void;
+  setEmergencyVideoChannel: (channel: number) => void;
+  deployEmergencyDrone: () => void;
+  recallEmergencyDrone: () => void;
+  startVideoConference: (participantIds: string[]) => void;
+  endVideoConference: () => void;
+
+  // === Analysis Mode State ===
+  analysisState: AnalysisState;
+  setAnalysisFilters: (filters: Partial<AnalysisFilters>) => void;
+  selectAnalysisEvent: (eventId: string | null) => void;
+  setAnalysisView: (view: AnalysisState['activeView']) => void;
+  setAnalysisQuickFilter: (filter: string | null) => void;
 }
 
 // === Original Default Data ===
@@ -942,6 +1059,30 @@ const defaultCommandState: CommandState = {
   callPersonId: null,
   chatWindowOpen: false,
   activeChatPersonId: null,
+  executionResources: {
+    personnel: [
+      { id: 'er-1', name: '张三', dept: '交警一队', status: 'executing', task: 'S376路口引导分流' },
+      { id: 'er-2', name: '李四', dept: '交警一队', status: 'enroute', task: '前往应急车道执勤' },
+      { id: 'er-3', name: '王五', dept: '拖车公司', status: 'enroute', task: '前往应急车道清障' },
+      { id: 'er-4', name: '赵六', dept: '交警二队', status: 'standby', task: '待调度' },
+    ],
+    materials: [
+      { name: '拖车', total: 2, ready: 1, unit: '台' },
+      { name: '警力', total: 6, ready: 4, unit: '组' },
+      { name: '锥桶', total: 20, ready: 20, unit: '个' },
+      { name: '诱导屏', total: 3, ready: 2, unit: '块' },
+    ],
+  },
+  historyStats: {
+    totalExecuted: 12,
+    adoptionRate: 67,
+    avgReliefMinutes: 28,
+    top3: [
+      { name: 'S-04 信号灯优化', avgMinutes: 22 },
+      { name: 'S-02 S376分流', avgMinutes: 31 },
+      { name: 'S-14 交警部署', avgMinutes: 35 },
+    ],
+  },
 };
 
 // === End Command Mode Default Mock Data ===
@@ -1417,6 +1558,22 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       { id: 'g1', type: 'personnel', name: '交警临时指挥点', position: [110.1538, 20.279], status: 'normal', detail: '交警 12 人在岗' },
       { id: 'd1', type: 'drone', name: '无人机巡查点', position: [110.1574, 20.2911], status: 'normal', detail: '无人机 1 架巡逻中' },
     ],
+    fieldResources: [
+      { id: 'fr-1', type: 'personnel', name: '王队长', department: '公安交警', status: 'working', position: [110.1538, 20.279], assignedTask: 'em-task-1', lastUpdate: '15:02', detail: '进港大道执勤' },
+      { id: 'fr-2', type: 'personnel', name: '李警官', department: '公安交警', status: 'working', position: [110.1542, 20.281], assignedTask: 'em-task-1', lastUpdate: '15:02', detail: '进港大道执勤' },
+      { id: 'fr-3', type: 'personnel', name: '张主任', department: '民政局', status: 'standby', lastUpdate: '15:05', detail: '物资调配中' },
+      { id: 'fr-4', type: 'vehicle', name: '粤G·L5827 物资运输车', department: '民政局', status: 'dispatched', lastUpdate: '15:10', detail: '运送盒饭至发放点' },
+      { id: 'fr-5', type: 'vehicle', name: '粤G·J9163 移动加油车', department: '交通运输局', status: 'standby', lastUpdate: '15:00', detail: '待命中' },
+      { id: 'fr-6', type: 'equipment', name: 'DJI M300 无人机', department: '公安交警', status: 'working', position: [110.1574, 20.2911], lastUpdate: '15:15', detail: '巡查中' },
+    ],
+    specialVehicles: [
+      { id: 'sv-1', plateNumber: '粤G·K7823', type: 'cold_chain', position: [110.1468, 20.245], strandedSince: '14:35', strandedHours: 0.5, alertLevel: 'normal', cargoType: '冷冻海鲜', driverPhone: '13726581903', fuelLevel: 85 },
+      { id: 'sv-2', plateNumber: '琼A·D3156', type: 'cold_chain', position: [110.1472, 20.247], strandedSince: '08:20', strandedHours: 7, alertLevel: 'yellow', cargoType: '冷冻肉类', driverPhone: '18976342087', fuelLevel: 42 },
+      { id: 'sv-3', plateNumber: '粤B·W9471', type: 'cold_chain', position: [110.1580, 20.290], strandedSince: '02:15', strandedHours: 13, alertLevel: 'orange', cargoType: '疫苗运输', driverPhone: '13590267841', fuelLevel: 28, notes: '优先保障' },
+      { id: 'sv-4', plateNumber: '桂C·M6038', type: 'cold_chain', position: [110.1510, 20.265], strandedSince: '昨日 14:30', strandedHours: 25, alertLevel: 'red', cargoType: '冷冻水产', driverPhone: '15277834562', fuelLevel: 15, notes: '燃油告急' },
+      { id: 'sv-5', plateNumber: '粤G·T2597', type: 'hazardous', position: [110.1485, 20.252], strandedSince: '10:40', strandedHours: 4.5, alertLevel: 'normal', cargoType: '易燃液体', driverPhone: '13692478305' },
+      { id: 'sv-6', plateNumber: '琼B·H8164', type: 'hazardous', position: [110.1520, 20.268], strandedSince: '12:10', strandedHours: 3, alertLevel: 'normal', cargoType: '腐蚀性物品', driverPhone: '18089763241' },
+    ],
     timeline: buildEmergencyTimeline(1960, 3200),
     communications: [
       { id: 'ec-1', type: 'system', source: '系统', time: '14:30', content: '收到港口停航通知，自动切换应急模式', urgent: true },
@@ -1437,6 +1594,9 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       { id: 'c11', name: '马主任', role: '指挥中心', department: '应急管理局', phone: '13800138011', status: 'online' },
       { id: 'c12', name: '钱专员', role: '协调', department: '应急管理局', phone: '13800138012', status: 'online' },
     ],
+    activeVideoChannel: 0,
+    isDroneDeployed: false,
+    videoConference: null,
     typhoon: {
       name: '摩羯',
       distance: 85,
@@ -1509,4 +1669,95 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       };
     });
   },
+
+  setEmergencyVideoChannel: (channel) => set((state) => ({
+    emergencyState: { ...state.emergencyState, activeVideoChannel: channel },
+  })),
+
+  deployEmergencyDrone: () => set((state) => ({
+    emergencyState: { ...state.emergencyState, isDroneDeployed: true, activeVideoChannel: 5 },
+  })),
+
+  recallEmergencyDrone: () => set((state) => ({
+    emergencyState: { ...state.emergencyState, isDroneDeployed: false, activeVideoChannel: 0 },
+  })),
+
+  startVideoConference: (participantIds) => {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    set((state) => ({
+      emergencyState: {
+        ...state.emergencyState,
+        videoConference: { active: true, participants: participantIds, startTime: timeStr, isMinimized: false },
+        communications: [
+          ...state.emergencyState.communications,
+          { id: `ec-vc-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: `视频会商已开启，${participantIds.length} 人参会`, urgent: false },
+        ],
+      },
+    }));
+  },
+
+  endVideoConference: () => {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    set((state) => ({
+      emergencyState: {
+        ...state.emergencyState,
+        videoConference: null,
+        communications: [
+          ...state.emergencyState.communications,
+          { id: `ec-vc-end-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: '视频会商已结束', urgent: false },
+        ],
+      },
+    }));
+  },
+
+  // === Analysis Mode ===
+  analysisState: {
+    filters: {
+      dateRange: { start: '2025-10-01', end: '2026-04-19' },
+      eventTypes: [],
+      strategyIds: [],
+      region: 'all',
+      responseLevels: [],
+      searchKeyword: '',
+    },
+    events: generateHistoryEvents() as HistoryEvent[],
+    strategyRecords: generateStrategyRecords() as StrategyRecord[],
+    selectedEventId: null,
+    activeView: 'trend',
+    activeQuickFilter: null,
+  },
+  setAnalysisFilters: (filters) => set((state) => ({
+    analysisState: {
+      ...state.analysisState,
+      filters: { ...state.analysisState.filters, ...filters },
+      activeQuickFilter: null,
+    },
+  })),
+  selectAnalysisEvent: (eventId) => set((state) => ({
+    analysisState: {
+      ...state.analysisState,
+      selectedEventId: eventId,
+      activeView: eventId ? 'event' : state.analysisState.activeView,
+    },
+  })),
+  setAnalysisView: (view) => set((state) => ({
+    analysisState: { ...state.analysisState, activeView: view, selectedEventId: view !== 'event' ? null : state.analysisState.selectedEventId },
+  })),
+  setAnalysisQuickFilter: (filter) => set((state) => {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString().slice(0, 10);
+    let newFilters = { ...state.analysisState.filters };
+    switch (filter) {
+      case 'today': newFilters = { ...newFilters, dateRange: { start: today, end: today }, eventTypes: [] }; break;
+      case 'week': newFilters = { ...newFilters, dateRange: { start: weekAgo, end: today }, eventTypes: [] }; break;
+      case 'spring': newFilters = { ...newFilters, dateRange: { start: '2026-01-28', end: '2026-02-16' }, eventTypes: ['spring_rush', 'congestion'] }; break;
+      case 'typhoon': newFilters = { ...newFilters, dateRange: { start: '2025-10-01', end: today }, eventTypes: ['typhoon'] }; break;
+      case 'congestion': newFilters = { ...newFilters, dateRange: { start: '2025-10-01', end: today }, eventTypes: ['congestion'] }; break;
+      case 'holiday': newFilters = { ...newFilters, dateRange: { start: '2025-10-01', end: today }, eventTypes: ['congestion', 'spring_rush'] }; break;
+    }
+    return { analysisState: { ...state.analysisState, filters: newFilters, activeQuickFilter: filter } };
+  }),
 }));

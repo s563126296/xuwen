@@ -115,7 +115,7 @@ export default function EmergencyPlanDetailModal({ onClose }: Props) {
         </div>
 
         {/* Steps list */}
-        <div style={{ overflowY: 'auto', padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ overflowY: 'auto', padding: '14px 26px 14px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {stepsForTab.length === 0 && (
             <div style={{ fontSize: 12, color: '#475569', textAlign: 'center', padding: '20px 0' }}>
               该阶段暂无步骤
