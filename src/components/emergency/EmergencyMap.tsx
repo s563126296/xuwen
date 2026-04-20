@@ -360,8 +360,8 @@ export default function EmergencyMap() {
       });
 
       setMapReady(true);
-    }).catch((e: any) => {
-      console.error('高德地图加载失败:', e);
+    }).catch(() => {
+      // Map loading failed - handled by UI state
     });
 
     return () => {

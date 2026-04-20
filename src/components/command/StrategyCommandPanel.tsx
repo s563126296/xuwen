@@ -196,7 +196,6 @@ function CustomStrategyGrid() {
           key={id}
           onClick={() => {
             playClickSound();
-            console.log('自定义策略:', id);
           }}
           style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,

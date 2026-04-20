@@ -21,10 +21,9 @@ export default function ExecutionResourcePanel() {
   const openChatWith = useDashboardStore((s) => s.openChatWith);
   const fieldPersons = useDashboardStore((s) => s.commandState.fieldPersons);
 
-  const handleLocate = (personId: string) => {
+  const handleLocate = (_personId: string) => {
     playClickSound();
-    // 地图定位逻辑（可选实现）
-    console.log('Locate person:', personId);
+    // TODO: Implement map location logic
   };
 
   if (!expanded) {

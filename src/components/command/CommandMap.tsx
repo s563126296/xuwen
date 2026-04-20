@@ -6,37 +6,7 @@ import PersonMarker from './PersonMarker';
 import IncomingCallModal from './IncomingCallModal';
 import { useDashboardStore } from '../../store/dashboardStore';
 import type { FieldPerson } from '../../store/dashboardStore';
-
-// 徐闻港精确坐标（高德GCJ-02，用户确认）
-const XUWEN_PORT: [number, number] = [110.141114, 20.233385];
-
-// 进港公路采集坐标（用户提供的原始 7 个关键点，从北到南）
-const JINGANG_ROAD_ORIGINAL: [number, number][] = [
-  [110.160745, 20.306732],  // 北端 G207 交叉口
-  [110.157380, 20.291170],  // 华四村
-  [110.153524, 20.278910],  // 迈陈镇
-  [110.150478, 20.264358],  // 中段
-  [110.147502, 20.250149],  // 南山镇
-  [110.143228, 20.245138],  // 近港区
-  [110.141114, 20.233385],  // 徐闻港
-];
-
-// 临时使用原始坐标，等待用户提供更密集的真实采集点
-const JINGANG_ROAD = JINGANG_ROAD_ORIGINAL;
-
-// 拥堵程度从北到南递增（越靠近港口越堵）
-const SEGMENT_STYLES = [
-  { color: '#2ED573', weight: 4, opacity: 0.6 },  // 北端：畅通
-  { color: '#F5A623', weight: 6, opacity: 0.7 },  // 华四村：缓行
-  { color: '#FF8C00', weight: 8, opacity: 0.8 },  // 迈陈镇：拥堵
-  { color: '#FF4757', weight: 10, opacity: 0.9 },  // 中段：严重拥堵
-  { color: '#FF4757', weight: 12, opacity: 1.0 },  // 南山镇：严重拥堵
-  { color: '#DC143C', weight: 14, opacity: 1.0 },  // 近港区：极度拥堵
-];
-
-// 粒子配置
-const PARTICLE_COUNT = 6;
-const PARTICLE_INTERVAL = 80; // ms
+import { XUWEN_PORT, JINGANG_ROAD, SEGMENT_STYLES, PARTICLE_CONFIG } from '../../constants';
 
 export default function CommandMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -421,7 +391,7 @@ export default function CommandMap() {
       }
 
       // 创建粒子
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
+      for (let i = 0; i < PARTICLE_CONFIG.COUNT; i++) {
         const particle = new AMap.Marker({
           position: JINGANG_ROAD[0],
           content: `<div style="
@@ -436,7 +406,7 @@ export default function CommandMap() {
         });
         map.add(particle);
         particles.push(particle);
-        particleProgress.push((i / PARTICLE_COUNT) * totalLength); // 均匀分布
+        particleProgress.push((i / PARTICLE_CONFIG.COUNT) * totalLength); // 均匀分布
       }
 
       // 粒子动画循环
@@ -488,7 +458,7 @@ export default function CommandMap() {
             accLen += segmentLengths[i];
           }
         });
-      }, PARTICLE_INTERVAL);
+      }, PARTICLE_CONFIG.INTERVAL);
 
       // 进港大道脉冲叠加线（S-01 执行时使用）
       const pulseLine = new AMap.Polyline({
@@ -550,12 +520,7 @@ export default function CommandMap() {
               });
 
               pulseLine.setPath(realPath);
-              console.log('✅ 进港大道路径已贴合真实道路，共', realPath.length, '个坐标点');
-            } else {
-              console.warn('⚠️ Driving API 返回点数过少:', realPath.length);
             }
-          } else {
-            console.warn('⚠️ Driving API 状态:', status, '使用原始采集坐标');
           }
         });
       });
@@ -565,8 +530,8 @@ export default function CommandMap() {
         clearInterval(particleInterval);
         particles.forEach(p => map.remove(p));
       };
-    }).catch((e: any) => {
-      console.error('高德地图加载失败:', e);
+    }).catch(() => {
+      // Map loading failed - handled by UI state
     });
 
     return () => {

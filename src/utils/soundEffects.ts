@@ -29,7 +29,7 @@ export function playIncomingCallSound() {
       playTone(1000, 0.2, i * 0.8 + 0.3);
     }
   } catch (error) {
-    console.warn('Failed to play incoming call sound:', error);
+    // Silently fail - audio playback is non-critical
   }
 }
 
@@ -52,7 +52,7 @@ export function playClickSound() {
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.05);
   } catch (error) {
-    console.warn('Failed to play click sound:', error);
+    // Silently fail - audio playback is non-critical
   }
 }
 
@@ -75,6 +75,6 @@ export function playMessageSound() {
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.3);
   } catch (error) {
-    console.warn('Failed to play message sound:', error);
+    // Silently fail - audio playback is non-critical
   }
 }

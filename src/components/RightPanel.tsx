@@ -5,14 +5,15 @@ import CorridorElasticityCard from './overview/CorridorElasticityCard';
 import SystemResilienceCard from './overview/SystemResilienceCard';
 import ShutdownProbabilityCard from './overview/ShutdownProbabilityCard';
 import WeatherCouplingCard from './overview/WeatherCouplingCard';
+import { TRAFFIC_STATUS_COLORS } from '../constants';
 
 const getLevelColor = (level: string) => {
   switch (level) {
-    case '畅通': return '#2ED573';
-    case '一般': return '#00D0E9';
-    case '轻度拥堵': return '#F5A623';
-    case '中度拥堵': return '#FF6B35';
-    case '重度拥堵': return '#FF4757';
+    case '畅通': return TRAFFIC_STATUS_COLORS.SMOOTH;
+    case '一般': return TRAFFIC_STATUS_COLORS.NORMAL;
+    case '轻度拥堵': return TRAFFIC_STATUS_COLORS.LIGHT_CONGESTION;
+    case '中度拥堵': return TRAFFIC_STATUS_COLORS.MODERATE_CONGESTION;
+    case '重度拥堵': return TRAFFIC_STATUS_COLORS.HEAVY_CONGESTION;
     default: return '#A0A8B4';
   }
 };
