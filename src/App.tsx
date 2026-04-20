@@ -133,20 +133,16 @@ function App() {
 
   return (
     <div className="dashboard-wrapper">
-      <div
-        className="dashboard"
-      >
+      <div className="dashboard">
         <div className="bg-grid" />
 
         <Header time={time}>
           <ModeSwitcher />
         </Header>
 
-        {systemMode === 'overview' && <AiSummaryBar />}
-
         {systemMode === 'overview' && (
           <>
-            {/* Full-screen map layer */}
+            {/* Full-screen map */}
             <div style={{
               position: 'absolute',
               top: 72,
@@ -158,65 +154,76 @@ function App() {
               <MapContainer />
             </div>
 
-            {/* Floating panels overlay */}
+            {/* AI Summary Bar */}
+            <AiSummaryBar />
+
+            {/* Left Panel */}
             <div style={{
               position: 'absolute',
-              top: 88,
+              top: 120,
               left: 16,
+              width: 340,
+              bottom: 100,
+              zIndex: 20,
+              pointerEvents: 'auto',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}>
+              <LeftPanel
+                deviceData={deviceData}
+                trafficData={trafficData}
+                violationData={violationData}
+              />
+            </div>
+
+            {/* Right Panel */}
+            <div style={{
+              position: 'absolute',
+              top: 120,
               right: 16,
-              bottom: 0,
-              display: 'grid',
-              gridTemplateColumns: '340px 1fr 340px',
-              gridTemplateRows: '1fr auto',
+              width: 340,
+              bottom: 100,
+              zIndex: 20,
+              pointerEvents: 'auto',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}>
+              <RightPanel />
+            </div>
+
+            {/* Bottom Charts */}
+            <div style={{
+              position: 'absolute',
+              bottom: 16,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
               gap: 12,
               zIndex: 20,
-              pointerEvents: 'none',
+              pointerEvents: 'auto',
             }}>
-              {/* Left panels */}
-              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 80 }}>
-                <LeftPanel
-                  deviceData={deviceData}
-                  trafficData={trafficData}
-                  violationData={violationData}
-                />
-              </div>
-
-              {/* Center - transparent, map shows through */}
-              <div style={{ pointerEvents: 'none' }} />
-
-              {/* Right panels */}
-              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 80 }}>
-                <RightPanel />
-              </div>
-
-              {/* Bottom charts - center, spanning middle column */}
-              <div style={{
-                gridColumn: '2 / 3',
-                gridRow: '2 / 3',
-                display: 'flex',
-                gap: 12,
-                pointerEvents: 'auto',
-                paddingBottom: 12,
-              }}>
-                <div className="module-card" style={{ flex: 1, padding: 10 }}>
-                  <div style={{ height: 70 }}>
-                    <PressurePredictionChart compact />
-                  </div>
+              <div className="module-card" style={{ width: 320, padding: 10 }}>
+                <div style={{ height: 70 }}>
+                  <PressurePredictionChart compact />
                 </div>
-                <div className="module-card" style={{ flex: 1, padding: 10 }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontFamily: 'var(--font-label, Rajdhani)' }}>24h车流趋势</div>
-                  <div style={{ height: 56 }}>
-                    <HourlyChart />
-                  </div>
+              </div>
+              <div className="module-card" style={{ width: 320, padding: 10 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontFamily: 'var(--font-label, Rajdhani)' }}>24h车流趋势</div>
+                <div style={{ height: 56 }}>
+                  <HourlyChart />
                 </div>
               </div>
             </div>
 
-            {/* Strait Transit Index - bottom right, above bottom charts */}
+            {/* Strait Transit Index */}
             <div style={{
               position: 'absolute',
-              bottom: 90,
-              right: 370,
+              bottom: 100,
+              left: 370,
               zIndex: 25,
               pointerEvents: 'auto',
             }}>
