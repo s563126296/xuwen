@@ -7,7 +7,7 @@ import StraitTransitIndex from './overview/StraitTransitIndex';
 import MapHeader, { type DeviceTypeId } from './center/MapHeader';
 import MapLegend from './center/MapLegend';
 import MapStats from './center/MapStats';
-import RoadNetwork from './center/RoadNetwork';
+import RoadNetworkV2 from './center/RoadNetworkV2';
 import DeviceMarkers from './center/DeviceMarkers';
 import DroneOverlay from './center/DroneOverlay';
 
@@ -88,7 +88,7 @@ export default function CenterPanel({ leftCollapsed, rightCollapsed, onToggleLef
           minHeight: 0,
           border: '1px solid rgba(0, 208, 233, 0.1)'
         }}>
-          <RoadNetwork />
+          <RoadNetworkV2 />
           <DeviceMarkers
             markers={filteredMarkers}
             onMarkerClick={handleMarkerClick}

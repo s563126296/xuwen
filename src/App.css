@@ -1,19 +1,30 @@
 :root {
-  /* 配色体系 - 按UI:UX规范 */
-  --bg-primary: #0A0F19;
-  --bg-secondary: #121A26;
-  --bg-card: #141D28;
-  --primary: #00D0E9;
-  --accent: #F5A623;
+  /* Enhanced Color System */
+  --bg-primary: #0A0E1A;
+  --bg-secondary: #141824;
+  --bg-card: #1A1F2E;
+  --primary: #1890FF;
+  --primary-light: #40A9FF;
+  --cyan: #13C2C2;
+  --accent: #FAAD14;
+  --success: #52C41A;
+  --warning: #FA8C16;
+  --error: #F5222D;
   --text-primary: #FFFFFF;
-  --text-secondary: #A0A8B4;
-  --text-muted: #C9CDD4;
-  --border-glow: rgba(0, 208, 233, 0.3);
-  --accent-glow: rgba(245, 166, 35, 0.3);
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --text-muted: rgba(255, 255, 255, 0.65);
+  --border-glow: rgba(24, 144, 255, 0.3);
+  --accent-glow: rgba(250, 173, 20, 0.3);
 
-  /* 间距规范 */
+  /* Spacing */
   --margin: 12px;
   --border-radius: 10px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(24, 144, 255, 0.3);
 }
 
 * {
@@ -29,9 +40,11 @@ html, body {
 }
 
 body {
-  font-family: 'Source Han Sans SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #000;
+  font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(180deg, #0A0E1A 0%, #141824 100%);
   color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 大屏容器 - 自动缩放适配视口 */
@@ -55,15 +68,24 @@ body {
   transform-origin: center center;
 }
 
-/* 通用卡片样式 */
+/* 通用卡片样式 - Enhanced Glassmorphism */
 .card {
-  background: rgba(13, 27, 42, 0.8);
-  border: 1px solid rgba(0, 208, 233, 0.12);
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
+  background: rgba(26, 31, 46, 0.7);
+  border: 1px solid rgba(24, 144, 255, 0.15);
+  border-radius: 10px;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* 背景网格 */
+.card:hover {
+  border-color: rgba(24, 144, 255, 0.3);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+/* 背景网格 - Enhanced */
 .bg-grid {
   position: absolute;
   top: 0;
@@ -72,12 +94,13 @@ body {
   height: 100%;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(0, 208, 233, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 208, 233, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(24, 144, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 144, 255, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
+  opacity: 0.6;
 }
 
-/* 顶部标题栏 - 1920×100px */
+/* 顶部标题栏 - Enhanced */
 .header {
   position: absolute;
   top: 0;
@@ -88,8 +111,10 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0 40px;
-  background: linear-gradient(180deg, rgba(18, 26, 38, 0.95) 0%, rgba(10, 15, 25, 0.8) 100%);
-  border-bottom: 1px solid rgba(0, 208, 233, 0.2);
+  background: linear-gradient(180deg, rgba(20, 24, 36, 0.95) 0%, rgba(10, 14, 26, 0.85) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(24, 144, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .header::after {
@@ -101,6 +126,7 @@ body {
   width: 60%;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0.7;
 }
 
 /* 预警横幅 - 1920×48px */
@@ -206,16 +232,23 @@ body {
   max-height: 100%;
 }
 
-/* 模块卡片通用样式 */
+/* 模块卡片通用样式 - Enhanced */
 .module-card {
-  background: var(--bg-secondary);
+  background: rgba(26, 31, 46, 0.7);
   border-radius: var(--border-radius);
-  border: 1px solid rgba(0, 208, 233, 0.15);
+  border: 1px solid rgba(24, 144, 255, 0.12);
   padding: 14px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0, 208, 233, 0.05);
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.module-card:hover {
+  border-color: rgba(24, 144, 255, 0.25);
+  box-shadow: var(--shadow-md), 0 0 15px rgba(24, 144, 255, 0.1);
 }
 
 .module-card::before {
@@ -226,6 +259,7 @@ body {
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--primary), transparent);
+  opacity: 0.8;
 }
 
 .module-card.glow-accent {
