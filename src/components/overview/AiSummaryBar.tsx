@@ -69,10 +69,10 @@ export default function AiSummaryBar() {
     <div
       style={{
         position: 'absolute',
-        top: 120,  // Below header (72px) + spacing (48px)
-        left: 356,  // Leave space for left panel
-        right: 356,  // Leave space for right panel
-        zIndex: 95,
+        top: 72,
+        left: 360,
+        right: 360,
+        zIndex: 30,
         overflow: 'hidden',
       }}
     >

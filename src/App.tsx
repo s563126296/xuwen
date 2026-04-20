@@ -198,7 +198,7 @@ function App() {
             {/* Bottom Charts */}
             <div style={{
               position: 'absolute',
-              bottom: 16,
+              bottom: 12,
               left: '50%',
               transform: 'translateX(-50%)',
               display: 'flex',
@@ -206,12 +206,12 @@ function App() {
               zIndex: 20,
               pointerEvents: 'auto',
             }}>
-              <div className="module-card" style={{ width: 320, padding: 10 }}>
+              <div className="module-card" style={{ width: 380, padding: 10 }}>
                 <div style={{ height: 70 }}>
                   <PressurePredictionChart compact />
                 </div>
               </div>
-              <div className="module-card" style={{ width: 320, padding: 10 }}>
+              <div className="module-card" style={{ width: 380, padding: 10 }}>
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontFamily: 'var(--font-label, Rajdhani)' }}>24h车流趋势</div>
                 <div style={{ height: 56 }}>
                   <HourlyChart />
@@ -223,7 +223,7 @@ function App() {
             <div style={{
               position: 'absolute',
               bottom: 100,
-              left: 370,
+              right: 370,
               zIndex: 25,
               pointerEvents: 'auto',
             }}>
