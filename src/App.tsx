@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import BigScreen from './pages/BigScreen';
 import Header from './components/Header';
 import AiSummaryBar from './components/overview/AiSummaryBar';
@@ -15,6 +15,8 @@ import CongestionPredictionModal from './components/CongestionPredictionModal';
 import StrategyModal from './components/StrategyModal';
 import ResilienceInfoModal from './components/overview/ResilienceInfoModal';
 import Modal from './components/Modal';
+import MapContainer from './components/map/MapContainer';
+import StraitTransitIndex from './components/overview/StraitTransitIndex';
 import { useUIStore, useOverviewStore } from './stores';
 import { computeAiSummary } from './utils/aiSummaryEngine';
 import './App.css';
@@ -50,8 +52,6 @@ function App() {
   if (route === '#/bigscreen') return <BigScreen />;
 
   const [time, setTime] = useState(new Date());
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
 
@@ -106,29 +106,6 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // 动态缩放计算
-  useEffect(() => {
-    const handleResize = () => {
-      if (!wrapperRef.current) return;
-
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const dashboardWidth = 1920;
-      const dashboardHeight = 1080;
-
-      // 计算缩放比例（保证完整显示）
-      const scaleX = viewportWidth / dashboardWidth;
-      const scaleY = viewportHeight / dashboardHeight;
-      const newScale = Math.min(scaleX, scaleY); // 支持4K大屏放大
-
-      setScale(newScale);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   // 感知设备数据
   const deviceData: DeviceData[] = [
     { name: '电子警察', count: 49, online: 48, offline: 1 },
@@ -156,12 +133,9 @@ function App() {
   ];
 
   return (
-    <div className="dashboard-wrapper" ref={wrapperRef}>
+    <div className="dashboard-wrapper">
       <div
         className="dashboard"
-        style={{
-          transform: `scale(${scale})`,
-        }}
       >
         <div className="bg-grid" />
 
@@ -172,30 +146,67 @@ function App() {
         {systemMode === 'overview' && <AiSummaryBar />}
 
         {systemMode === 'overview' && (
-          <div className="main-content">
+          <>
+            {/* Full-screen map layer - behind everything */}
             <div style={{
-              display: 'flex',
-              gap: 12,
-              width: '100%',
-              height: '100%',
-              transition: 'all 0.3s ease',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1,
             }}>
-              {!leftCollapsed && (
+              <MapContainer />
+              <StraitTransitIndex />
+            </div>
+
+            {/* Floating panels overlay */}
+            <div style={{
+              position: 'absolute',
+              top: 120,
+              left: 16,
+              right: 16,
+              bottom: 16,
+              display: 'grid',
+              gridTemplateColumns: '340px 1fr 340px',
+              gridTemplateRows: '1fr auto',
+              gap: 12,
+              zIndex: 20,
+              pointerEvents: 'none',
+            }}>
+              {/* Left panels */}
+              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <LeftPanel
                   deviceData={deviceData}
                   trafficData={trafficData}
                   violationData={violationData}
                 />
-              )}
-              <CenterPanel
-                leftCollapsed={leftCollapsed}
-                rightCollapsed={rightCollapsed}
-                onToggleLeft={() => setLeftCollapsed(!leftCollapsed)}
-                onToggleRight={() => setRightCollapsed(!rightCollapsed)}
-              />
-              {!rightCollapsed && <RightPanel />}
+              </div>
+
+              {/* Center - transparent, map shows through */}
+              <div style={{ pointerEvents: 'none' }} />
+
+              {/* Right panels */}
+              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <RightPanel />
+              </div>
+
+              {/* Bottom charts spanning full width */}
+              <div style={{
+                gridColumn: '1 / -1',
+                display: 'flex',
+                gap: 12,
+                pointerEvents: 'auto',
+              }}>
+                <CenterPanel
+                  leftCollapsed={leftCollapsed}
+                  rightCollapsed={rightCollapsed}
+                  onToggleLeft={() => setLeftCollapsed(!leftCollapsed)}
+                  onToggleRight={() => setRightCollapsed(!rightCollapsed)}
+                />
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {systemMode === 'command' && <CommandMode />}
