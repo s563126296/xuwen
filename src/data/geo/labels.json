@@ -1,0 +1,42 @@
+[
+  {
+    "name": "琼州海峡",
+    "lng": 110.18,
+    "lat": 20.12,
+    "category": "water",
+    "size": 14,
+    "level": 1
+  },
+  {
+    "name": "徐闻",
+    "lng": 110.134812,
+    "lat": 20.237437999999997,
+    "category": "city",
+    "size": 12,
+    "level": 1
+  },
+  {
+    "name": "海口",
+    "lng": 110.25,
+    "lat": 20.03,
+    "category": "city",
+    "size": 12,
+    "level": 1
+  },
+  {
+    "name": "沈海高速",
+    "lng": 110.12,
+    "lat": 20.36,
+    "category": "road",
+    "size": 9,
+    "level": 2
+  },
+  {
+    "name": "进港大道",
+    "lng": 110.143,
+    "lat": 20.24,
+    "category": "road",
+    "size": 9,
+    "level": 3
+  }
+]

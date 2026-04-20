@@ -1,0 +1,110 @@
+[
+  {
+    "id": "vessel-lane-xuwen-xinhai-1",
+    "name": "徐闻港—新海港主航线 / 船舶 1",
+    "coordinates": [
+      110.19044,
+      20.272314
+    ],
+    "course": 161.8,
+    "speed": 12,
+    "status": "sailing",
+    "destination": "徐闻港"
+  },
+  {
+    "id": "vessel-lane-xuwen-xinhai-2",
+    "name": "徐闻港—新海港主航线 / 船舶 2",
+    "coordinates": [
+      110.206496,
+      20.181734
+    ],
+    "course": -177.2,
+    "speed": 15,
+    "status": "sailing",
+    "destination": "徐闻港"
+  },
+  {
+    "id": "vessel-lane-xuwen-xinhai-3",
+    "name": "徐闻港—新海港主航线 / 船舶 3",
+    "coordinates": [
+      110.183867,
+      20.092565
+    ],
+    "course": -155.1,
+    "speed": 18,
+    "status": "sailing",
+    "destination": "徐闻港"
+  },
+  {
+    "id": "vessel-lane-haian-xiuying-1",
+    "name": "海安新港—秀英港航线 / 船舶 1",
+    "coordinates": [
+      110.205773,
+      20.213793
+    ],
+    "course": 4.3,
+    "speed": 15,
+    "status": "sailing",
+    "destination": "海口"
+  },
+  {
+    "id": "vessel-lane-haian-xiuying-2",
+    "name": "海安新港—秀英港航线 / 船舶 2",
+    "coordinates": [
+      110.211824,
+      20.138672
+    ],
+    "course": -14.4,
+    "speed": 18,
+    "status": "sailing",
+    "destination": "海口"
+  },
+  {
+    "id": "vessel-lane-haian-xiuying-3",
+    "name": "海安新港—秀英港航线 / 船舶 3",
+    "coordinates": [
+      110.246037,
+      20.07057
+    ],
+    "course": -35.7,
+    "speed": 21,
+    "status": "sailing",
+    "destination": "海口"
+  },
+  {
+    "id": "vessel-lane-haian-nangang-1",
+    "name": "海安港—南港补给航线 / 船舶 1",
+    "coordinates": [
+      110.229623,
+      20.203229
+    ],
+    "course": 3.3,
+    "speed": 18,
+    "status": "sailing",
+    "destination": "海口"
+  },
+  {
+    "id": "vessel-lane-haian-nangang-2",
+    "name": "海安港—南港补给航线 / 船舶 2",
+    "coordinates": [
+      110.212967,
+      20.125272
+    ],
+    "course": 20,
+    "speed": 21,
+    "status": "sailing",
+    "destination": "海口"
+  },
+  {
+    "id": "vessel-lane-haian-nangang-3",
+    "name": "海安港—南港补给航线 / 船舶 3",
+    "coordinates": [
+      110.172256,
+      20.055515
+    ],
+    "course": 36.5,
+    "speed": 24,
+    "status": "sailing",
+    "destination": "海口"
+  }
+]

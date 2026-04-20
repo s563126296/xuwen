@@ -1,0 +1,98 @@
+[
+  {
+    "id": "cp01",
+    "name": "沈海高速北入口",
+    "coordinates": [110.101891, 20.438228],
+    "type": "entrance",
+    "flowCount": 691,
+    "flowLevel": 1
+  },
+  {
+    "id": "cp02",
+    "name": "沈海高速徐闻段",
+    "coordinates": [110.112888, 20.409485],
+    "type": "internal",
+    "flowCount": 576,
+    "flowLevel": 0
+  },
+  {
+    "id": "cp03",
+    "name": "沈海高速服务区",
+    "coordinates": [110.12256, 20.37653],
+    "type": "internal",
+    "flowCount": 228,
+    "flowLevel": 1
+  },
+  {
+    "id": "cp04",
+    "name": "徐城收费站",
+    "coordinates": [110.128077, 20.351045],
+    "type": "entrance",
+    "flowCount": 713,
+    "flowLevel": 1
+  },
+  {
+    "id": "cp05",
+    "name": "城南卡口",
+    "coordinates": [110.129442, 20.34848],
+    "type": "internal",
+    "flowCount": 654,
+    "flowLevel": 0
+  },
+  {
+    "id": "cp06",
+    "name": "进港大道卡口",
+    "coordinates": [110.129356, 20.310554],
+    "type": "internal",
+    "flowCount": 551,
+    "flowLevel": 2
+  },
+  {
+    "id": "cp07",
+    "name": "港口大道1号",
+    "coordinates": [110.132546, 20.294161],
+    "type": "internal",
+    "flowCount": 573,
+    "flowLevel": 1
+  },
+  {
+    "id": "cp08",
+    "name": "徐闻港出口",
+    "coordinates": [110.13235, 20.295403],
+    "type": "entrance",
+    "flowCount": 332,
+    "flowLevel": 1
+  },
+  {
+    "id": "cp09",
+    "name": "南港大道卡口",
+    "coordinates": [110.1385, 20.278],
+    "type": "internal",
+    "flowCount": 478,
+    "flowLevel": 2
+  },
+  {
+    "id": "cp10",
+    "name": "北港公路卡口",
+    "coordinates": [110.145, 20.275],
+    "type": "internal",
+    "flowCount": 378,
+    "flowLevel": 2
+  },
+  {
+    "id": "cp11",
+    "name": "海安新港入口",
+    "coordinates": [110.152, 20.268],
+    "type": "entrance",
+    "flowCount": 299,
+    "flowLevel": 1
+  },
+  {
+    "id": "cp12",
+    "name": "龙塘镇卡口",
+    "coordinates": [110.162, 20.252],
+    "type": "internal",
+    "flowCount": 244,
+    "flowLevel": 1
+  }
+]

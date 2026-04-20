@@ -1,0 +1,90 @@
+[
+  {
+    "id": "port-5360127215",
+    "name": "海安新港",
+    "lng": 110.212396,
+    "lat": 20.268227,
+    "category": "port",
+    "scope": "haian"
+  },
+  {
+    "id": "port-6804509977",
+    "name": "秀英轮渡码头",
+    "lng": 110.281037,
+    "lat": 20.026748,
+    "category": "terminal",
+    "scope": "shared"
+  },
+  {
+    "id": "port-6804538697",
+    "name": "海安港",
+    "lng": 110.230557,
+    "lat": 20.269242,
+    "category": "port",
+    "scope": "haian"
+  },
+  {
+    "id": "port-6804538747",
+    "name": "粵海鐵路北港碼頭",
+    "lng": 110.12585,
+    "lat": 20.229559,
+    "category": "port",
+    "scope": "shared"
+  },
+  {
+    "id": "default-port-0",
+    "name": "徐闻港",
+    "lng": 110.134812,
+    "lat": 20.232438,
+    "category": "port",
+    "scope": "xuwen"
+  },
+  {
+    "id": "default-port-3",
+    "name": "海口新海港",
+    "lng": 110.1465,
+    "lat": 20.0248,
+    "category": "port",
+    "scope": "shared"
+  },
+  {
+    "id": "default-port-4",
+    "name": "海口秀英港",
+    "lng": 110.2718,
+    "lat": 20.0414,
+    "category": "port",
+    "scope": "shared"
+  },
+  {
+    "id": "default-port-5",
+    "name": "海口南港码头",
+    "lng": 110.1402,
+    "lat": 20.0162,
+    "category": "terminal",
+    "scope": "shared"
+  },
+  {
+    "id": "default-poi-0",
+    "name": "徐闻港调度中心",
+    "lng": 110.136,
+    "lat": 20.233,
+    "category": "dispatch",
+    "scope": "xuwen"
+  },
+  {
+    "id": "default-poi-1",
+    "name": "海安待渡服务区",
+    "lng": 110.2841,
+    "lat": 20.2693,
+    "category": "service",
+    "scope": "haian"
+  },
+  {
+    "id": "default-poi-2",
+    "name": "琼州海峡应急联动点",
+    "lng": 110.2126,
+    "lat": 20.2437,
+    "category": "dispatch",
+    "scope": "shared"
+  }
+]
