@@ -1,20 +1,22 @@
 :root {
-  /* Enhanced Color System */
-  --bg-primary: #0A0E1A;
-  --bg-secondary: #141824;
-  --bg-card: #1A1F2E;
-  --primary: #1890FF;
-  --primary-light: #40A9FF;
-  --cyan: #13C2C2;
-  --accent: #FAAD14;
-  --success: #52C41A;
-  --warning: #FA8C16;
-  --error: #F5222D;
+  /* UI/UX Pro Max Design System - OLED Dark Mode */
+  --bg-primary: #000000;
+  --bg-secondary: #0A0E1A;
+  --bg-card: rgba(18, 18, 18, 0.8);
+  --primary: #3B82F6;
+  --primary-light: #60A5FA;
+  --primary-dark: #1E40AF;
+  --cyan: #06B6D4;
+  --accent: #F59E0B;
+  --success: #22C55E;
+  --warning: #FB923C;
+  --error: #EF4444;
+  --critical: #FF0000;
   --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.85);
-  --text-muted: rgba(255, 255, 255, 0.65);
-  --border-glow: rgba(24, 144, 255, 0.3);
-  --accent-glow: rgba(250, 173, 20, 0.3);
+  --text-secondary: #E0E0E0;
+  --text-muted: #A0A0A0;
+  --border-glow: rgba(59, 130, 246, 0.3);
+  --accent-glow: rgba(245, 158, 11, 0.3);
 
   /* Spacing */
   --margin: 12px;
@@ -40,21 +42,21 @@ html, body {
 }
 
 body {
-  font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(180deg, #0A0E1A 0%, #141824 100%);
+  font-family: 'Fira Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #000000;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 大屏容器 - 自动缩放适配视口 */
+/* 大屏容器 - OLED Black */
 .dashboard-wrapper {
   width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: #000000;
   overflow: hidden;
 }
 
@@ -70,19 +72,18 @@ body {
 
 /* 通用卡片样式 - Enhanced Glassmorphism */
 .card {
-  background: rgba(26, 31, 46, 0.7);
-  border: 1px solid rgba(24, 144, 255, 0.15);
+  background: rgba(10, 14, 26, 0.85);
+  border: 1px solid rgba(59, 130, 246, 0.12);
   border-radius: 10px;
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  box-shadow: var(--shadow-md);
-  transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: all 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .card:hover {
-  border-color: rgba(24, 144, 255, 0.3);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
-  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(59, 130, 246, 0.15);
 }
 
 /* 背景网格 - Enhanced */
@@ -111,10 +112,10 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0 40px;
-  background: linear-gradient(180deg, rgba(20, 24, 36, 0.95) 0%, rgba(10, 14, 26, 0.85) 100%);
+  background: linear-gradient(180deg, rgba(10, 14, 26, 0.98) 0%, rgba(0, 0, 0, 0.9) 100%);
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(24, 144, 255, 0.25);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .header::after {
@@ -126,7 +127,7 @@ body {
   width: 60%;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 /* 预警横幅 - 1920×48px */
@@ -232,23 +233,23 @@ body {
   max-height: 100%;
 }
 
-/* 模块卡片通用样式 - Enhanced */
+/* 模块卡片通用样式 - UI/UX Pro Max OLED */
 .module-card {
-  background: rgba(26, 31, 46, 0.7);
+  background: rgba(10, 14, 26, 0.85);
   border-radius: var(--border-radius);
-  border: 1px solid rgba(24, 144, 255, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.12);
   padding: 14px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
-  backdrop-filter: blur(8px);
-  transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+  transition: all 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .module-card:hover {
-  border-color: rgba(24, 144, 255, 0.25);
-  box-shadow: var(--shadow-md), 0 0 15px rgba(24, 144, 255, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 10px rgba(59, 130, 246, 0.15);
 }
 
 .module-card::before {
@@ -259,7 +260,7 @@ body {
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--primary), transparent);
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .module-card.glow-accent {
