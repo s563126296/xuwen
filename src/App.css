@@ -1,3 +1,5 @@
+@import './styles/effects.css';
+
 :root {
   /* UI/UX Pro Max Design System - OLED Dark Mode */
   --bg-primary: #000000;
@@ -524,7 +526,13 @@ body {
 }
 
 .animate-in {
-  animation: fadeInUp 0.5s ease forwards;
+  animation: fadeInUp 0.5s ease forwards, shimmer-once 2s ease 0.5s;
+}
+
+@keyframes shimmer-once {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
+  100% { filter: brightness(1); }
 }
 
 /* 呼吸灯效 */
@@ -549,7 +557,8 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 208, 233, 0.25);
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(59, 130, 246, 0.2));
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
   border-radius: 3px;
   border: 1px solid transparent;
   background-clip: padding-box;

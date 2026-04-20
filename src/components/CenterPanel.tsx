@@ -67,7 +67,7 @@ export default function CenterPanel({ leftCollapsed, rightCollapsed, onToggleLef
   return (
     <div className="panel-center" style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
       {/* GIS地图 */}
-      <div className="module-card full-height animate-in" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+      <div className="module-card full-height animate-in scanlines" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <MapHeader
           leftCollapsed={leftCollapsed}
           rightCollapsed={rightCollapsed}
@@ -79,14 +79,15 @@ export default function CenterPanel({ leftCollapsed, rightCollapsed, onToggleLef
           onDronesToggle={() => setDronesActive(!dronesActive)}
         />
 
-        <div style={{
+        <div className="cyber-grid" style={{
           flex: 1,
-          background: 'rgba(0, 0, 0, 0.3)',
+          background: 'rgba(0, 0, 0, 0.5)',
           borderRadius: 10,
           position: 'relative',
           overflow: 'hidden',
           minHeight: 0,
-          border: '1px solid rgba(0, 208, 233, 0.1)'
+          border: '1px solid rgba(59, 130, 246, 0.15)',
+          boxShadow: 'inset 0 0 30px rgba(59, 130, 246, 0.05)'
         }}>
           <RoadNetworkV2 />
           <DeviceMarkers

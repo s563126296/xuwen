@@ -17,14 +17,14 @@ export default function Header({ time, children }: Props) {
   const weekday = weekdays[time.getDay()];
 
   return (
-    <header className="header">
+    <header className="header scanlines">
       <div className="header-left">
         <div className="logo">
-          <div className="logo-icon">
+          <div className="logo-icon pulse-glow" style={{ borderRadius: '50%' }}>
             <Activity size={24} color="#0A0F19" />
           </div>
           <div>
-            <div className="logo-text">徐闻县智慧交通大数据系统</div>
+            <div className="logo-text neon-text">徐闻县智慧交通大数据系统</div>
             <div className="header-subtitle">XUWEN INTELLIGENT TRANSPORTATION SYSTEM</div>
           </div>
         </div>

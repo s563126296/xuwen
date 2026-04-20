@@ -58,13 +58,27 @@ export default function RoadNetwork() {
             <stop offset="100%" stopColor={COLORS_V2.traffic.heavy} stopOpacity="0.9"/>
           </linearGradient>
 
-          {/* 道路发光效果 */}
+          {/* 道路发光效果 - Enhanced */}
           <filter id="roadGlow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="6" result="coloredBlur2"/>
             <feMerge>
+              <feMergeNode in="coloredBlur2"/>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
+          </filter>
+
+          {/* 道路脉冲效果 */}
+          <filter id="roadPulse">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feFlood floodColor="#3B82F6" floodOpacity="0.3" result="color"/>
+            <feComposite in="color" in2="blur" operator="in" result="glow"/>
+            <feMerge>
+              <feMergeNode in="glow"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+            <animate attributeName="stdDeviation" values="2;6;2" dur="2s" repeatCount="indefinite"/>
           </filter>
 
           {/* 道路标线 */}
@@ -172,13 +186,69 @@ export default function RoadNetwork() {
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          {/* 车辆图标 */}
-          <circle id="vehicle" r="2" fill={COLORS_V2.primary[400]}>
-            <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
-          </circle>
+          {/* 车辆粒子 */}
+          <radialGradient id="particleGlow">
+            <stop offset="0%" stopColor="#3B82F6" stopOpacity="1"/>
+            <stop offset="50%" stopColor="#3B82F6" stopOpacity="0.5"/>
+            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0"/>
+          </radialGradient>
         </defs>
 
-        {/* 车流动画会在运行时由 useParticleAnimation hook 添加 */}
+        {/* G207 车流粒子 */}
+        <circle r="4" fill="url(#particleGlow)">
+          <animateMotion dur="6s" repeatCount="indefinite" path="M30 100 L730 100"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="6s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="4" fill="url(#particleGlow)">
+          <animateMotion dur="6s" begin="2s" repeatCount="indefinite" path="M30 100 L730 100"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="6s" begin="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="4" fill="url(#particleGlow)">
+          <animateMotion dur="6s" begin="4s" repeatCount="indefinite" path="M30 100 L730 100"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="6s" begin="4s" repeatCount="indefinite"/>
+        </circle>
+
+        {/* S376 车流粒子 */}
+        <circle r="3" fill="url(#particleGlow)">
+          <animateMotion dur="7s" repeatCount="indefinite" path="M30 170 L730 170"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="7s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="3" fill="url(#particleGlow)">
+          <animateMotion dur="7s" begin="3.5s" repeatCount="indefinite" path="M30 170 L730 170"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="7s" begin="3.5s" repeatCount="indefinite"/>
+        </circle>
+
+        {/* 进港大道 车流粒子（密集 - 拥堵） */}
+        <circle r="5" fill="url(#particleGlow)">
+          <animateMotion dur="8s" repeatCount="indefinite" path="M550 100 L550 320"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="8s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="5" fill="url(#particleGlow)">
+          <animateMotion dur="8s" begin="1.6s" repeatCount="indefinite" path="M550 100 L550 320"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="8s" begin="1.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="5" fill="url(#particleGlow)">
+          <animateMotion dur="8s" begin="3.2s" repeatCount="indefinite" path="M550 100 L550 320"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="8s" begin="3.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="5" fill="url(#particleGlow)">
+          <animateMotion dur="8s" begin="4.8s" repeatCount="indefinite" path="M550 100 L550 320"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="8s" begin="4.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="5" fill="url(#particleGlow)">
+          <animateMotion dur="8s" begin="6.4s" repeatCount="indefinite" path="M550 100 L550 320"/>
+          <animate attributeName="opacity" values="0;1;1;0" dur="8s" begin="6.4s" repeatCount="indefinite"/>
+        </circle>
+
+        {/* 港口脉冲环 */}
+        <circle cx="625" cy="320" r="20" fill="none" stroke="#3B82F6" strokeWidth="1" opacity="0.5">
+          <animate attributeName="r" values="15;30;15" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="625" cy="320" r="20" fill="none" stroke="#3B82F6" strokeWidth="1" opacity="0.3">
+          <animate attributeName="r" values="15;30;15" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+        </circle>
       </svg>
     </>
   );
