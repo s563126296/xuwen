@@ -1,5 +1,6 @@
 import { ArrowLeftRight } from 'lucide-react';
-import { useDashboardStore, TidalStatus, TidalIntensity } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
+import type { TidalStatus, TidalIntensity } from '../../stores/overviewStore';
 
 const statusLabel: Record<TidalStatus, string> = {
   inbound_tide: '进港潮',
@@ -14,7 +15,7 @@ const intensityLabel: Record<TidalIntensity, string> = {
 };
 
 export default function TidalEffectCard() {
-  const { tidalEffect } = useDashboardStore();
+  const tidalEffect = useOverviewStore((s) => s.tidalEffect);
   const total = tidalEffect.inboundFlow + tidalEffect.outboundFlow;
   const inPct = total > 0 ? (tidalEffect.inboundFlow / total) * 100 : 50;
 

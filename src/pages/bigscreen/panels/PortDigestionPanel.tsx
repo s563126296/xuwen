@@ -1,6 +1,6 @@
 import PanelFrame from '../components/PanelFrame';
 import FlipNumber from '../components/FlipNumber';
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const portLabels: Record<'xuwen' | 'haian', string> = {
   xuwen: '徐闻港',
@@ -8,7 +8,7 @@ const portLabels: Record<'xuwen' | 'haian', string> = {
 };
 
 export default function PortDigestionPanel() {
-  const portDigestion = useDashboardStore((s) => s.portDigestion);
+  const portDigestion = useOverviewStore((s) => s.portDigestion);
 
   return (
     <PanelFrame title="港口消化">

@@ -1,9 +1,9 @@
 import { TrendingUp, Activity, Clock, Target, AlertTriangle, Users } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
 import { filterEvents } from '../../utils/analysisMockData';
 
 export default function StatsSummaryPanel() {
-  const { analysisState } = useDashboardStore();
+  const analysisState = useAnalysisStore((s) => s.analysisState);
   const { filters, strategyRecords } = analysisState;
   const filteredEvents = filterEvents(analysisState.events, filters) as typeof analysisState.events;
   const relatedRecords = strategyRecords.filter(r => filteredEvents.some(e => e.id === r.eventId));

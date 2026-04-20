@@ -1,6 +1,6 @@
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from 'recharts';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { EmergencyTimelinePoint } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
+import type { EmergencyTimelinePoint } from '../../stores/emergencyStore';
 
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -15,8 +15,8 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export default function EmergencyTimeline() {
-  const timeline = useDashboardStore((s) => s.emergencyState.timeline);
-  const peak = useDashboardStore((s) => s.emergencyState.forecast.peakStrandedVehicles);
+  const timeline = useEmergencyStore((s) => s.emergencyState.timeline);
+  const peak = useEmergencyStore((s) => s.emergencyState.forecast.peakStrandedVehicles);
 
   const currentPoint = timeline.find((p: EmergencyTimelinePoint) => p.isCurrent);
   const currentTime = currentPoint?.time;

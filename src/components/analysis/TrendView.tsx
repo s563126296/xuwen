@@ -1,6 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, ReferenceLine, ReferenceArea } from 'recharts';
 import { TrendingUp, AlertTriangle, Calendar, Activity } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
 import { generateTrendData } from '../../utils/analysisMockData';
 import { filterEvents } from '../../utils/analysisMockData';
 
@@ -14,7 +14,7 @@ const TOOLTIP_STYLE = {
 };
 
 export default function TrendView() {
-  const { analysisState } = useDashboardStore();
+  const analysisState = useAnalysisStore((s) => s.analysisState);
   const { dateRange } = analysisState.filters;
   const trendData = generateTrendData(dateRange.start, dateRange.end);
   const filteredEvents = filterEvents(analysisState.events, analysisState.filters) as typeof analysisState.events;

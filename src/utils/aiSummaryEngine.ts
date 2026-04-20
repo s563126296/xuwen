@@ -9,7 +9,7 @@ import type {
   PressureTransmission,
   WeatherCoupling,
   SpecialEvent,
-} from '../store/dashboardStore';
+} from '../stores/overviewStore';
 
 interface OverviewIndicators {
   portDigestion: PortDigestion;

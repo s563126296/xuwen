@@ -1,6 +1,7 @@
 import Modal from '../Modal';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { StrategyPermission } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
+import { useUIStore } from '../../stores/uiStore';
+import type { StrategyPermission } from '../../stores/commandStore';
 import { ShieldAlert, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { checkConflicts } from '../../utils/strategyConflicts';
 
@@ -39,7 +40,11 @@ function PermissionBadge({ permission }: { permission: StrategyPermission }) {
 }
 
 export default function StrategyConfirmModal() {
-  const { pendingStrategyId, commandState, executeStrategy, setActiveModal, setPendingStrategy } = useDashboardStore();
+  const pendingStrategyId = useUIStore((s) => s.pendingStrategyId);
+  const commandState = useCommandStore((s) => s.commandState);
+  const executeStrategy = useCommandStore((s) => s.executeStrategy);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const setPendingStrategy = useUIStore((s) => s.setPendingStrategy);
 
   if (!pendingStrategyId) return null;
 

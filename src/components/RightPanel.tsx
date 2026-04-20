@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useOverviewStore } from '../stores';
 import PressureTransmissionCard from './overview/PressureTransmissionCard';
 import CorridorElasticityCard from './overview/CorridorElasticityCard';
 import SystemResilienceCard from './overview/SystemResilienceCard';
@@ -19,7 +19,7 @@ const getLevelColor = (level: string) => {
 };
 
 export default function RightPanel() {
-  const { roadCongestions } = useDashboardStore();
+  const roadCongestions = useOverviewStore((s) => s.roadCongestions);
   const top3 = [...roadCongestions].sort((a, b) => b.index - a.index).slice(0, 3);
 
   return (

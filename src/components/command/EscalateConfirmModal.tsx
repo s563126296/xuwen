@@ -1,9 +1,14 @@
 import Modal from '../Modal';
 import { AlertTriangle } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
+import { useUIStore } from '../../stores/uiStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 
 export default function EscalateConfirmModal() {
-  const { commandState, setActiveModal, setSystemMode, addCommandFeedItem } = useDashboardStore();
+  const commandState = useCommandStore((s) => s.commandState);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const setSystemMode = useUIStore((s) => s.setSystemMode);
+  const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
   const { congestionIndex } = commandState;
 
   const handleConfirm = () => {
@@ -11,13 +16,13 @@ export default function EscalateConfirmModal() {
 
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const emergencyState = useDashboardStore.getState().emergencyState;
+    const emergencyState = useEmergencyStore.getState().emergencyState;
     const syncComms = [
       ...emergencyState.communications,
       { id: `ec-esc-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: `从指挥模式升级：拥堵指数 ${congestionIndex.toFixed(1)}，策略效果不足`, urgent: true },
       { id: `ec-esc2-${Date.now()}`, type: 'system' as const, source: '系统', time: timeStr, content: '指挥模式策略已保持执行，应急模式已接管调度', urgent: false },
     ];
-    useDashboardStore.getState().setEmergencyState({ communications: syncComms });
+    useEmergencyStore.getState().setEmergencyState({ communications: syncComms });
 
     setSystemMode('emergency');
     setActiveModal(null);

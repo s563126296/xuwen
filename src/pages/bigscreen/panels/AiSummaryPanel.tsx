@@ -1,5 +1,5 @@
 import PanelFrame from '../components/PanelFrame';
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const levelColorMap: Record<string, string> = {
   green: '#00ffa2',
@@ -15,7 +15,7 @@ const priorityLabelMap: Record<string, string> = {
 };
 
 export default function AiSummaryPanel() {
-  const aiSummary = useDashboardStore((s) => s.aiSummary);
+  const aiSummary = useOverviewStore((s) => s.aiSummary);
   const dotColor = levelColorMap[aiSummary.level] || '#00ffa2';
   const shouldAnimate = aiSummary.level === 'orange' || aiSummary.level === 'red';
   const firstAction = aiSummary.actions[0];

@@ -1,8 +1,8 @@
 import { BarChart3, Calendar } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
 
 export default function DataRangeBanner() {
-  const { analysisState } = useDashboardStore();
+  const analysisState = useAnalysisStore((s) => s.analysisState);
   const { start, end } = analysisState.filters.dateRange;
   const days = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / 86400000) + 1;
   const eventCount = analysisState.events.length;

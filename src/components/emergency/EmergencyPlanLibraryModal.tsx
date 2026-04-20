@@ -1,14 +1,14 @@
 import { EMERGENCY_PLANS } from '../../data/emergencyPlans';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
+import type { PlanId } from '../../stores/emergencyStore';
 import { playClickSound } from '../../utils/soundEffects';
-import type { PlanId } from '../../store/dashboardStore';
 
 interface Props {
   onClose: () => void;
 }
 
 export default function EmergencyPlanLibraryModal({ onClose }: Props) {
-  const activatePlan = useDashboardStore((s) => s.activatePlan);
+  const activatePlan = useEmergencyStore((s) => s.activatePlan);
 
   const handleActivate = (planId: PlanId) => {
     playClickSound();

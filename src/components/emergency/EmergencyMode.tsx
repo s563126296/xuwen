@@ -14,11 +14,11 @@ import EmergencyPlanLibraryModal from './EmergencyPlanLibraryModal';
 import EmergencyPlanDetailModal from './EmergencyPlanDetailModal';
 import SpecialVehicleDetailModal from './SpecialVehicleDetailModal';
 import EmergencyVideoConference from './EmergencyVideoConference';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useUIStore } from '../../stores/uiStore';
 
 export default function EmergencyMode() {
-  const activeModal = useDashboardStore((s) => s.activeModal);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const activeModal = useUIStore((s) => s.activeModal);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
 
   return (
     <>

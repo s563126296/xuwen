@@ -1,5 +1,6 @@
 import { Shield, Info } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
+import { useUIStore } from '../../stores/uiStore';
 
 const getArcColor = (score: number) => {
   if (score > 80) return '#2ED573';
@@ -8,7 +9,7 @@ const getArcColor = (score: number) => {
   return '#FF4757';
 };
 
-const subLabels: { key: keyof ReturnType<typeof useDashboardStore.getState>['systemResilience']['subScores']; label: string }[] = [
+const subLabels: { key: 'corridorRedundancy' | 'alternateRoutes' | 'controlCapacity' | 'portBuffer'; label: string }[] = [
   { key: 'corridorRedundancy', label: '通道冗余' },
   { key: 'alternateRoutes', label: '备选路线' },
   { key: 'controlCapacity', label: '调控空间' },
@@ -16,8 +17,8 @@ const subLabels: { key: keyof ReturnType<typeof useDashboardStore.getState>['sys
 ];
 
 export default function SystemResilienceCard() {
-  const { systemResilience } = useDashboardStore();
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const systemResilience = useOverviewStore((s) => s.systemResilience);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
   const { score, subScores, weakestDimension } = systemResilience;
   const arcColor = getArcColor(score);
   const r = 38;

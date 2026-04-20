@@ -9,10 +9,10 @@ import VideoCallWindow from './VideoCallWindow';
 import CommandReportModal from './CommandReportModal';
 import EscalateConfirmModal from './EscalateConfirmModal';
 import CongestionDetailModal from './CongestionDetailModal';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 
 export default function CommandMode() {
-  const strategies = useDashboardStore((s) => s.commandState.strategies);
+  const strategies = useCommandStore((s) => s.commandState.strategies);
   const hasExecuting = strategies.some((s) => s.status === 'executing' || s.status === 'done');
   const mainBottom = hasExecuting ? 310 : 240;
 

@@ -1,9 +1,12 @@
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine, Tooltip } from 'recharts';
 import { Activity } from 'lucide-react';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useUIStore, useOverviewStore } from '../stores';
 
 export default function CongestionPredictionChart() {
-  const { predictions, selectedDirection, setActiveModal, setSelectedRoad } = useDashboardStore();
+  const predictions = useOverviewStore((s) => s.predictions);
+  const selectedDirection = useUIStore((s) => s.selectedDirection);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const setSelectedRoad = useUIStore((s) => s.setSelectedRoad);
 
   const getCongestionLevel = (index: number) => {
     if (index <= 2) return { color: '#2ED573', label: '畅通' };

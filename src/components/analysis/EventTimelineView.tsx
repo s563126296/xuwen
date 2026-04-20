@@ -1,6 +1,6 @@
 import { Clock, MapPin, AlertTriangle, ArrowLeft } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { HistoryEventSeverity } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
+import type { HistoryEventSeverity } from '../../stores';
 
 const SEVERITY_COLORS: Record<HistoryEventSeverity, string> = {
   critical: '#FF4757', major: '#F5A623', minor: '#00D0E9', info: '#64748B',
@@ -13,7 +13,8 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function EventTimelineView() {
-  const { analysisState, selectAnalysisEvent } = useDashboardStore();
+  const analysisState = useAnalysisStore((s) => s.analysisState);
+  const selectAnalysisEvent = useAnalysisStore((s) => s.selectAnalysisEvent);
   const { selectedEventId, events, strategyRecords } = analysisState;
   const event = events.find(e => e.id === selectedEventId);
 

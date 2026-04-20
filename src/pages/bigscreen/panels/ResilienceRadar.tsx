@@ -1,12 +1,12 @@
 import ReactECharts from 'echarts-for-react';
 import PanelFrame from '../components/PanelFrame';
 import FlipNumber from '../components/FlipNumber';
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const dimensionLabels = ['通道冗余', '备选路线', '调控空间', '港口缓冲'];
 
 export default function ResilienceRadar() {
-  const data = useDashboardStore((s) => s.systemResilience);
+  const data = useOverviewStore((s) => s.systemResilience);
 
   const scores = [
     data.subScores.corridorRedundancy,

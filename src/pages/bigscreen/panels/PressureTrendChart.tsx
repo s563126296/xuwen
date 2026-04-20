@@ -1,5 +1,5 @@
 import ReactECharts from 'echarts-for-react';
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const chartColors = {
   cyan: '#00f0ff',
@@ -9,7 +9,7 @@ const chartColors = {
 };
 
 export default function PressureTrendChart() {
-  const predictions = useDashboardStore((s) => s.predictions);
+  const predictions = useOverviewStore((s) => s.predictions);
 
   // Split into actual and predicted segments
   const actualIdx = predictions.findIndex((p) => p.isPredicted);

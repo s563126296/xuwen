@@ -1,8 +1,10 @@
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
-import { useDashboardStore, DirectionType } from '../store/dashboardStore';
+import { useUIStore } from '../stores';
+import type { DirectionType } from '../stores';
 
 export default function DirectionSwitcher() {
-  const { selectedDirection, setSelectedDirection } = useDashboardStore();
+  const selectedDirection = useUIStore((s) => s.selectedDirection);
+  const setSelectedDirection = useUIStore((s) => s.setSelectedDirection);
 
   const directions: { key: DirectionType; label: string; icon: typeof ArrowDownLeft }[] = [
     { key: 'inbound', label: '进港方向', icon: ArrowDownLeft },

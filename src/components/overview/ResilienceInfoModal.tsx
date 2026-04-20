@@ -1,5 +1,5 @@
 import { Shield, AlertTriangle, ArrowUpCircle, Zap } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 const levels = [
   { range: '80-100', label: '优秀', color: '#2ED573', desc: '系统弹性充足，可应对多重突发' },
@@ -16,7 +16,7 @@ const dimensions = [
 ];
 
 export default function ResilienceInfoModal() {
-  const { systemResilience } = useDashboardStore();
+  const systemResilience = useOverviewStore((s) => s.systemResilience);
   const score = systemResilience.score;
   const currentLevel = levels.find((l) => {
     const [min, max] = l.range.split('-').map(Number);

@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useDashboardStore, SpecialVehicleDetail } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
+import { useUIStore } from '../../stores/uiStore';
+import type { SpecialVehicleDetail } from '../../stores/emergencyStore';
 import { buildEmergencyTimeline } from '../../utils/emergencyEngine';
 
 function getAlertLevel(hours: number): SpecialVehicleDetail['alertLevel'] {
@@ -10,9 +12,9 @@ function getAlertLevel(hours: number): SpecialVehicleDetail['alertLevel'] {
 }
 
 export default function EmergencySimulator() {
-  const emergency = useDashboardStore((s) => s.emergencyState);
-  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const emergency = useEmergencyStore((s) => s.emergencyState);
+  const setEmergencyState = useEmergencyStore((s) => s.setEmergencyState);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
   const autoTriggerRef = useRef(false);
 
   // Weather-linked auto plan trigger

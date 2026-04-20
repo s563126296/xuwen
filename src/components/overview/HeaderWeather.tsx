@@ -1,5 +1,5 @@
 import { Sun, Cloud, CloudRain, CloudFog, Wind, Eye, Waves } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 const iconMap = {
   sun: Sun,
@@ -9,7 +9,7 @@ const iconMap = {
 };
 
 export default function HeaderWeather() {
-  const weather = useDashboardStore((s) => s.currentWeather);
+  const weather = useOverviewStore((s) => s.currentWeather);
   const WeatherIcon = iconMap[weather.conditionIcon];
 
   return (

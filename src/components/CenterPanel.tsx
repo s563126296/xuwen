@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Map, TrendingUp, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useUIStore } from '../stores';
 import HourlyChart from './HourlyChart';
 import PressurePredictionChart from './overview/PressurePredictionChart';
 import StraitTransitIndex from './overview/StraitTransitIndex';
@@ -45,7 +45,8 @@ const deviceMarkers = [
 ] as const;
 
 export default function CenterPanel({ leftCollapsed, rightCollapsed, onToggleLeft, onToggleRight }: CenterPanelProps) {
-  const { setActiveModal, setSelectedDeviceType } = useDashboardStore();
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const setSelectedDeviceType = useUIStore((s) => s.setSelectedDeviceType);
   const [activeFilter, setActiveFilter] = useState<DeviceTypeId>('all');
   const [dronesActive, setDronesActive] = useState(false);
 

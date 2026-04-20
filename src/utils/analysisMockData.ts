@@ -1,4 +1,4 @@
-import type { HistoryEventType, HistoryEventSeverity, HistoryEventStatus } from '../store/dashboardStore';
+import type { HistoryEventType, HistoryEventSeverity, HistoryEventStatus } from '../stores/analysisStore';
 
 export interface TrendDataPoint {
   date: string;

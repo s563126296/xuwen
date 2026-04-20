@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Users, Package, MessageCircle, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 import { playClickSound } from '../../utils/soundEffects';
 
 const statusColors = {
@@ -17,9 +17,9 @@ const statusLabels = {
 
 export default function ExecutionResourcePanel() {
   const [expanded, setExpanded] = useState(true);
-  const executionResources = useDashboardStore((s) => s.commandState.executionResources);
-  const openChatWith = useDashboardStore((s) => s.openChatWith);
-  const fieldPersons = useDashboardStore((s) => s.commandState.fieldPersons);
+  const executionResources = useCommandStore((s) => s.commandState.executionResources);
+  const openChatWith = useCommandStore((s) => s.openChatWith);
+  const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
 
   const handleLocate = (_personId: string) => {
     playClickSound();

@@ -1,6 +1,6 @@
 import { Settings, Truck, AlertCircle, Ship } from 'lucide-react';
 import Modal from './Modal';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useUIStore, useOverviewStore } from '../stores';
 
 interface Strategy {
   id: string;
@@ -47,7 +47,9 @@ const strategies: Strategy[] = [
 ];
 
 export default function StrategyModal() {
-  const { selectedDirection, portData, selectedPort } = useDashboardStore();
+  const selectedDirection = useUIStore((s) => s.selectedDirection);
+  const selectedPort = useUIStore((s) => s.selectedPort);
+  const portData = useOverviewStore((s) => s.portData);
   const port = portData[selectedPort];
 
   const getStatusStyle = (status: Strategy['status']) => {

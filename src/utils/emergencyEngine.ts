@@ -1,4 +1,4 @@
-import type { EmergencyLevel, EmergencyPhase, EmergencyTimelinePoint, EmergencyTask, PlanStep } from '../store/dashboardStore';
+import type { EmergencyLevel, EmergencyPhase, EmergencyTimelinePoint, EmergencyTask, PlanStep } from '../stores/emergencyStore';
 
 export function getEmergencyLevel(peakVehicles: number, shutdownHours: number): EmergencyLevel {
   if (peakVehicles > 3000 || shutdownHours > 72) return 'I';

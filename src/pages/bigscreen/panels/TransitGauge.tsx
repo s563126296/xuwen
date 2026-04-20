@@ -1,5 +1,5 @@
 import ReactECharts from 'echarts-for-react';
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const statusLabelMap: Record<string, string> = {
   normal: '正常通航',
@@ -9,7 +9,7 @@ const statusLabelMap: Record<string, string> = {
 };
 
 export default function TransitGauge() {
-  const data = useDashboardStore((s) => s.straitTransitIndex);
+  const data = useOverviewStore((s) => s.straitTransitIndex);
 
   const option: echarts.EChartsOption = {
     series: [

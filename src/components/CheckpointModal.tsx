@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Camera, TrendingUp, Clock, Gauge, Video, X, Monitor, Type, ImageIcon, Plane, Battery, Signal, MapPin, Wind, Thermometer, AlertTriangle, BarChart3, Timer } from 'lucide-react';
 import Modal from './Modal';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useUIStore } from '../stores';
 
 // ============ 模拟视频画面组件 ============
 function MockVideoFeed({ title, onClose }: { title: string; onClose: () => void }) {
@@ -332,7 +332,7 @@ function GenericCameraContent({ name, videoOpen, setVideoOpen }: { name: string;
 
 // ============ 主导出组件 ============
 export default function CheckpointModal() {
-  const { selectedDeviceType } = useDashboardStore();
+  const selectedDeviceType = useUIStore((s) => s.selectedDeviceType);
   const [videoOpen, setVideoOpen] = useState(false);
 
   const typeConfig: Record<string, { title: string; name: string; location: string }> = {

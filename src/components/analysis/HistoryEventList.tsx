@@ -1,7 +1,7 @@
 import { Clock, MapPin, AlertCircle } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
 import { filterEvents } from '../../utils/analysisMockData';
-import type { HistoryEventSeverity } from '../../store/dashboardStore';
+import type { HistoryEventSeverity } from '../../stores';
 
 const SEVERITY_COLORS: Record<HistoryEventSeverity, string> = {
   critical: '#FF4757',
@@ -20,7 +20,8 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function HistoryEventList() {
-  const { analysisState, selectAnalysisEvent } = useDashboardStore();
+  const analysisState = useAnalysisStore((s) => s.analysisState);
+  const selectAnalysisEvent = useAnalysisStore((s) => s.selectAnalysisEvent);
   const { filters, selectedEventId } = analysisState;
   const filteredEvents = filterEvents(analysisState.events, filters) as typeof analysisState.events;
 

@@ -14,7 +14,7 @@ import CongestionPredictionModal from './components/CongestionPredictionModal';
 import StrategyModal from './components/StrategyModal';
 import ResilienceInfoModal from './components/overview/ResilienceInfoModal';
 import Modal from './components/Modal';
-import { useDashboardStore } from './store/dashboardStore';
+import { useUIStore, useOverviewStore } from './stores';
 import { computeAiSummary } from './utils/aiSummaryEngine';
 import './App.css';
 
@@ -53,19 +53,18 @@ function App() {
   const [scale, setScale] = useState(1);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
-  const {
-    systemMode,
-    portDigestion,
-    tidalEffect,
-    corridorPressure,
-    systemResilience,
-    shutdownProbability,
-    urbanHealth,
-    pressureTransmission,
-    weatherCoupling,
-    specialEvents,
-    setAiSummary,
-  } = useDashboardStore();
+
+  const systemMode = useUIStore((s) => s.systemMode);
+  const portDigestion = useOverviewStore((s) => s.portDigestion);
+  const tidalEffect = useOverviewStore((s) => s.tidalEffect);
+  const corridorPressure = useOverviewStore((s) => s.corridorPressure);
+  const systemResilience = useOverviewStore((s) => s.systemResilience);
+  const shutdownProbability = useOverviewStore((s) => s.shutdownProbability);
+  const urbanHealth = useOverviewStore((s) => s.urbanHealth);
+  const pressureTransmission = useOverviewStore((s) => s.pressureTransmission);
+  const weatherCoupling = useOverviewStore((s) => s.weatherCoupling);
+  const specialEvents = useOverviewStore((s) => s.specialEvents);
+  const setAiSummary = useOverviewStore((s) => s.setAiSummary);
 
   // Auto-compute AI summary when indicators change (overview mode only)
   useEffect(() => {

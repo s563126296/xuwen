@@ -10,10 +10,12 @@ import type {
   CongestionCauseType,
   CommandStrategy,
   StrategyPermission,
+} from '../stores/commandStore';
+import type {
   PortDigestion,
   WeatherCoupling,
   SpecialEvent,
-} from '../store/dashboardStore';
+} from '../stores/overviewStore';
 
 // ---------------------------------------------------------------------------
 // Types — minimal slice of DashboardState so the engine stays decoupled

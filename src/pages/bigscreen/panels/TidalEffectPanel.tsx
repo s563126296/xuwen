@@ -1,5 +1,5 @@
 import PanelFrame from '../components/PanelFrame';
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const statusLabelMap: Record<string, string> = {
   inbound_tide: '进港潮',
@@ -14,7 +14,7 @@ const intensityLabel: Record<string, string> = {
 };
 
 export default function TidalEffectPanel() {
-  const data = useDashboardStore((s) => s.tidalEffect);
+  const data = useOverviewStore((s) => s.tidalEffect);
   const total = data.inboundFlow + data.outboundFlow;
   const inPct = total > 0 ? Math.round((data.inboundFlow / total) * 100) : 50;
   const outPct = 100 - inPct;

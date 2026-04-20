@@ -1,5 +1,6 @@
 import { CloudRain } from 'lucide-react';
-import { useDashboardStore, WeatherCouplingLevel } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
+import type { WeatherCouplingLevel } from '../../stores/overviewStore';
 
 const levelConfig: Record<WeatherCouplingLevel, { label: string; color: string; bg: string; border: string }> = {
   none: { label: '无影响', color: '#2ED573', bg: 'rgba(46,213,115,0.15)', border: 'rgba(46,213,115,0.3)' },
@@ -9,7 +10,7 @@ const levelConfig: Record<WeatherCouplingLevel, { label: string; color: string; 
 };
 
 export default function WeatherCouplingCard() {
-  const { weatherCoupling } = useDashboardStore();
+  const weatherCoupling = useOverviewStore((s) => s.weatherCoupling);
   const cfg = levelConfig[weatherCoupling.level];
 
   return (

@@ -1,5 +1,6 @@
 import { Compass } from 'lucide-react';
-import { useDashboardStore, CorridorDirection } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
+import type { CorridorDirection } from '../../stores/overviewStore';
 
 function pressureColor(p: number): string {
   if (p < 50) return '#2ED573';
@@ -16,7 +17,7 @@ const dirLabels: Record<CorridorDirection, { label: string; road: string }> = {
 };
 
 function PressureItem({ direction }: { direction: CorridorDirection }) {
-  const { corridorPressure } = useDashboardStore();
+  const corridorPressure = useOverviewStore((s) => s.corridorPressure);
   const item = corridorPressure[direction];
   const color = pressureColor(item.pressure);
   const info = dirLabels[direction];

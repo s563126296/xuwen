@@ -1,5 +1,6 @@
 import Modal from '../Modal';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
+import { useUIStore } from '../../stores/uiStore';
 
 function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes} 分钟`;
@@ -27,7 +28,8 @@ function getStatusColor(status: 'idle' | 'executing' | 'done' | 'failed'): strin
 }
 
 export default function CommandReportModal() {
-  const { commandState, setActiveModal } = useDashboardStore();
+  const commandState = useCommandStore((s) => s.commandState);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
   const { congestionIndex, predictedIndex, strategies, commandFeed } = commandState;
 
   // Calculate metrics

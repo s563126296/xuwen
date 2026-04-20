@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import { playClickSound } from '../../utils/soundEffects';
 
 // 物资库存（mock，待民政局确认后替换真实数据）
@@ -21,9 +21,9 @@ function getBarColor(ratio: number): string {
 }
 
 export default function SupplyDemandPanel() {
-  const forecast = useDashboardStore((s) => s.emergencyState.forecast);
-  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
-  const communications = useDashboardStore((s) => s.emergencyState.communications);
+  const forecast = useEmergencyStore((s) => s.emergencyState.forecast);
+  const setEmergencyState = useEmergencyStore((s) => s.setEmergencyState);
+  const communications = useEmergencyStore((s) => s.emergencyState.communications);
   const strandedPeople = Math.round(forecast.currentStrandedVehicles * 2);
   const shutdownDays = Math.max(1, Math.ceil(forecast.estimatedShutdownHours / 24));
 

@@ -1,5 +1,5 @@
 import { TrendingUp, GitCompare, Target, Clock, Grid3X3 } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
 import TrendView from './TrendView';
 import CompareView from './CompareView';
 import StrategyAnalysisView from './StrategyAnalysisView';
@@ -15,8 +15,8 @@ const TABS = [
 ];
 
 export default function MainViewArea() {
-  const { analysisState, setAnalysisView } = useDashboardStore();
-  const { activeView } = analysisState;
+  const activeView = useAnalysisStore((s) => s.analysisState.activeView);
+  const setAnalysisView = useAnalysisStore((s) => s.setAnalysisView);
 
   return (
     <div style={{

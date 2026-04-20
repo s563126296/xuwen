@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
+import { useUIStore } from '../../stores/uiStore';
 
 const coldChainAlerts = [
   { level: '黄色', threshold: '> 6h', count: 42, color: '#F5A623' },
@@ -8,9 +9,9 @@ const coldChainAlerts = [
 ];
 
 export default function SpecialVehiclePanel() {
-  const forecast = useDashboardStore((s) => s.emergencyState.forecast);
-  const shutdownStartTime = useDashboardStore((s) => s.emergencyState.shutdownStartTime);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const forecast = useEmergencyStore((s) => s.emergencyState.forecast);
+  const shutdownStartTime = useEmergencyStore((s) => s.emergencyState.shutdownStartTime);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
   const [elapsed, setElapsed] = useState('');
   const [elapsedColor, setElapsedColor] = useState('#2ED573');
 

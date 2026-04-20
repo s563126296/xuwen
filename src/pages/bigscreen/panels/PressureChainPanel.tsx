@@ -1,4 +1,4 @@
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const nodeConfig = [
   { key: 'port', label: '港口' },
@@ -22,7 +22,7 @@ const statusTagClass: Record<string, string> = {
 };
 
 export default function PressureChainPanel() {
-  const data = useDashboardStore((s) => s.pressureTransmission);
+  const data = useOverviewStore((s) => s.pressureTransmission);
 
   return (
     <div className="bs-panel">

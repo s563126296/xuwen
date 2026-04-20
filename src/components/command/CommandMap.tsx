@@ -4,22 +4,23 @@ import { Video, MessageSquare } from 'lucide-react';
 import MapVideoDock from './MapVideoDock';
 import PersonMarker from './PersonMarker';
 import IncomingCallModal from './IncomingCallModal';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { FieldPerson } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
+import { useUIStore } from '../../stores/uiStore';
+import type { FieldPerson } from '../../stores/commandStore';
 import { XUWEN_PORT, JINGANG_ROAD, SEGMENT_STYLES, PARTICLE_CONFIG } from '../../constants';
 
 export default function CommandMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
-  const fieldPersons = useDashboardStore((s) => s.commandState.fieldPersons);
-  const commandFeed = useDashboardStore((s) => s.commandState.commandFeed);
-  const addCommandFeedItem = useDashboardStore((s) => s.addCommandFeedItem);
-  const startCall = useDashboardStore((s) => s.startCall);
-  const openChatWith = useDashboardStore((s) => s.openChatWith);
-  const strategies = useDashboardStore((s) => s.commandState.strategies);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
-  const isDroneDeployed = useDashboardStore((s) => s.commandState.isDroneDeployed);
+  const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
+  const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
+  const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
+  const startCall = useCommandStore((s) => s.startCall);
+  const openChatWith = useCommandStore((s) => s.openChatWith);
+  const strategies = useCommandStore((s) => s.commandState.strategies);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const isDroneDeployed = useCommandStore((s) => s.commandState.isDroneDeployed);
 
   const [showIncomingCall, setShowIncomingCall] = useState(false);
   const [incomingCallMessage, setIncomingCallMessage] = useState('');

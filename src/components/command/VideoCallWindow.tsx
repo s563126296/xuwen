@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Minimize2, X, Phone } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 import { playClickSound } from '../../utils/soundEffects';
 
 export default function VideoCallWindow() {
-  const { commandState, endCall } = useDashboardStore();
+  const commandState = useCommandStore((s) => s.commandState);
+  const endCall = useCommandStore((s) => s.endCall);
   const { isInCall, callPersonId, fieldPersons } = commandState;
 
   const [isMinimized, setIsMinimized] = useState(false);

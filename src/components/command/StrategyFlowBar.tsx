@@ -1,4 +1,4 @@
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 import { Check, Circle, Loader } from 'lucide-react';
 
 interface StrategyFlowBarProps {
@@ -23,7 +23,7 @@ const stepDuration: Record<number, string> = {
 };
 
 export default function StrategyFlowBar({ currentStep, onStepClick }: StrategyFlowBarProps) {
-  const { commandFeed } = useDashboardStore((s) => s.commandState);
+  const { commandFeed } = useCommandStore((s) => s.commandState);
 
   // Map currentStep (1-6) to flow step (1-4)
   const getFlowStep = (storeStep: number): number => {

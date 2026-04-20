@@ -1,5 +1,5 @@
 import { Zap, Calendar, CloudRain, AlertTriangle, BarChart3, GitCompare } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
 
 const QUICK_FILTERS = [
   { id: 'today', label: '今日概览', icon: Calendar, color: '#00D0E9' },
@@ -11,8 +11,8 @@ const QUICK_FILTERS = [
 ];
 
 export default function QuickFilterPanel() {
-  const { analysisState, setAnalysisQuickFilter } = useDashboardStore();
-  const { activeQuickFilter } = analysisState;
+  const activeQuickFilter = useAnalysisStore((s) => s.analysisState.activeQuickFilter);
+  const setAnalysisQuickFilter = useAnalysisStore((s) => s.setAnalysisQuickFilter);
 
   return (
     <div style={{

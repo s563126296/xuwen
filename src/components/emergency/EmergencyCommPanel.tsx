@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import { playMessageSound } from '../../utils/soundEffects';
 
 const DEPARTMENTS = ['公安交警', '民政局', '交通运输局', '港口管理方', '城管局', '应急管理局'] as const;
@@ -38,10 +38,10 @@ function renderContent(content: string) {
 }
 
 export default function EmergencyCommPanel() {
-  const communications = useDashboardStore((s) => s.emergencyState.communications);
-  const contacts = useDashboardStore((s) => s.emergencyState.contacts);
-  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
-  const startVideoConference = useDashboardStore((s) => s.startVideoConference);
+  const communications = useEmergencyStore((s) => s.emergencyState.communications);
+  const contacts = useEmergencyStore((s) => s.emergencyState.contacts);
+  const setEmergencyState = useEmergencyStore((s) => s.setEmergencyState);
+  const startVideoConference = useEmergencyStore((s) => s.startVideoConference);
 
   const [selectedChannel, setSelectedChannel] = useState<string>('全部');
   const [inputText, setInputText] = useState('');

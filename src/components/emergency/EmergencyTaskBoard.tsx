@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import { playClickSound, playMessageSound } from '../../utils/soundEffects';
 import AddTaskModal from './AddTaskModal';
 
@@ -26,8 +26,8 @@ const nextStatusConfig: Record<string, { label: string; next: 'received' | 'exec
 };
 
 export default function EmergencyTaskBoard() {
-  const tasks = useDashboardStore((s) => s.emergencyState.tasks);
-  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
+  const tasks = useEmergencyStore((s) => s.emergencyState.tasks);
+  const setEmergencyState = useEmergencyStore((s) => s.setEmergencyState);
   const [showModal, setShowModal] = useState(false);
 
   const handleStatusChange = (taskId: string, newStatus: 'received' | 'executing' | 'arrived' | 'done') => {

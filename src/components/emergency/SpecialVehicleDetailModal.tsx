@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useDashboardStore, SpecialVehicleDetail } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
+import type { SpecialVehicleDetail } from '../../stores/emergencyStore';
 import { X, Snowflake, AlertTriangle, Fuel } from 'lucide-react';
 
 const alertColors = {
@@ -100,7 +101,7 @@ function VehicleCard({ vehicle }: { vehicle: SpecialVehicleDetail }) {
 }
 
 export default function SpecialVehicleDetailModal({ onClose }: { onClose: () => void }) {
-  const specialVehicles = useDashboardStore((s) => s.emergencyState.specialVehicles);
+  const specialVehicles = useEmergencyStore((s) => s.emergencyState.specialVehicles);
   const [filter, setFilter] = useState<'all' | 'cold_chain' | 'hazardous'>('all');
 
   const filtered = filter === 'all'

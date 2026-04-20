@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 import Counter from './components/Counter';
 
 const LEVEL_MAP: Record<string, string> = {
@@ -25,7 +25,7 @@ export default function BigScreenHeader() {
     urbanHealth,
     aiSummary,
     predictions,
-  } = useDashboardStore();
+  } = useOverviewStore();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);

@@ -1,5 +1,5 @@
 import { Ship } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 function digestionColor(minutes: number): string {
   if (minutes < 120) return '#2ED573';
@@ -15,7 +15,7 @@ function formatTime(minutes: number): string {
 }
 
 export default function PortDigestionCard() {
-  const { portDigestion } = useDashboardStore();
+  const portDigestion = useOverviewStore((s) => s.portDigestion);
   const xw = portDigestion.xuwen;
   const ha = portDigestion.haian;
 

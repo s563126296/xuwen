@@ -1,4 +1,4 @@
-import type { EmergencyPlan, PlanId } from '../store/dashboardStore';
+import type { EmergencyPlan, PlanId } from '../stores/emergencyStore';
 
 export const EMERGENCY_PLANS: EmergencyPlan[] = [
   {

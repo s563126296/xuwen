@@ -1,10 +1,12 @@
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine, Tooltip, Legend } from 'recharts';
 import { Activity, Clock, Route, TrendingUp } from 'lucide-react';
 import Modal from './Modal';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useUIStore, useOverviewStore } from '../stores';
 
 export default function CongestionPredictionModal() {
-  const { selectedRoad, roadCongestions, predictions } = useDashboardStore();
+  const selectedRoad = useUIStore((s) => s.selectedRoad);
+  const roadCongestions = useOverviewStore((s) => s.roadCongestions);
+  const predictions = useOverviewStore((s) => s.predictions);
 
   const currentCongestion = roadCongestions.find(r => r.road === selectedRoad) || roadCongestions[0];
 

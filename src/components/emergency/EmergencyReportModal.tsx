@@ -1,4 +1,5 @@
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
+import { useUIStore } from '../../stores/uiStore';
 import { estimateSupplyDemand } from '../../utils/emergencyEngine';
 import { playClickSound } from '../../utils/soundEffects';
 
@@ -7,8 +8,8 @@ interface Props {
 }
 
 export default function EmergencyReportModal({ onClose }: Props) {
-  const emergency = useDashboardStore((s) => s.emergencyState);
-  const setSystemMode = useDashboardStore((s) => s.setSystemMode);
+  const emergency = useEmergencyStore((s) => s.emergencyState);
+  const setSystemMode = useUIStore((s) => s.setSystemMode);
   const { forecast, tasks, communications } = emergency;
   const { strandedPeople, boxedMeals, waterBoxes } = estimateSupplyDemand(forecast.currentStrandedVehicles);
 

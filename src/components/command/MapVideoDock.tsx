@@ -1,5 +1,6 @@
 import { Plane, Maximize2 } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
+import { useUIStore } from '../../stores/uiStore';
 import Modal from '../Modal';
 
 // Camera mode AI detection boxes (small panel)
@@ -25,7 +26,11 @@ const CAMERAS = [
 ];
 
 export default function MapVideoDock() {
-  const { commandState, deployDrone, recallDrone, setActiveModal, setActiveVideoChannel } = useDashboardStore();
+  const commandState = useCommandStore((s) => s.commandState);
+  const deployDrone = useCommandStore((s) => s.deployDrone);
+  const recallDrone = useCommandStore((s) => s.recallDrone);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const setActiveVideoChannel = useCommandStore((s) => s.setActiveVideoChannel);
   const { isDroneDeployed, resources, activeVideoChannel } = commandState;
 
   const channel = activeVideoChannel;

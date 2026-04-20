@@ -1,12 +1,13 @@
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useUIStore } from '../../stores/uiStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import { getPlanById } from '../../data/emergencyPlans';
 import { PHASE_ORDER, PHASE_LABELS } from '../../utils/emergencyEngine';
 
 const PHASE_COLORS = ['#F5A623', '#FF6B35', '#FF4757', '#00D0E9', '#2ED573'];
 
 export default function EmergencyPlanPanel() {
-  const emergency = useDashboardStore((s) => s.emergencyState);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const emergency = useEmergencyStore((s) => s.emergencyState);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
   const { activePlan, tasks } = emergency;
 
   if (!activePlan) {

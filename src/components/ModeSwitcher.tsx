@@ -1,7 +1,9 @@
-import { useDashboardStore, SystemMode } from '../store/dashboardStore';
+import { useUIStore } from '../stores';
+import type { SystemMode } from '../stores';
 
 export default function ModeSwitcher() {
-  const { systemMode, setSystemMode } = useDashboardStore();
+  const systemMode = useUIStore((s) => s.systemMode);
+  const setSystemMode = useUIStore((s) => s.setSystemMode);
 
   const modes: { id: SystemMode; label: string }[] = [
     { id: 'overview', label: '总览' },

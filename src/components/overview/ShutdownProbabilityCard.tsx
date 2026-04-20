@@ -1,5 +1,6 @@
 import { CloudLightning } from 'lucide-react';
-import { useDashboardStore, ShutdownLevel } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
+import type { ShutdownLevel } from '../../stores/overviewStore';
 
 const levelColors: Record<ShutdownLevel, string> = {
   low: '#2ED573',
@@ -9,7 +10,7 @@ const levelColors: Record<ShutdownLevel, string> = {
 };
 
 export default function ShutdownProbabilityCard() {
-  const { shutdownProbability } = useDashboardStore();
+  const shutdownProbability = useOverviewStore((s) => s.shutdownProbability);
   const { windows, drivingFactor } = shutdownProbability;
 
   return (

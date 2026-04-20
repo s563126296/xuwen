@@ -1,7 +1,7 @@
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 
 export default function EmergencyForecastPanel() {
-  const forecast = useDashboardStore((s) => s.emergencyState.forecast);
+  const forecast = useEmergencyStore((s) => s.emergencyState.forecast);
 
   return (
     <div className="card" style={{ padding: 14, flex: '35 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

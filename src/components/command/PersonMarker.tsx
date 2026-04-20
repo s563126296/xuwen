@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { FieldPerson } from '../../store/dashboardStore';
+import type { FieldPerson } from '../../stores/commandStore';
 
 interface PersonMarkerProps {
   person: FieldPerson;

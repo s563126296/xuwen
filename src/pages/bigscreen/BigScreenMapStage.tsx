@@ -1,4 +1,4 @@
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 const navStatusMap: Record<string, string> = {
   normal: '正常通航',
@@ -48,7 +48,7 @@ function HexMarker({ x, y, label, value, unit = '', color = '#00f0ff' }: MarkerP
 }
 
 export default function BigScreenMapStage() {
-  const { portDigestion, urbanHealth, straitTransitIndex } = useDashboardStore();
+  const { portDigestion, urbanHealth, straitTransitIndex } = useOverviewStore();
 
   return (
     <div className="bs-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

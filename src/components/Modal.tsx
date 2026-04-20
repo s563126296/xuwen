@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useUIStore } from '../stores';
 
 interface ModalProps {
   id: string;
@@ -9,7 +9,8 @@ interface ModalProps {
 }
 
 export default function Modal({ id, title, width = 600, children }: ModalProps) {
-  const { activeModal, setActiveModal } = useDashboardStore();
+  const activeModal = useUIStore((s) => s.activeModal);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
 
   if (activeModal !== id) return null;
 

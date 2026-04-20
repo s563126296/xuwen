@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 import { Info, Bot, UserCheck, Camera, Phone, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
 import StrategyFlowBar from './StrategyFlowBar';
 
@@ -51,7 +51,7 @@ const typeLabel: Record<string, { text: string; color: string }> = {
 };
 
 export default function CommandCommPanel() {
-  const { commandFeed, currentStep, strategies } = useDashboardStore((s) => s.commandState);
+  const { commandFeed, currentStep, strategies } = useCommandStore((s) => s.commandState);
   const [selectedStep, setSelectedStep] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const executingStrategy = strategies.find((s) => s.status === 'executing' || s.status === 'done') ?? null;

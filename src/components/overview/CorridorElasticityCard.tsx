@@ -1,5 +1,5 @@
 import { Route } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 const getBarColor = (pct: number) => {
   if (pct >= 50) return '#2ED573';
@@ -9,7 +9,7 @@ const getBarColor = (pct: number) => {
 };
 
 export default function CorridorElasticityCard() {
-  const { corridorElasticity } = useDashboardStore();
+  const corridorElasticity = useOverviewStore((s) => s.corridorElasticity);
   const critical = corridorElasticity.filter(c => c.remainingPercent < 20);
 
   return (

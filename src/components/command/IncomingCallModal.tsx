@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Phone, Video, X } from 'lucide-react';
-import type { FieldPerson } from '../../store/dashboardStore';
+import type { FieldPerson } from '../../stores/commandStore';
 import { playIncomingCallSound, playClickSound } from '../../utils/soundEffects';
 
 interface IncomingCallModalProps {

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 import { playClickSound } from '../../utils/soundEffects';
 
 export default function HistoryStatsPanel() {
   const [expanded, setExpanded] = useState(false);
-  const stats = useDashboardStore((s) => s.commandState.historyStats);
+  const stats = useCommandStore((s) => s.commandState.historyStats);
 
   if (!expanded) {
     return (

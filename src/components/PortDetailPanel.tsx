@@ -1,8 +1,11 @@
 import { Ship, TrendingUp, Clock, Route, Gauge, AlertTriangle } from 'lucide-react';
-import { useDashboardStore } from '../store/dashboardStore';
+import { useUIStore, useOverviewStore } from '../stores';
 
 export default function PortDetailPanel() {
-  const { selectedPort, selectedDirection, portData, setActiveModal } = useDashboardStore();
+  const selectedPort = useUIStore((s) => s.selectedPort);
+  const selectedDirection = useUIStore((s) => s.selectedDirection);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const portData = useOverviewStore((s) => s.portData);
   const data = portData[selectedPort];
 
   const getCongestionInfo = (index: number) => {

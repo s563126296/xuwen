@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MessageSquare, Minimize2, Phone, Video, Users, X } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 import { playMessageSound, playClickSound } from '../../utils/soundEffects';
 
 interface Person {
@@ -37,9 +37,11 @@ export default function ChatWindow() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef(0);
 
-  const { commandState, addCommandFeedItem, startCall } = useDashboardStore();
+  const commandState = useCommandStore((s) => s.commandState);
+  const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
+  const startCall = useCommandStore((s) => s.startCall);
   const { commandFeed } = commandState;
-  const activeChatPersonId = useDashboardStore((s) => s.commandState.activeChatPersonId);
+  const activeChatPersonId = useCommandStore((s) => s.commandState.activeChatPersonId);
 
   const unreadCount = commandFeed.filter((item) => item.type === 'field').length;
 

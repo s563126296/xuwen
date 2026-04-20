@@ -1,7 +1,7 @@
 import ReactECharts from 'echarts-for-react';
 import PanelFrame from '../components/PanelFrame';
-import { useDashboardStore } from '../../../store/dashboardStore';
-import type { CorridorDirection } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
+import type { CorridorDirection } from '../../../stores/overviewStore';
 
 const directionOrder: CorridorDirection[] = ['south', 'north', 'west', 'east'];
 const directionLabels: Record<CorridorDirection, string> = {
@@ -18,7 +18,7 @@ function getBarColor(pressure: number): string {
 }
 
 export default function CorridorPressurePanel() {
-  const corridorPressure = useDashboardStore((s) => s.corridorPressure);
+  const corridorPressure = useOverviewStore((s) => s.corridorPressure);
 
   const items = directionOrder.map((d) => corridorPressure[d]);
   const names = directionOrder.map((d) => directionLabels[d]);

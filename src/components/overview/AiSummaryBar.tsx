@@ -1,6 +1,8 @@
 import { CheckCircle, AlertTriangle, AlertOctagon, ChevronDown, ChevronUp } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { AiSummary } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
+import { useUIStore } from '../../stores/uiStore';
+import { useCommandStore } from '../../stores/commandStore';
+import type { AiSummary } from '../../stores/overviewStore';
 
 const levelConfig = {
   green: {
@@ -43,11 +45,11 @@ const forecastBorderColor = { info: '#00D0E9', warn: '#F5A623', danger: '#FF6B35
 const priorityColor = { high: '#FF6B35', medium: '#F5A623', low: '#00D0E9' };
 
 export default function AiSummaryBar() {
-  const aiSummary = useDashboardStore((s) => s.aiSummary);
-  const toggleAiSummaryExpanded = useDashboardStore((s) => s.toggleAiSummaryExpanded);
-  const setSystemMode = useDashboardStore((s) => s.setSystemMode);
-  const enterCommandMode = useDashboardStore((s) => s.enterCommandMode);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const aiSummary = useOverviewStore((s) => s.aiSummary);
+  const toggleAiSummaryExpanded = useOverviewStore((s) => s.toggleAiSummaryExpanded);
+  const setSystemMode = useUIStore((s) => s.setSystemMode);
+  const enterCommandMode = useCommandStore((s) => s.enterCommandMode);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
 
   if (!aiSummary) return null;
 

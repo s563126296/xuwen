@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import { getPlanById } from '../../data/emergencyPlans';
 import { PHASE_ORDER, PHASE_LABELS } from '../../utils/emergencyEngine';
-import type { EmergencyPhase } from '../../store/dashboardStore';
+import type { EmergencyPhase } from '../../stores/emergencyStore';
 
 interface Props {
   onClose: () => void;
@@ -25,7 +25,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function EmergencyPlanDetailModal({ onClose }: Props) {
-  const emergency = useDashboardStore((s) => s.emergencyState);
+  const emergency = useEmergencyStore((s) => s.emergencyState);
   const { activePlan, tasks } = emergency;
 
   const plan = activePlan ? getPlanById(activePlan.planId) : undefined;

@@ -1,5 +1,5 @@
 import { Building2 } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 const getSatColor = (v: number) => {
   if (v < 0.6) return '#2ED573';
@@ -16,7 +16,7 @@ const levelColors: Record<string, { color: string; bg: string }> = {
 };
 
 export default function UrbanHealthCard() {
-  const { urbanHealth } = useDashboardStore();
+  const urbanHealth = useOverviewStore((s) => s.urbanHealth);
   const { score, level, intersections, hotspots } = urbanHealth;
   const lc = levelColors[level] || levelColors['健康'];
   const top4 = intersections.slice(0, 4);

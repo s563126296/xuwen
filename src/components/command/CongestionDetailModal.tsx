@@ -1,9 +1,9 @@
 import Modal from '../Modal';
 import { TrendingUp, Clock, Car, AlertTriangle } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
 
 export default function CongestionDetailModal() {
-  const cmd = useDashboardStore((s) => s.commandState);
+  const cmd = useCommandStore((s) => s.commandState);
 
   return (
     <Modal

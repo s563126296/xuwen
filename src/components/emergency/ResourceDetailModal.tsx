@@ -1,5 +1,5 @@
 import { X, Users, Truck, Wrench } from 'lucide-react';
-import type { FieldResource } from '../../store/dashboardStore';
+import type { FieldResource } from '../../stores/emergencyStore';
 
 const statusColor = {
   standby: '#94A3B8',

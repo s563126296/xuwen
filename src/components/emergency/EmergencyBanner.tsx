@@ -1,6 +1,7 @@
 import { AlertTriangle, Wind, CloudRain, Eye, Navigation } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { EmergencyPhase } from '../../store/dashboardStore';
+import { useUIStore } from '../../stores/uiStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
+import type { EmergencyPhase } from '../../stores/emergencyStore';
 import { PHASE_LABELS } from '../../utils/emergencyEngine';
 import { playClickSound } from '../../utils/soundEffects';
 
@@ -37,9 +38,9 @@ const PHASE_BANNER_COLOR: Record<EmergencyPhase, string> = {
 };
 
 export default function EmergencyBanner() {
-  const emergency = useDashboardStore((s) => s.emergencyState);
-  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const emergency = useEmergencyStore((s) => s.emergencyState);
+  const setEmergencyState = useEmergencyStore((s) => s.setEmergencyState);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
   const levelColor = levelColorMap[emergency.emergencyLevel];
   const phaseColor = PHASE_BANNER_COLOR[emergency.forecast.strandedPhase];
   const color = phaseColor ?? levelColor;

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import AMapLoader from '@amap/amap-jsapi-loader';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import EmergencyVideoDock from './EmergencyVideoDock';
 
 // 进港公路坐标（与指挥模式一致）
@@ -37,11 +37,11 @@ export default function EmergencyMap() {
   const typhoonMarkerRef = useRef<any>(null);
   const droneMarkerRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
-  const points = useDashboardStore((s) => s.emergencyState.resourcePoints);
-  const specialVehicles = useDashboardStore((s) => s.emergencyState.specialVehicles);
-  const isDroneDeployed = useDashboardStore((s) => s.emergencyState.isDroneDeployed);
-  const typhoon = useDashboardStore((s) => s.emergencyState.typhoon);
-  const currentStranded = useDashboardStore((s) => s.emergencyState.forecast.currentStrandedVehicles);
+  const points = useEmergencyStore((s) => s.emergencyState.resourcePoints);
+  const specialVehicles = useEmergencyStore((s) => s.emergencyState.specialVehicles);
+  const isDroneDeployed = useEmergencyStore((s) => s.emergencyState.isDroneDeployed);
+  const typhoon = useEmergencyStore((s) => s.emergencyState.typhoon);
+  const currentStranded = useEmergencyStore((s) => s.emergencyState.forecast.currentStrandedVehicles);
 
   // 根据台风距离计算当前位置（线性插值）
   const getTyphoonPosition = (distance: number): [number, number] => {

@@ -1,8 +1,11 @@
 import { Ship } from 'lucide-react';
-import { useDashboardStore, PortType } from '../store/dashboardStore';
+import { useUIStore, useOverviewStore } from '../stores';
+import type { PortType } from '../stores';
 
 export default function PortSwitcher() {
-  const { selectedPort, setSelectedPort, portData } = useDashboardStore();
+  const selectedPort = useUIStore((s) => s.selectedPort);
+  const setSelectedPort = useUIStore((s) => s.setSelectedPort);
+  const portData = useOverviewStore((s) => s.portData);
 
   const ports: { key: PortType; label: string }[] = [
     { key: 'overview', label: '双港总览' },

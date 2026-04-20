@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import { Users, Truck, Wrench } from 'lucide-react';
 import ResourceDetailModal from './ResourceDetailModal';
 
 export default function ResourceDispatchPanel() {
-  const fieldResources = useDashboardStore((s) => s.emergencyState.fieldResources);
+  const fieldResources = useEmergencyStore((s) => s.emergencyState.fieldResources);
   const [detailType, setDetailType] = useState<'personnel' | 'vehicle' | 'equipment' | null>(null);
 
   const personnel = fieldResources.filter((r) => r.type === 'personnel');

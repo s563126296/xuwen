@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Cpu, Car, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 interface DeviceData {
   name: string;
@@ -34,7 +34,7 @@ export default function CollapsibleStatsBar({ deviceData, trafficData, violation
   const [deviceFilter, setDeviceFilter] = useState<string>('全部');
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState(0);
-  const holidayContext = useDashboardStore((s) => s.holidayContext);
+  const holidayContext = useOverviewStore((s) => s.holidayContext);
 
   useEffect(() => {
     if (contentRef.current) {

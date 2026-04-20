@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, Calendar, MapPin, AlertTriangle } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { HistoryEventType } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
+import type { HistoryEventType } from '../../stores';
 
 const EVENT_TYPE_OPTIONS: { value: HistoryEventType; label: string }[] = [
   { value: 'congestion', label: '拥堵事件' },
@@ -22,7 +22,8 @@ const REGION_OPTIONS = [
 ];
 
 export default function QueryFilterPanel() {
-  const { analysisState, setAnalysisFilters } = useDashboardStore();
+  const analysisState = useAnalysisStore((s) => s.analysisState);
+  const setAnalysisFilters = useAnalysisStore((s) => s.setAnalysisFilters);
   const { filters } = analysisState;
   const [localFilters, setLocalFilters] = useState(filters);
 

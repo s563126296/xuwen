@@ -1,7 +1,8 @@
 import { Phone, Camera, Plus, Settings, Zap, Signal, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
-import type { CommandFeedItem, CommandStrategy, StrategyPermission } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
+import { useUIStore } from '../../stores/uiStore';
+import type { CommandFeedItem, CommandStrategy, StrategyPermission } from '../../stores/commandStore';
 import { playClickSound } from '../../utils/soundEffects';
 import ExecutionResourcePanel from './ExecutionResourcePanel';
 import HistoryStatsPanel from './HistoryStatsPanel';
@@ -116,7 +117,8 @@ function AltStrategyCard({
   hasExecuting: boolean;
   isFirst: boolean;
 }) {
-  const { setActiveModal, setPendingStrategy } = useDashboardStore();
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const setPendingStrategy = useUIStore((s) => s.setPendingStrategy);
   const stars = '★'.repeat(strategy.difficulty) + '☆'.repeat(Math.max(0, 5 - strategy.difficulty));
 
   return (
@@ -510,11 +512,11 @@ function HistoryItem({ name, rate, color }: { name: string; rate: number; color:
 }
 
 export default function StrategyCommandPanel() {
-  const cmd = useDashboardStore((s) => s.commandState);
-  const commandFeed = useDashboardStore((s) => s.commandState.commandFeed);
-  const fieldPersons = useDashboardStore((s) => s.commandState.fieldPersons);
-  const startCall = useDashboardStore((s) => s.startCall);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
+  const cmd = useCommandStore((s) => s.commandState);
+  const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
+  const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
+  const startCall = useCommandStore((s) => s.startCall);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
 
   const strategies = cmd.strategies;
   const activeStrategy = strategies.find((s) => s.status === 'executing' || s.status === 'done');

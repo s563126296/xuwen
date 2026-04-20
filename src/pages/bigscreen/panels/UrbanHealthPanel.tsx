@@ -1,5 +1,5 @@
-import { useDashboardStore } from '../../../store/dashboardStore';
-import type { IntersectionStatus } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
+import type { IntersectionStatus } from '../../../stores/overviewStore';
 
 const statusColor: Record<IntersectionStatus, string> = {
   normal: '#00ffa2',
@@ -16,7 +16,7 @@ const statusLabel: Record<IntersectionStatus, string> = {
 };
 
 export default function UrbanHealthPanel() {
-  const data = useDashboardStore((s) => s.urbanHealth);
+  const data = useOverviewStore((s) => s.urbanHealth);
   const scoreColor = data.score >= 80 ? '#00ffa2' : data.score >= 60 ? '#ffc107' : '#ff4757';
 
   return (

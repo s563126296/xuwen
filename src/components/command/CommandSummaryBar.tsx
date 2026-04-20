@@ -1,5 +1,6 @@
 import { ArrowLeft, FileText, AlertTriangle } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useCommandStore } from '../../stores/commandStore';
+import { useUIStore } from '../../stores/uiStore';
 
 const INITIAL_INDEX = 6.5;
 
@@ -12,12 +13,12 @@ function getLevel(index: number) {
 }
 
 export default function CommandSummaryBar() {
-  const cmd = useDashboardStore((s) => s.commandState);
-  const selectedPort = useDashboardStore((s) => s.selectedPort);
-  const setSelectedPort = useDashboardStore((s) => s.setSelectedPort);
-  const exitCommandMode = useDashboardStore((s) => s.exitCommandMode);
-  const setActiveModal = useDashboardStore((s) => s.setActiveModal);
-  const causes = useDashboardStore((s) => s.commandState.causes);
+  const cmd = useCommandStore((s) => s.commandState);
+  const selectedPort = useUIStore((s) => s.selectedPort);
+  const setSelectedPort = useUIStore((s) => s.setSelectedPort);
+  const exitCommandMode = useCommandStore((s) => s.exitCommandMode);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
+  const causes = useCommandStore((s) => s.commandState.causes);
 
   const { label, color } = getLevel(cmd.congestionIndex);
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 import { Video, Mic, MicOff, PhoneOff, Minimize2, X } from 'lucide-react';
 
 const DEPT_COLORS: Record<string, string> = {
@@ -12,10 +12,10 @@ const DEPT_COLORS: Record<string, string> = {
 };
 
 export default function EmergencyVideoConference() {
-  const videoConference = useDashboardStore((s) => s.emergencyState.videoConference);
-  const contacts = useDashboardStore((s) => s.emergencyState.contacts);
-  const endVideoConference = useDashboardStore((s) => s.endVideoConference);
-  const setEmergencyState = useDashboardStore((s) => s.setEmergencyState);
+  const videoConference = useEmergencyStore((s) => s.emergencyState.videoConference);
+  const contacts = useEmergencyStore((s) => s.emergencyState.contacts);
+  const endVideoConference = useEmergencyStore((s) => s.endVideoConference);
+  const setEmergencyState = useEmergencyStore((s) => s.setEmergencyState);
   const [isMuted, setIsMuted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [activeSpeaker, setActiveSpeaker] = useState(0);

@@ -1,4 +1,4 @@
-import { useDashboardStore } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
 
 const levelLabel: Record<string, string> = {
   none: '无影响',
@@ -15,7 +15,7 @@ const levelTagClass: Record<string, string> = {
 };
 
 export default function WeatherCouplingPanel() {
-  const data = useDashboardStore((s) => s.weatherCoupling);
+  const data = useOverviewStore((s) => s.weatherCoupling);
 
   return (
     <div className="bs-panel">

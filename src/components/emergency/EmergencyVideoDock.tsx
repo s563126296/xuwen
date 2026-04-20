@@ -1,6 +1,6 @@
 import { Maximize2 } from 'lucide-react';
 import { useState } from 'react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useEmergencyStore } from '../../stores/emergencyStore';
 
 const CAMERAS = [
   { id: 'cam-01', name: '进港大道', status: 'online' },
@@ -17,7 +17,7 @@ const DETECTION_BOXES = [
 ];
 
 function VideoScene({ isDroneView, compact = false }: { isDroneView: boolean; compact?: boolean }) {
-  const typhoon = useDashboardStore((s) => s.emergencyState.typhoon);
+  const typhoon = useEmergencyStore((s) => s.emergencyState.typhoon);
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   const sizeScale = compact ? 1 : 1.6;
@@ -72,11 +72,11 @@ function VideoScene({ isDroneView, compact = false }: { isDroneView: boolean; co
 }
 
 export default function EmergencyVideoDock() {
-  const activeVideoChannel = useDashboardStore((s) => s.emergencyState.activeVideoChannel);
-  const isDroneDeployed = useDashboardStore((s) => s.emergencyState.isDroneDeployed);
-  const setEmergencyVideoChannel = useDashboardStore((s) => s.setEmergencyVideoChannel);
-  const deployEmergencyDrone = useDashboardStore((s) => s.deployEmergencyDrone);
-  const recallEmergencyDrone = useDashboardStore((s) => s.recallEmergencyDrone);
+  const activeVideoChannel = useEmergencyStore((s) => s.emergencyState.activeVideoChannel);
+  const isDroneDeployed = useEmergencyStore((s) => s.emergencyState.isDroneDeployed);
+  const setEmergencyVideoChannel = useEmergencyStore((s) => s.setEmergencyVideoChannel);
+  const deployEmergencyDrone = useEmergencyStore((s) => s.deployEmergencyDrone);
+  const recallEmergencyDrone = useEmergencyStore((s) => s.recallEmergencyDrone);
   const [fullscreen, setFullscreen] = useState(false);
 
   const isDroneView = isDroneDeployed && activeVideoChannel === 5;

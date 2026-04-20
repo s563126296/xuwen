@@ -1,7 +1,7 @@
 import ReactECharts from 'echarts-for-react';
 import PanelFrame from '../components/PanelFrame';
-import { useDashboardStore } from '../../../store/dashboardStore';
-import type { ShutdownLevel } from '../../../store/dashboardStore';
+import { useOverviewStore } from '../../../stores/overviewStore';
+import type { ShutdownLevel } from '../../../stores/overviewStore';
 
 const levelColorMap: Record<ShutdownLevel, string> = {
   low: '#00D9FF',
@@ -11,7 +11,7 @@ const levelColorMap: Record<ShutdownLevel, string> = {
 };
 
 export default function ShutdownRiskPanel() {
-  const data = useDashboardStore((s) => s.shutdownProbability);
+  const data = useOverviewStore((s) => s.shutdownProbability);
 
   const xLabels = data.windows.map((w) => `${w.hours}h`);
   const values = data.windows.map((w) => ({

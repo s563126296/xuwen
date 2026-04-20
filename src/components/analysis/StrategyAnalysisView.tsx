@@ -1,6 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis, Cell } from 'recharts';
 import { Target, Award, TrendingUp, AlertCircle } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useAnalysisStore } from '../../stores';
 
 const TOOLTIP_STYLE = {
   background: 'linear-gradient(135deg, rgba(13,27,42,0.98) 0%, rgba(20,35,55,0.98) 100%)',
@@ -12,8 +12,7 @@ const TOOLTIP_STYLE = {
 };
 
 export default function StrategyAnalysisView() {
-  const { analysisState } = useDashboardStore();
-  const { strategyRecords } = analysisState;
+  const strategyRecords = useAnalysisStore((s) => s.analysisState.strategyRecords);
 
   // Group by strategyId
   const grouped: Record<string, { strategyId: string; strategyName: string; count: number; totalRelief: number; adopted: number; totalPreIndex: number; totalPostIndex: number }> = {};

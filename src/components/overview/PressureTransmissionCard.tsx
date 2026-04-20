@@ -1,5 +1,6 @@
 import { GitBranch } from 'lucide-react';
-import { useDashboardStore, PressureOverallStatus } from '../../store/dashboardStore';
+import { useOverviewStore } from '../../stores/overviewStore';
+import type { PressureOverallStatus } from '../../stores/overviewStore';
 
 const nodeLabels = ['港口', '进港通道', '城区', '全域'] as const;
 const nodeKeys = ['port', 'corridor', 'city', 'citywide'] as const;
@@ -12,7 +13,7 @@ const statusMap: Record<PressureOverallStatus, { label: string; color: string; b
 };
 
 export default function PressureTransmissionCard() {
-  const { pressureTransmission } = useDashboardStore();
+  const pressureTransmission = useOverviewStore((s) => s.pressureTransmission);
   const nodes = nodeKeys.map((k, i) => ({ ...pressureTransmission[k], label: nodeLabels[i] }));
   const st = statusMap[pressureTransmission.overallStatus];
 
