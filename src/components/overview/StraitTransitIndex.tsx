@@ -10,7 +10,7 @@ export default function StraitTransitIndex() {
     <div style={{
       position: 'absolute',
       bottom: 12,
-      right: 12,
+      left: 12,
       width: 180,
       background: 'rgba(10, 15, 25, 0.95)',
       border: `1px solid ${statusColor}40`,
