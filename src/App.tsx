@@ -3,7 +3,6 @@ import BigScreen from './pages/BigScreen';
 import Header from './components/Header';
 import AiSummaryBar from './components/overview/AiSummaryBar';
 import LeftPanel from './components/LeftPanel';
-import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
 import ModeSwitcher from './components/ModeSwitcher';
 import CommandMode from './components/command/CommandMode';
@@ -52,8 +51,6 @@ function App() {
   if (route === '#/bigscreen') return <BigScreen />;
 
   const [time, setTime] = useState(new Date());
-  const [leftCollapsed, setLeftCollapsed] = useState(false);
-  const [rightCollapsed, setRightCollapsed] = useState(false);
 
   const systemMode = useUIStore((s) => s.systemMode);
   const portDigestion = useOverviewStore((s) => s.portDigestion);
@@ -150,7 +147,7 @@ function App() {
             {/* Full-screen map layer - behind everything */}
             <div style={{
               position: 'absolute',
-              top: 0,
+              top: 72,  // Start below header
               left: 0,
               right: 0,
               bottom: 0,
@@ -163,13 +160,12 @@ function App() {
             {/* Floating panels overlay */}
             <div style={{
               position: 'absolute',
-              top: 120,
+              top: 120,  // Below header + AI summary
               left: 16,
               right: 16,
               bottom: 16,
               display: 'grid',
               gridTemplateColumns: '340px 1fr 340px',
-              gridTemplateRows: '1fr auto',
               gap: 12,
               zIndex: 20,
               pointerEvents: 'none',
@@ -189,21 +185,6 @@ function App() {
               {/* Right panels */}
               <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <RightPanel />
-              </div>
-
-              {/* Bottom charts spanning full width */}
-              <div style={{
-                gridColumn: '1 / -1',
-                display: 'flex',
-                gap: 12,
-                pointerEvents: 'auto',
-              }}>
-                <CenterPanel
-                  leftCollapsed={leftCollapsed}
-                  rightCollapsed={rightCollapsed}
-                  onToggleLeft={() => setLeftCollapsed(!leftCollapsed)}
-                  onToggleRight={() => setRightCollapsed(!rightCollapsed)}
-                />
               </div>
             </div>
           </>
