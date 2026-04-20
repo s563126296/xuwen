@@ -9,6 +9,7 @@ import ModeSwitcher from './components/ModeSwitcher';
 import CommandMode from './components/command/CommandMode';
 import EmergencyMode from './components/emergency/EmergencyMode';
 import AnalysisMode from './components/analysis/AnalysisMode';
+import AIDecisionMode from './components/ai-decision/AIDecisionMode';
 import CheckpointModal from './components/CheckpointModal';
 import CongestionPredictionModal from './components/CongestionPredictionModal';
 import StrategyModal from './components/StrategyModal';
@@ -200,6 +201,7 @@ function App() {
         {systemMode === 'command' && <CommandMode />}
         {systemMode === 'emergency' && <EmergencyMode />}
         {systemMode === 'analysis' && <AnalysisMode />}
+        {systemMode === 'ai-decision' && <AIDecisionMode />}
 
         {/* Modals */}
         <CheckpointModal />

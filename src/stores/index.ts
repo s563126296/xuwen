@@ -97,5 +97,15 @@ export type {
   AnalysisState,
 } from './analysisStore';
 
+// AI Decision Store
+export { useAIDecisionStore } from './aiDecisionStore';
+export type {
+  TrendPrediction,
+  CausalNode,
+  AIRecommendation,
+  SafetyMetrics,
+  AIDecisionState,
+} from './aiDecisionStore';
+
 // Shared Types
 export type { PortType, DirectionType, ViewMode, SystemMode, BaselineMode } from './types';

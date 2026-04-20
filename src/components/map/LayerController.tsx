@@ -12,6 +12,7 @@ const LAYER_VISIBILITY: Record<SystemMode, string[]> = {
   command: ['roadCongestion', 'eventMarker', 'heatmap'],
   emergency: ['roadCongestion', 'eventMarker', 'heatmap'],
   analysis: ['roadCongestion', 'heatmap', 'eventMarker'],
+  'ai-decision': ['roadCongestion', 'heatmap', 'eventMarker'],
 };
 
 export default function LayerController() {

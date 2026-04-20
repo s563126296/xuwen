@@ -10,7 +10,8 @@ export default function ModeSwitcher() {
     { id: 'port', label: '港口' },
     { id: 'command', label: '指挥' },
     { id: 'emergency', label: '应急' },
-    { id: 'analysis', label: '分析' },
+    { id: 'analysis', label: '统计分析' },
+    { id: 'ai-decision', label: 'AI决策' },
   ];
 
   return (
