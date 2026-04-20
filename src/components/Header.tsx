@@ -17,14 +17,14 @@ export default function Header({ time, children }: Props) {
   const weekday = weekdays[time.getDay()];
 
   return (
-    <header className="header scanlines">
+    <header className="header">
       <div className="header-left">
         <div className="logo">
-          <div className="logo-icon pulse-glow" style={{ borderRadius: '50%' }}>
-            <Activity size={24} color="#0A0F19" />
+          <div className="logo-icon">
+            <Activity size={20} color="#060d1a" />
           </div>
           <div>
-            <div className="logo-text neon-text">徐闻县智慧交通大数据系统</div>
+            <div className="logo-text">徐闻县智慧交通大数据系统</div>
             <div className="header-subtitle">XUWEN INTELLIGENT TRANSPORTATION SYSTEM</div>
           </div>
         </div>
@@ -43,91 +43,44 @@ export default function Header({ time, children }: Props) {
       </div>
 
       <style>{`
-        .header {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 1920px;
-          height: 80px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0 30px;
-          background: linear-gradient(180deg, rgba(18, 26, 38, 0.98) 0%, rgba(10, 15, 25, 0.9) 100%);
-          border-bottom: 1px solid rgba(0, 208, 233, 0.2);
-          z-index: 100;
-        }
-        .header::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 50%;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, #00D0E9, transparent);
-        }
-        .header-left {
-          flex: 1;
-        }
-        .header-center {
-          flex: 1;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        .header-right {
-          flex: 1;
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          gap: 16px;
-        }
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+        .header-left { flex: 1; }
+        .header-center { flex: 1; display: flex; justify-content: center; align-items: center; }
+        .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+        .logo { display: flex; align-items: center; gap: 12px; }
         .logo-icon {
-          width: 40px;
-          height: 40px;
-          background: linear-gradient(135deg, #00D0E9 0%, #00A8CC 100%);
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 0 15px rgba(0, 208, 233, 0.4);
+          width: 36px; height: 36px;
+          background: linear-gradient(135deg, var(--color-primary, #4da6ff) 0%, #2563EB 100%);
+          border-radius: var(--radius-md, 12px);
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: var(--glow-primary, 0 0 12px rgba(77,166,255,0.35));
         }
         .logo-text {
-          font-size: 22px;
-          font-weight: 700;
-          color: #FFFFFF;
+          font-family: var(--font-label, 'Rajdhani'), sans-serif;
+          font-size: 20px; font-weight: 600;
+          color: var(--text-highlight, rgba(255,255,255,0.98));
           letter-spacing: 2px;
-          text-shadow: 0 0 15px rgba(0, 208, 233, 0.3);
+          text-shadow: 0 0 15px var(--color-primary-glow, rgba(77,166,255,0.5));
         }
         .header-subtitle {
-          font-size: 11px;
-          color: #A0A8B4;
-          letter-spacing: 2px;
-          margin-top: 2px;
+          font-family: var(--font-display, 'Orbitron'), sans-serif;
+          font-size: 9px;
+          color: var(--text-tertiary, rgba(140,160,180,0.45));
+          letter-spacing: 3px; margin-top: 2px;
         }
-        .header-time {
-          text-align: right;
-        }
+        .header-time { text-align: right; }
         .time-value {
-          font-family: 'DIN', 'Orbitron', sans-serif;
-          font-size: 26px;
-          font-weight: 700;
-          color: #00D0E9;
-          text-shadow: 0 0 20px rgba(0, 208, 233, 0.5);
+          font-family: var(--font-display, 'Orbitron'), sans-serif;
+          font-size: 24px; font-weight: 600;
+          color: var(--color-primary, #4da6ff);
+          text-shadow: 0 0 20px var(--color-primary-glow, rgba(77,166,255,0.5));
           letter-spacing: 3px;
         }
         .time-label {
           display: block;
-          font-size: 11px;
-          color: #A0A8B4;
-          margin-top: 2px;
-          letter-spacing: 1px;
+          font-family: var(--font-data, 'JetBrains Mono'), monospace;
+          font-size: 10px;
+          color: var(--text-tertiary, rgba(140,160,180,0.45));
+          margin-top: 2px; letter-spacing: 1px;
         }
       `}</style>
     </header>
