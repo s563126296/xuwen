@@ -8,15 +8,11 @@ export default function StraitTransitIndex() {
 
   return (
     <div style={{
-      position: 'absolute',
-      bottom: 12,
-      left: 12,
       width: 180,
       background: 'rgba(10, 15, 25, 0.95)',
       border: `1px solid ${statusColor}40`,
       borderRadius: 10,
       padding: '10px 14px',
-      zIndex: 10,
     }}>
       {/* 标题 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>

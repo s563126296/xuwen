@@ -24,8 +24,8 @@ export default function Header({ time, children }: Props) {
             <Activity size={20} color="#060d1a" />
           </div>
           <div>
-            <div className="logo-text">徐闻县智慧交通大数据系统</div>
-            <div className="header-subtitle">XUWEN INTELLIGENT TRANSPORTATION SYSTEM</div>
+            <div className="logo-text">徐闻智慧交通大屏</div>
+            <div className="header-subtitle">XUWEN INTELLIGENT TRANSPORTATION DASHBOARD</div>
           </div>
         </div>
       </div>

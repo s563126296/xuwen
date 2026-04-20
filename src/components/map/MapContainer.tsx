@@ -53,6 +53,7 @@ export default function MapContainer({ children }: { children?: React.ReactNode 
         style: 'amap://styles/darkblue',
         token: AMAP_KEY || '',
         viewMode: '3D',
+        features: ['bg', 'road', 'building'],
       }),
     });
 

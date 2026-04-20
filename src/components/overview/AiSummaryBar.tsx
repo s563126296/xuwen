@@ -69,9 +69,9 @@ export default function AiSummaryBar() {
     <div
       style={{
         position: 'absolute',
-        top: 80,
-        left: 0,
-        width: '100%',
+        top: 120,  // Below header (72px) + spacing (48px)
+        left: 356,  // Leave space for left panel
+        right: 356,  // Leave space for right panel
         zIndex: 95,
         overflow: 'hidden',
       }}
@@ -164,8 +164,6 @@ export default function AiSummaryBar() {
         background: '#0D1220',
         borderBottom: expanded ? `1px solid ${config.border}` : 'none',
         boxShadow: expanded ? '0 8px 40px rgba(0,0,0,0.7)' : 'none',
-        marginLeft: 356,
-        marginRight: 356,
       }}>
         {/* Expanded header */}
         <div style={{

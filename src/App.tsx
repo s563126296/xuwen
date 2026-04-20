@@ -16,6 +16,8 @@ import ResilienceInfoModal from './components/overview/ResilienceInfoModal';
 import Modal from './components/Modal';
 import MapContainer from './components/map/MapContainer';
 import StraitTransitIndex from './components/overview/StraitTransitIndex';
+import PressurePredictionChart from './components/overview/PressurePredictionChart';
+import HourlyChart from './components/HourlyChart';
 import { useUIStore, useOverviewStore } from './stores';
 import { computeAiSummary } from './utils/aiSummaryEngine';
 import './App.css';
@@ -144,34 +146,34 @@ function App() {
 
         {systemMode === 'overview' && (
           <>
-            {/* Full-screen map layer - behind everything */}
+            {/* Full-screen map layer */}
             <div style={{
               position: 'absolute',
-              top: 72,  // Start below header
+              top: 72,
               left: 0,
               right: 0,
               bottom: 0,
               zIndex: 1,
             }}>
               <MapContainer />
-              <StraitTransitIndex />
             </div>
 
             {/* Floating panels overlay */}
             <div style={{
               position: 'absolute',
-              top: 120,  // Below header + AI summary
+              top: 88,
               left: 16,
               right: 16,
-              bottom: 16,
+              bottom: 0,
               display: 'grid',
               gridTemplateColumns: '340px 1fr 340px',
+              gridTemplateRows: '1fr auto',
               gap: 12,
               zIndex: 20,
               pointerEvents: 'none',
             }}>
               {/* Left panels */}
-              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 80 }}>
                 <LeftPanel
                   deviceData={deviceData}
                   trafficData={trafficData}
@@ -183,9 +185,42 @@ function App() {
               <div style={{ pointerEvents: 'none' }} />
 
               {/* Right panels */}
-              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ pointerEvents: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 80 }}>
                 <RightPanel />
               </div>
+
+              {/* Bottom charts - center, spanning middle column */}
+              <div style={{
+                gridColumn: '2 / 3',
+                gridRow: '2 / 3',
+                display: 'flex',
+                gap: 12,
+                pointerEvents: 'auto',
+                paddingBottom: 12,
+              }}>
+                <div className="module-card" style={{ flex: 1, padding: 10 }}>
+                  <div style={{ height: 70 }}>
+                    <PressurePredictionChart compact />
+                  </div>
+                </div>
+                <div className="module-card" style={{ flex: 1, padding: 10 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontFamily: 'var(--font-label, Rajdhani)' }}>24h车流趋势</div>
+                  <div style={{ height: 56 }}>
+                    <HourlyChart />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Strait Transit Index - bottom right, above bottom charts */}
+            <div style={{
+              position: 'absolute',
+              bottom: 90,
+              right: 370,
+              zIndex: 25,
+              pointerEvents: 'auto',
+            }}>
+              <StraitTransitIndex />
             </div>
           </>
         )}
