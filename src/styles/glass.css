@@ -1,0 +1,135 @@
+/* === 毛玻璃组件 — 4级深度层次 === */
+
+/* L1: 侧栏面板 */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--duration-fast) ease-out,
+              box-shadow var(--duration-fast) ease-out,
+              transform var(--duration-fast) ease-out;
+}
+
+/* 顶部光线 */
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--glow-line);
+  z-index: 1;
+}
+
+/* 左侧装饰光条 */
+.glass-panel::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 0;
+  width: 3px;
+  height: 24px;
+  background: linear-gradient(180deg, var(--color-primary), rgba(77, 166, 255, 0.1));
+  border-radius: 0 2px 2px 0;
+  z-index: 1;
+}
+
+.glass-panel:hover {
+  border-color: var(--glass-border-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
+              0 0 0 0.5px rgba(100, 180, 255, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* L2: 弹窗/浮层 */
+.glass-popup {
+  background: var(--glass-strong-bg);
+  backdrop-filter: blur(var(--glass-strong-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-strong-blur)) saturate(160%);
+  border: 1px solid rgba(100, 180, 255, 0.12);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-strong-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-popup::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--glow-line);
+}
+
+/* L3: 顶部栏 */
+.glass-bar-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  z-index: var(--z-bars);
+  background: linear-gradient(180deg, rgba(6, 13, 26, 0.95) 0%, rgba(6, 13, 26, 0.7) 70%, transparent 100%);
+  backdrop-filter: blur(var(--glass-bar-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-bar-blur)) saturate(140%);
+}
+
+.glass-bar-top::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 40px;
+  right: 40px;
+  height: 1px;
+  background: var(--glow-line);
+}
+
+/* L3: 底部栏 */
+.glass-bar-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: var(--z-bars);
+  background: linear-gradient(0deg, rgba(6, 13, 26, 0.92) 0%, rgba(6, 13, 26, 0.6) 70%, transparent 100%);
+  backdrop-filter: blur(var(--glass-bar-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-bar-blur)) saturate(140%);
+}
+
+.glass-bar-bottom::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 40px;
+  right: 40px;
+  height: 1px;
+  background: var(--glow-line-subtle);
+}
+
+/* 警告级别面板边框 */
+.glass-panel.alert-warning {
+  border-color: rgba(251, 191, 36, 0.15);
+}
+.glass-panel.alert-warning::after {
+  background: linear-gradient(180deg, var(--color-warning), rgba(251, 191, 36, 0.1));
+}
+
+.glass-panel.alert-danger {
+  border-color: rgba(248, 113, 113, 0.2);
+}
+.glass-panel.alert-danger::after {
+  background: linear-gradient(180deg, var(--color-danger), rgba(248, 113, 113, 0.1));
+}

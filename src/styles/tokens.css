@@ -1,0 +1,104 @@
+/* === 深空指挥舱 Design Tokens === */
+
+:root {
+  /* 背景 */
+  --bg-void: #060d1a;
+  --bg-deep: #0a1628;
+  --bg-surface: #0f1f3a;
+
+  /* 色彩 */
+  --color-primary: #4da6ff;
+  --color-primary-glow: rgba(77, 166, 255, 0.5);
+  --color-secondary: #a78bfa;
+  --color-accent: #f0b429;
+  --color-accent-glow: rgba(240, 180, 41, 0.4);
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger-soft: #fb923c;
+  --color-danger: #f87171;
+
+  /* 文字 */
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(180, 200, 220, 0.65);
+  --text-tertiary: rgba(140, 160, 180, 0.45);
+  --text-data: rgba(255, 255, 255, 0.88);
+  --text-highlight: rgba(255, 255, 255, 0.98);
+
+  /* 数据发光 */
+  --glow-primary: 0 0 12px rgba(77, 166, 255, 0.35);
+  --glow-accent: 0 0 12px rgba(240, 180, 41, 0.3);
+  --glow-danger: 0 0 10px rgba(248, 113, 113, 0.3);
+  --glow-success: 0 0 10px rgba(52, 211, 153, 0.3);
+
+  /* 玻璃面板 — L1 侧栏面板 */
+  --glass-bg: rgba(12, 25, 48, 0.82);
+  --glass-blur: 40px;
+  --glass-saturate: 150%;
+  --glass-border: rgba(100, 180, 255, 0.08);
+  --glass-border-hover: rgba(100, 180, 255, 0.18);
+  --glass-radius: 20px;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(100, 180, 255, 0.06);
+
+  /* 玻璃面板 — L2 弹窗/浮层 */
+  --glass-strong-bg: rgba(12, 25, 48, 0.72);
+  --glass-strong-blur: 50px;
+  --glass-strong-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(100, 180, 255, 0.08);
+
+  /* 玻璃面板 — L3 顶底栏 */
+  --glass-bar-bg: rgba(6, 13, 26, 0.92);
+  --glass-bar-blur: 30px;
+
+  /* 玻璃面板 — L4 Overlay */
+  --glass-overlay-bg: rgba(6, 13, 26, 0.85);
+  --glass-overlay-blur: 60px;
+
+  /* 光线 */
+  --glow-line: linear-gradient(90deg, transparent, rgba(77, 166, 255, 0.35), transparent);
+  --glow-line-subtle: linear-gradient(90deg, transparent, rgba(77, 166, 255, 0.12), transparent);
+  --glow-line-accent: linear-gradient(90deg, transparent, rgba(240, 180, 41, 0.2), transparent);
+  --glow-border: linear-gradient(180deg, rgba(77, 166, 255, 0.15), rgba(77, 166, 255, 0.02) 50%, rgba(240, 180, 41, 0.08));
+
+  /* 分割线 */
+  --divider: rgba(180, 200, 220, 0.08);
+  --divider-subtle: rgba(180, 200, 220, 0.04);
+  --divider-accent: rgba(240, 180, 41, 0.12);
+
+  /* 字体 */
+  --font-display: 'Orbitron', sans-serif;
+  --font-label: 'Rajdhani', sans-serif;
+  --font-body: 'Noto Sans SC', sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
+
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* 动效 */
+  --duration-fast: 200ms;
+  --duration-normal: 400ms;
+  --duration-slow: 600ms;
+  --duration-enter: 300ms;
+  --duration-exit: 200ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* 层级 */
+  --z-map: 1;
+  --z-layers: 10;
+  --z-panels: 20;
+  --z-popups: 30;
+  --z-bars: 40;
+  --z-overlay: 50;
+
+  /* 间距 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+}
