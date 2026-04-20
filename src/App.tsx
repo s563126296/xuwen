@@ -199,23 +199,19 @@ function App() {
             <div style={{
               position: 'absolute',
               bottom: 12,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              gap: 12,
+              left: 368,
+              right: 368,
+              height: 80,
               zIndex: 20,
               pointerEvents: 'auto',
+              display: 'flex',
+              gap: 12,
             }}>
-              <div className="module-card" style={{ width: 380, padding: 10 }}>
-                <div style={{ height: 70 }}>
-                  <PressurePredictionChart compact />
-                </div>
+              <div className="module-card" style={{ flex: 1, padding: '8px 12px' }}>
+                <PressurePredictionChart compact />
               </div>
-              <div className="module-card" style={{ width: 380, padding: 10 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontFamily: 'var(--font-label, Rajdhani)' }}>24h车流趋势</div>
-                <div style={{ height: 56 }}>
-                  <HourlyChart />
-                </div>
+              <div className="module-card" style={{ flex: 1, padding: '8px 12px' }}>
+                <HourlyChart />
               </div>
             </div>
 
@@ -223,7 +219,7 @@ function App() {
             <div style={{
               position: 'absolute',
               bottom: 100,
-              right: 370,
+              right: 368,
               zIndex: 25,
               pointerEvents: 'auto',
             }}>
