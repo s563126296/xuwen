@@ -1,18 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
-import AMapLoader from '@amap/amap-jsapi-loader';
-import { Video, MessageSquare } from 'lucide-react';
+import { useRef, useState } from 'react';
 import MapVideoDock from './MapVideoDock';
 import PersonMarker from './PersonMarker';
 import IncomingCallModal from './IncomingCallModal';
+import PersonPopup from './PersonPopup';
 import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
+import { useAMapInit } from '../../hooks/useAMapInit';
+import { useParticleAnimation } from '../../hooks/useParticleAnimation';
+import { useStrategyPulseEffects } from '../../hooks/useStrategyPulseEffects';
+import { useDronePatrol } from '../../hooks/useDronePatrol';
+import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
+import { usePersonClickHandler } from '../../hooks/usePersonClickHandler';
 import type { FieldPerson } from '../../stores/commandStore';
-import { XUWEN_PORT, JINGANG_ROAD, SEGMENT_STYLES, PARTICLE_CONFIG } from '../../constants';
 
 export default function CommandMap() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
-  const [mapReady, setMapReady] = useState(false);
   const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
   const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
   const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
@@ -22,36 +24,43 @@ export default function CommandMap() {
   const setActiveModal = useUIStore((s) => s.setActiveModal);
   const isDroneDeployed = useCommandStore((s) => s.commandState.isDroneDeployed);
 
-  const [showIncomingCall, setShowIncomingCall] = useState(false);
-  const [incomingCallMessage, setIncomingCallMessage] = useState('');
-  const [incomingCallPerson, setIncomingCallPerson] = useState<FieldPerson | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<FieldPerson | null>(null);
   const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
-  const popupRef = useRef<HTMLDivElement>(null);
-  const lastPhoneFeedIdRef = useRef<string | null>(null);
 
-  // 存储地图元素引用，供脉冲效果使用
-  const diversionLineRef = useRef<any>(null);
-  const diversionLabelRef = useRef<any>(null);
-  const pulseLineRef = useRef<any>(null);
-  const droneMarkerRef = useRef<any>(null);
-  const dronePatrolIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const droneTrajectoryRef = useRef<any>(null);
+  const {
+    showIncomingCall,
+    incomingCallMessage,
+    incomingCallPerson,
+    setShowIncomingCall,
+  } = useIncomingCallHandler(commandFeed, fieldPersons);
 
-  // 监听 commandFeed 中的 phone 类型消息
-  useEffect(() => {
-    const phoneMsg = commandFeed.find(f => f.icon === 'phone');
-    if (phoneMsg && phoneMsg.id !== lastPhoneFeedIdRef.current) {
-      lastPhoneFeedIdRef.current = phoneMsg.id;
-      // 根据 source 匹配人员
-      const person = fieldPersons.find(p => p.name === phoneMsg.source);
-      if (person) {
-        setIncomingCallPerson(person);
-        setIncomingCallMessage(phoneMsg.content);
-        setShowIncomingCall(true);
-      }
-    }
-  }, [commandFeed, fieldPersons]);
+  const {
+    mapInstance,
+    mapReady,
+    diversionLineRef,
+    diversionLabelRef,
+    pulseLineRef,
+    droneMarkerRef,
+  } = useAMapInit(
+    mapRef,
+    () => {
+      setSelectedPerson(null);
+      setPopupPosition(null);
+    },
+    selectedPerson
+  );
+
+  const { handlePersonClick } = usePersonClickHandler(
+    mapInstance,
+    mapRef,
+    selectedPerson,
+    setSelectedPerson,
+    setPopupPosition
+  );
+
+  useParticleAnimation(mapInstance.current, mapReady);
+  useStrategyPulseEffects(mapReady, strategies, diversionLineRef, diversionLabelRef, pulseLineRef);
+  useDronePatrol(mapReady, isDroneDeployed, droneMarkerRef, mapInstance);
 
   const handleAcceptVideo = () => {
     setShowIncomingCall(false);
@@ -72,672 +81,29 @@ export default function CommandMap() {
     setShowIncomingCall(false);
   };
 
-  const handlePersonClick = (person: FieldPerson) => {
-    if (selectedPerson?.id === person.id) {
-      setSelectedPerson(null);
-      setPopupPosition(null);
-      return;
-    }
-
-    setSelectedPerson(person);
-
-    if (mapInstance.current && (window as any).AMap) {
-      const AMap = (window as any).AMap;
-      const pixel = mapInstance.current.lngLatToContainer(
-        new AMap.LngLat(person.position[0], person.position[1])
-      );
-
-      const mapContainer = mapRef.current;
-      const popupWidth = 200;
-      const popupHeight = 140;
-      const padding = 20;
-
-      let x = pixel.getX() + 20;
-      let y = pixel.getY() - 70;
-
-      if (mapContainer) {
-        const mapWidth = mapContainer.clientWidth;
-        const mapHeight = mapContainer.clientHeight;
-
-        // 右边界检测
-        if (x + popupWidth > mapWidth - padding) {
-          x = pixel.getX() - popupWidth - 20;
-        }
-        // 左边界检测
-        if (x < padding) {
-          x = padding;
-        }
-        // 上边界检测
-        if (y < padding) {
-          y = padding;
-        }
-        // 下边界检测
-        if (y + popupHeight > mapHeight - padding) {
-          y = mapHeight - popupHeight - padding;
-        }
-      }
-
-      setPopupPosition({ x, y });
+  const handleStartCall = (personId: string) => {
+    const person = fieldPersons.find(p => p.id === personId);
+    if (person) {
+      startCall(personId);
+      addCommandFeedItem(`发起与${person.name}的视频通话`);
     }
   };
 
-  useEffect(() => {
-    let destroyed = false;
+  const handleOpenChat = (personId: string) => {
+    openChatWith(personId);
+  };
 
-    AMapLoader.load({
-      key: 'd68ecc01797b67df1d265f2aa29ebc87',
-      version: '2.0',
-      plugins: ['AMap.Scale', 'AMap.Driving'],
-    }).then((AMap: any) => {
-      if (destroyed || !mapRef.current) return;
-
-      const map = new AMap.Map(mapRef.current, {
-        zoom: 13,
-        center: [110.150, 20.270],
-        mapStyle: 'amap://styles/normal',
-        viewMode: '2D',
-        features: ['bg', 'road', 'building'],
-      });
-
-      // 手动设置深色背景
-      if (mapRef.current) {
-        mapRef.current.style.background = '#0A1929';
-
-        // 添加深色遮罩层到地图容器
-        const overlay = document.createElement('div');
-        overlay.style.cssText = `
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(10, 25, 41, 0.25);
-          pointer-events: none;
-          z-index: 1;
-          mix-blend-mode: multiply;
-        `;
-        mapRef.current.appendChild(overlay);
-      }
-      mapInstance.current = map;
-
-      // 点击地图空白处关闭人员弹窗
-      map.on('click', () => {
-        setSelectedPerson(null);
-        setPopupPosition(null);
-      });
-
-      // 地图缩放/平移时更新弹窗位置
-      map.on('moveend', () => {
-        if (selectedPerson && mapInstance.current) {
-          const AMap = (window as any).AMap;
-          const pixel = mapInstance.current.lngLatToContainer(
-            new AMap.LngLat(selectedPerson.position[0], selectedPerson.position[1])
-          );
-          setPopupPosition({ x: pixel.getX(), y: pixel.getY() });
-        }
-      });
-
-      map.on('zoomend', () => {
-        if (selectedPerson && mapInstance.current) {
-          const AMap = (window as any).AMap;
-          const pixel = mapInstance.current.lngLatToContainer(
-            new AMap.LngLat(selectedPerson.position[0], selectedPerson.position[1])
-          );
-          setPopupPosition({ x: pixel.getX(), y: pixel.getY() });
-        }
-      });
-
-      // 实时路况图层
-      map.add(new AMap.TileLayer.Traffic({
-        zIndex: 10,
-        autoRefresh: true,
-        interval: 30,
-      }));
-
-      // 进港公路拥堵热力渐变（分段显示）
-      const congestionSegments: any[] = [];
-      const glowSegments: any[] = [];
-
-      for (let i = 0; i < JINGANG_ROAD.length - 1; i++) {
-        const style = SEGMENT_STYLES[i];
-        const segmentPath = [JINGANG_ROAD[i], JINGANG_ROAD[i + 1]];
-
-        // 主线条
-        const segment = new AMap.Polyline({
-          path: segmentPath,
-          strokeColor: style.color,
-          strokeWeight: style.weight,
-          strokeOpacity: style.opacity,
-          lineJoin: 'round',
-          lineCap: 'round',
-          zIndex: 15,
-          isOutline: true,
-          outlineColor: style.color + '66', // 40% opacity
-          borderWeight: 2,
-        });
-        map.add(segment);
-        congestionSegments.push(segment);
-
-        // 严重拥堵路段（后3段）添加光晕
-        if (i >= 3) {
-          const glow = new AMap.Polyline({
-            path: segmentPath,
-            strokeColor: style.color,
-            strokeWeight: style.weight + 8,
-            strokeOpacity: 0.15,
-            lineJoin: 'round',
-            lineCap: 'round',
-            zIndex: 14,
-          });
-          map.add(glow);
-          glowSegments.push(glow);
-        }
-      }
-
-      // S376分流路线（绿色虚线，从华四村向西绕行）
-      const huasiPos = JINGANG_ROAD[1]; // 华四村附近
-      const diversionLine = new AMap.Polyline({
-        path: [
-          huasiPos,
-          [huasiPos[0] - 0.018, huasiPos[1] - 0.015],
-          [huasiPos[0] - 0.022, huasiPos[1] - 0.032],
-          [huasiPos[0] - 0.016, huasiPos[1] - 0.042],
-          XUWEN_PORT,
-        ],
-        strokeColor: '#2ED573',
-        strokeWeight: 4,
-        strokeOpacity: 0.6,
-        lineJoin: 'round',
-        strokeStyle: 'dashed',
-        strokeDasharray: [10, 5],
-        zIndex: 14,
-      });
-      map.add(diversionLine);
-      diversionLineRef.current = diversionLine;
-
-      const diversionLabel = new AMap.Text({
-        text: 'S376 建议分流路线',
-        position: [huasiPos[0] - 0.022, huasiPos[1] - 0.025],
-        style: {
-          'font-size': '11px',
-          'font-weight': '600',
-          color: '#2ED573',
-          'background-color': 'rgba(16,185,129,0.15)',
-          border: '1px solid rgba(16,185,129,0.3)',
-          'border-radius': '4px',
-          padding: '3px 8px',
-        },
-      });
-      map.add(diversionLabel);
-      diversionLabelRef.current = diversionLabel;
-
-      // 卡口标记（沿路径分布）
-      const cpDefs = [
-        { name: '城区路口', idx: 0, flow: 480 },
-        { name: '华四村', idx: 1, flow: 520 },
-        { name: '高速入口', idx: 2, flow: 390 },
-        { name: '南山上村', idx: 4, flow: 350 },
-        { name: '港口入口', idx: 5, flow: 310 },
-      ];
-      cpDefs.forEach((cp) => {
-        map.add(new AMap.Marker({
-          position: JINGANG_ROAD[cp.idx],
-          content: `<div style="display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;background:rgba(0,208,233,0.15);border:1px solid rgba(0,208,233,0.3);white-space:nowrap;">
-            <div style="width:6px;height:6px;border-radius:50%;background:#00D0E9"></div>
-            <span style="font-size:12px;color:#00D0E9;font-weight:600">${cp.name}</span>
-            <span style="font-size:11px;color:#94A3B8;font-family:monospace">${cp.flow}辆/h</span>
-          </div>`,
-          offset: new AMap.Pixel(-40, -12),
-        }));
-      });
-
-      // 徐闻港标记
-      map.add(new AMap.Marker({
-        position: XUWEN_PORT,
-        content: `<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;background:rgba(220,38,38,0.2);border:1px solid rgba(220,38,38,0.4);white-space:nowrap;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4757" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-          <span style="font-size:12px;font-weight:700;color:#FF4757">徐闻港 · 排队3.2km</span>
-        </div>`,
-        offset: new AMap.Pixel(-80, -20),
-      }));
-
-      // 无人机 Marker（初始隐藏）— 与总览模式统一的白色无人机图标
-      const droneMarker = new AMap.Marker({
-        position: JINGANG_ROAD[1], // 华四村起飞点
-        content: `
-          <div style="
-            position: relative;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          ">
-            <div style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%,-50%);
-              width: 80px;
-              height: 80px;
-              border-radius: 50%;
-              border: 1px dashed rgba(255,255,255,0.2);
-              animation: dronePulse 3s ease-in-out infinite;
-            "></div>
-            <div style="
-              position: absolute;
-              top: 65%;
-              left: 50%;
-              width: 1px;
-              height: 35px;
-              background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
-              transform: translateX(-50%);
-            "></div>
-            <svg viewBox="-28 -22 56 44" width="64" height="52" style="position:absolute;top:8px;left:8px;animation:droneRotorSpin 3s linear infinite;">
-              <line x1="-20" y1="-14" x2="20" y2="14" stroke="#FFF" stroke-width="3"/>
-              <line x1="20" y1="-14" x2="-20" y2="14" stroke="#FFF" stroke-width="3"/>
-              <ellipse cx="0" cy="0" rx="12" ry="9" fill="#FFF"/>
-              <ellipse cx="0" cy="-1" rx="7" ry="4" fill="#C8D0D8" opacity="0.5"/>
-              <circle cx="-20" cy="-14" r="7" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
-              <circle cx="20" cy="-14" r="7" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
-              <circle cx="-20" cy="14" r="7" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
-              <circle cx="20" cy="14" r="7" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
-              <circle cx="0" cy="0" r="3" fill="#00FF88">
-                <animate attributeName="opacity" values="1;0.2;1" dur="1.2s" repeatCount="indefinite"/>
-              </circle>
-            </svg>
-            <div style="
-              position: absolute;
-              bottom: -2px;
-              left: 50%;
-              transform: translateX(-50%);
-              background: rgba(0,0,0,0.85);
-              border: 1px solid rgba(255,255,255,0.25);
-              border-radius: 4px;
-              padding: 2px 8px;
-              white-space: nowrap;
-              text-align: center;
-            ">
-              <div style="font-size: 11px;color: #FFF;font-weight: 700;">无人机-01</div>
-              <div style="font-size: 11px;color: #A0AAB8;">巡逻中</div>
-            </div>
-          </div>
-        `,
-        offset: new AMap.Pixel(-40, -40),
-        zIndex: 300,
-        visible: false,
-      });
-      map.add(droneMarker);
-      droneMarkerRef.current = droneMarker;
-
-      setMapReady(true);
-
-      // 车流粒子动画
-      const particles: any[] = [];
-      const particleProgress: number[] = [];
-
-      // 计算路径总长度（用于均匀分布粒子）
-      const segmentLengths: number[] = [];
-      let totalLength = 0;
-      for (let i = 0; i < JINGANG_ROAD.length - 1; i++) {
-        const len = Math.sqrt(
-          Math.pow(JINGANG_ROAD[i + 1][0] - JINGANG_ROAD[i][0], 2) +
-          Math.pow(JINGANG_ROAD[i + 1][1] - JINGANG_ROAD[i][1], 2)
-        );
-        segmentLengths.push(len);
-        totalLength += len;
-      }
-
-      // 创建粒子
-      for (let i = 0; i < PARTICLE_CONFIG.COUNT; i++) {
-        const particle = new AMap.Marker({
-          position: JINGANG_ROAD[0],
-          content: `<div style="
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #00D0E9;
-            box-shadow: 0 0 6px #00D0E9, 0 0 12px rgba(0,208,233,0.4);
-          "></div>`,
-          offset: new AMap.Pixel(-4, -4),
-          zIndex: 50,
-        });
-        map.add(particle);
-        particles.push(particle);
-        particleProgress.push((i / PARTICLE_CONFIG.COUNT) * totalLength); // 均匀分布
-      }
-
-      // 粒子动画循环
-      const particleInterval = setInterval(() => {
-        if (destroyed) return;
-
-        particles.forEach((particle, idx) => {
-          let progress = particleProgress[idx];
-
-          // 根据路段拥堵程度调整速度
-          let currentSegment = 0;
-          let accumulatedLength = 0;
-          for (let i = 0; i < segmentLengths.length; i++) {
-            if (progress < accumulatedLength + segmentLengths[i]) {
-              currentSegment = i;
-              break;
-            }
-            accumulatedLength += segmentLengths[i];
-          }
-
-          // 速度映射：畅通段快，拥堵段慢
-          let speed: number;
-          if (currentSegment === 0) speed = 0.0005; // 畅通
-          else if (currentSegment === 1) speed = 0.0003; // 缓行
-          else if (currentSegment === 2) speed = 0.0002; // 拥堵
-          else if (currentSegment === 3) speed = 0.0001; // 严重拥堵
-          else if (currentSegment === 4) speed = 0.00005; // 严重拥堵
-          else speed = 0.00003; // 极度拥堵
-
-          progress += speed;
-
-          // 重置到起点
-          if (progress >= totalLength) {
-            progress = 0;
-          }
-
-          particleProgress[idx] = progress;
-
-          // 计算粒子位置
-          let accLen = 0;
-          for (let i = 0; i < segmentLengths.length; i++) {
-            if (progress < accLen + segmentLengths[i]) {
-              const t = (progress - accLen) / segmentLengths[i];
-              const lng = JINGANG_ROAD[i][0] + t * (JINGANG_ROAD[i + 1][0] - JINGANG_ROAD[i][0]);
-              const lat = JINGANG_ROAD[i][1] + t * (JINGANG_ROAD[i + 1][1] - JINGANG_ROAD[i][1]);
-              particle.setPosition([lng, lat]);
-              break;
-            }
-            accLen += segmentLengths[i];
-          }
-        });
-      }, PARTICLE_CONFIG.INTERVAL);
-
-      // 进港大道脉冲叠加线（S-01 执行时使用）
-      const pulseLine = new AMap.Polyline({
-        path: JINGANG_ROAD,
-        strokeColor: '#00D0E9',
-        strokeWeight: 2,
-        strokeOpacity: 0,
-        lineJoin: 'round',
-        lineCap: 'round',
-        zIndex: 16,
-      });
-      map.add(pulseLine);
-      pulseLineRef.current = pulseLine;
-
-      // 用 Driving API 获取贴合道路的真实路径
-      AMap.plugin('AMap.Driving', () => {
-        const driving = new AMap.Driving({
-          map: undefined,
-          policy: AMap.DrivingPolicy.LEAST_TIME,
-        });
-
-        const start = new AMap.LngLat(JINGANG_ROAD[0][0], JINGANG_ROAD[0][1]);
-        const end = new AMap.LngLat(JINGANG_ROAD[JINGANG_ROAD.length - 1][0], JINGANG_ROAD[JINGANG_ROAD.length - 1][1]);
-        const waypoints = JINGANG_ROAD.slice(1, -1).map(p => new AMap.LngLat(p[0], p[1]));
-
-        driving.search(start, end, { waypoints }, (status: string, result: any) => {
-          if (destroyed) return;
-
-          if (status === 'complete' && result?.routes?.[0]) {
-            const route = result.routes[0];
-            const realPath: [number, number][] = [];
-
-            route.steps.forEach((step: any) => {
-              if (step.path && Array.isArray(step.path)) {
-                step.path.forEach((p: any) => {
-                  const lng = typeof p.getLng === 'function' ? p.getLng() : p.lng;
-                  const lat = typeof p.getLat === 'function' ? p.getLat() : p.lat;
-                  if (lng && lat) {
-                    realPath.push([lng, lat]);
-                  }
-                });
-              }
-            });
-
-            if (realPath.length > 10) {
-              // 更新分段路径
-              const segmentSize = Math.floor(realPath.length / 6);
-              congestionSegments.forEach((segment, i) => {
-                const start = i * segmentSize;
-                const end = i === 5 ? realPath.length : (i + 1) * segmentSize;
-                segment.setPath(realPath.slice(start, end));
-              });
-
-              glowSegments.forEach((glow, i) => {
-                const segmentIndex = i + 3;
-                const start = segmentIndex * segmentSize;
-                const end = segmentIndex === 5 ? realPath.length : (segmentIndex + 1) * segmentSize;
-                glow.setPath(realPath.slice(start, end));
-              });
-
-              pulseLine.setPath(realPath);
-            }
-          }
-        });
-      });
-
-      // 清理函数
-      return () => {
-        clearInterval(particleInterval);
-        particles.forEach(p => map.remove(p));
-      };
-    }).catch(() => {
-      // Map loading failed - handled by UI state
-    });
-
-    return () => {
-      destroyed = true;
-      if (mapInstance.current) {
-        mapInstance.current.destroy();
-      }
-    };
-  }, []);
-
-  // 执行中路段脉冲效果（独立 useEffect，响应策略变化）
-  useEffect(() => {
-    if (!mapReady) return;
-
-    const executingStrategy = strategies.find(s => s.status === 'executing');
-
-    // S-02 执行中：S376 分流路线脉冲
-    let diversionOpacity = 0.3;
-    let diversionDirection = 1;
-    let diversionInterval: number | null = null;
-
-    if (executingStrategy?.id === 'S-02' && diversionLineRef.current && diversionLabelRef.current) {
-      diversionInterval = window.setInterval(() => {
-        diversionOpacity += diversionDirection * 0.7;
-        if (diversionOpacity >= 1.0) {
-          diversionOpacity = 1.0;
-          diversionDirection = -1;
-        } else if (diversionOpacity <= 0.3) {
-          diversionOpacity = 0.3;
-          diversionDirection = 1;
-        }
-        diversionLineRef.current?.setOptions({ strokeOpacity: diversionOpacity });
-      }, 1000);
-
-      if (diversionLabelRef.current && diversionLabelRef.current.setText && diversionLabelRef.current.setStyle) {
-        diversionLabelRef.current.setText('S376 分流执行中 ●');
-        diversionLabelRef.current.setStyle({
-          'font-size': '11px',
-          'font-weight': '600',
-          color: '#00D0E9',
-          'background-color': 'rgba(0,208,233,0.15)',
-          border: '1px solid rgba(0,208,233,0.3)',
-          'border-radius': '4px',
-          padding: '3px 8px',
-        });
-      }
-    } else if (diversionLineRef.current && diversionLabelRef.current) {
-      if (diversionLabelRef.current.setText && diversionLabelRef.current.setStyle) {
-        diversionLineRef.current.setOptions({ strokeOpacity: 0.6 });
-        diversionLabelRef.current.setText('S376 建议分流路线');
-        diversionLabelRef.current.setStyle({
-          'font-size': '11px',
-          'font-weight': '600',
-          color: '#2ED573',
-          'background-color': 'rgba(16,185,129,0.15)',
-          border: '1px solid rgba(16,185,129,0.3)',
-          'border-radius': '4px',
-          padding: '3px 8px',
-        });
-      }
-    }
-
-    // S-01 执行中：进港大道青色脉冲
-    let roadOpacity = 0;
-    let roadDirection = 1;
-    let roadInterval: number | null = null;
-
-    if (executingStrategy?.id === 'S-01' && pulseLineRef.current) {
-      roadInterval = window.setInterval(() => {
-        roadOpacity += roadDirection * 0.8;
-        if (roadOpacity >= 0.8) {
-          roadOpacity = 0.8;
-          roadDirection = -1;
-        } else if (roadOpacity <= 0) {
-          roadOpacity = 0;
-          roadDirection = 1;
-        }
-        pulseLineRef.current?.setOptions({ strokeOpacity: roadOpacity });
-      }, 1000);
-    } else if (pulseLineRef.current) {
-      pulseLineRef.current.setOptions({ strokeOpacity: 0 });
-    }
-
-    return () => {
-      if (diversionInterval) clearInterval(diversionInterval);
-      if (roadInterval) clearInterval(roadInterval);
-    };
-  }, [mapReady, strategies]);
-
-  // 无人机部署状态监听
-  useEffect(() => {
-    if (!mapReady || !droneMarkerRef.current) return;
-
-    const droneMarker = droneMarkerRef.current;
-
-    // 清理之前的巡逻定时器
-    if (dronePatrolIntervalRef.current) {
-      clearInterval(dronePatrolIntervalRef.current);
-      dronePatrolIntervalRef.current = null;
-    }
-
-    if (isDroneDeployed) {
-      // 直接从华四村开始巡逻
-      droneMarker.setPosition(JINGANG_ROAD[1]);
-      droneMarker.show();
-
-      // 巡逻路径：华四村(1) → 迈陈镇(2) → 中段(3) → 南山镇(4) → 近港区/港口入口(5)
-      const patrolPath = [
-        JINGANG_ROAD[1], // 华四村
-        JINGANG_ROAD[2], // 迈陈镇
-        JINGANG_ROAD[3], // 中段
-        JINGANG_ROAD[4], // 南山镇
-        JINGANG_ROAD[5], // 近港区（港口入口）
-      ];
-
-      let pathIndex = 0;
-      let direction = 1;
-      let currentPos: [number, number] = [JINGANG_ROAD[1][0], JINGANG_ROAD[1][1]];
-      let targetPos = patrolPath[1]; // 第一个目标：迈陈镇
-
-      dronePatrolIntervalRef.current = setInterval(() => {
-        const dx = targetPos[0] - currentPos[0];
-        const dy = targetPos[1] - currentPos[1];
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // 到达当前目标点，切换到下一个目标点
-        if (distance < 0.0002) {
-          pathIndex += direction;
-
-          // 到达终点（近港区），反向巡逻
-          if (pathIndex >= patrolPath.length) {
-            pathIndex = patrolPath.length - 2;
-            direction = -1;
-          }
-          // 到达起点（华四村），正向巡逻
-          else if (pathIndex < 0) {
-            pathIndex = 1;
-            direction = 1;
-          }
-
-          targetPos = patrolPath[pathIndex];
-        }
-
-        // 向目标点移动（每次移动 0.00035 经纬度，加快速度）
-        const moveSpeed = 0.00035;
-        const ratio = distance > 0 ? moveSpeed / distance : 0;
-        currentPos = [
-          currentPos[0] + dx * ratio,
-          currentPos[1] + dy * ratio,
-        ];
-
-        droneMarker.setPosition(currentPos);
-
-        // Update trajectory line
-        if (!droneTrajectoryRef.current && mapInstance.current && (window as any).AMap) {
-          const AMap = (window as any).AMap;
-          droneTrajectoryRef.current = new AMap.Polyline({
-            path: [],
-            strokeColor: '#00D0E9',
-            strokeWeight: 2,
-            strokeOpacity: 0.4,
-            strokeStyle: 'dashed',
-            strokeDasharray: [10, 5],
-            zIndex: 150,
-          });
-          droneTrajectoryRef.current.setMap(mapInstance.current);
-        }
-
-        if (droneTrajectoryRef.current && (window as any).AMap) {
-          const AMap = (window as any).AMap;
-          const path = droneTrajectoryRef.current.getPath() || [];
-          path.push(new AMap.LngLat(currentPos[0], currentPos[1]));
-          if (path.length > 20) {
-            path.shift();
-          }
-          droneTrajectoryRef.current.setPath(path);
-        }
-      }, 100); // 每 100ms 更新一次位置
-
-      return () => {
-        if (dronePatrolIntervalRef.current) {
-          clearInterval(dronePatrolIntervalRef.current);
-          dronePatrolIntervalRef.current = null;
-        }
-        if (droneTrajectoryRef.current) {
-          droneTrajectoryRef.current.setMap(null);
-          droneTrajectoryRef.current = null;
-        }
-      };
-    } else {
-      droneMarker.hide();
-      if (droneTrajectoryRef.current) {
-        droneTrajectoryRef.current.setMap(null);
-        droneTrajectoryRef.current = null;
-      }
-    }
-  }, [isDroneDeployed, mapReady]);
+  const closePopup = () => {
+    setSelectedPerson(null);
+    setPopupPosition(null);
+  };
 
   return (
     <div
       className="card"
       style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}
-      onClick={(e) => {
-        // Close popup when clicking outside
-        if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+      onClick={() => {
+        if (selectedPerson) {
           setSelectedPerson(null);
           setPopupPosition(null);
         }
@@ -745,6 +111,8 @@ export default function CommandMap() {
     >
       {/* 地图容器 */}
       <div ref={mapRef} style={{ position: 'absolute', inset: 0 }} />
+
+      {/* PLACEHOLDER_REST_JSX */}
 
       {/* 加载状态 */}
       {!mapReady && (
@@ -770,7 +138,18 @@ export default function CommandMap() {
       {/* 地图标题和聚焦提示 */}
       <div
         onClick={() => setActiveModal('congestion-detail')}
-        style={{ position: 'absolute', top: 16, left: 16, zIndex: 20, padding: '8px 12px', borderRadius: 6, background: 'rgba(10,15,25,0.9)', border: '1px solid rgba(0,208,233,0.15)', cursor: 'pointer', transition: 'border-color 0.2s' }}
+        style={{
+          position: 'absolute',
+          top: 16,
+          left: 16,
+          zIndex: 20,
+          padding: '8px 12px',
+          borderRadius: 6,
+          background: 'rgba(10,15,25,0.9)',
+          border: '1px solid rgba(0,208,233,0.15)',
+          cursor: 'pointer',
+          transition: 'border-color 0.2s'
+        }}
         onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(0,208,233,0.4)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(0,208,233,0.15)'; }}
       >
@@ -791,6 +170,8 @@ export default function CommandMap() {
         />
       ))}
 
+      {/* PLACEHOLDER_MODALS */}
+
       {/* 来电弹窗 */}
       {showIncomingCall && incomingCallPerson && (
         <IncomingCallModal
@@ -804,105 +185,13 @@ export default function CommandMap() {
 
       {/* 人员操作弹窗 */}
       {selectedPerson && popupPosition && (
-        <div
-          ref={popupRef}
-          style={{
-            position: 'absolute',
-            left: popupPosition.x - 100,
-            top: popupPosition.y - 140,
-            width: 200,
-            background: 'rgba(13,27,42,0.95)',
-            border: '1px solid rgba(0,208,233,0.3)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: 8,
-            padding: 12,
-            zIndex: 300,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            animation: 'personPopupFadeIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* 人员信息 */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#E2E8F0', marginBottom: 4 }}>
-              {selectedPerson.name} · {selectedPerson.department}
-            </div>
-            <div style={{ fontSize: 12, color: '#94A3B8' }}>
-              状态：{selectedPerson.task || '空闲'}
-            </div>
-          </div>
-
-          {/* 分隔线 */}
-          <div style={{ height: 1, background: 'rgba(0,208,233,0.15)', marginBottom: 12 }} />
-
-          {/* 操作按钮 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <button
-              onClick={() => {
-                startCall(selectedPerson.id);
-                addCommandFeedItem(`发起与${selectedPerson.name}的视频通话`);
-                setSelectedPerson(null);
-                setPopupPosition(null);
-              }}
-              style={{
-                padding: '8px 12px',
-                fontSize: 13,
-                fontWeight: 500,
-                borderRadius: 6,
-                border: '1px solid rgba(0,208,233,0.3)',
-                background: 'rgba(0,208,233,0.1)',
-                color: '#00D0E9',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(0,208,233,0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(0,208,233,0.1)';
-              }}
-            >
-              <Video size={14} />
-              视频通话
-            </button>
-
-            <button
-              onClick={() => {
-                openChatWith(selectedPerson.id);
-                setSelectedPerson(null);
-                setPopupPosition(null);
-              }}
-              style={{
-                padding: '8px 12px',
-                fontSize: 13,
-                fontWeight: 500,
-                borderRadius: 6,
-                border: '1px solid rgba(0,208,233,0.3)',
-                background: 'rgba(0,208,233,0.1)',
-                color: '#00D0E9',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(0,208,233,0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(0,208,233,0.1)';
-              }}
-            >
-              <MessageSquare size={14} />
-              发送消息
-            </button>
-          </div>
-        </div>
+        <PersonPopup
+          person={selectedPerson}
+          position={popupPosition}
+          onStartCall={handleStartCall}
+          onOpenChat={handleOpenChat}
+          onClose={closePopup}
+        />
       )}
 
       <style>{`
