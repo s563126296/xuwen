@@ -1,118 +1,172 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MapVideoDock from './MapVideoDock';
-import PersonMarker from './PersonMarker';
-import IncomingCallModal from './IncomingCallModal';
-import PersonPopup from './PersonPopup';
-import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
-import { useAMapInit } from '../../hooks/useAMapInit';
-import { useParticleAnimation } from '../../hooks/useParticleAnimation';
-import { useStrategyPulseEffects } from '../../hooks/useStrategyPulseEffects';
-import { useDronePatrol } from '../../hooks/useDronePatrol';
-import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
-import { usePersonClickHandler } from '../../hooks/usePersonClickHandler';
-import type { FieldPerson } from '../../stores/commandStore';
+
+const AMAP_KEY = import.meta.env.VITE_AMAP_KEY;
+
+// 进港大道关键坐标点（GCJ-02）
+const JINGANG_ROAD = [
+  [110.134812, 20.232438],  // 徐闻港
+  [110.145, 20.245],        // 华四村
+  [110.155, 20.265],        // 迈陈镇
+  [110.165, 20.285],        // 中段
+  [110.175, 20.305],        // 南山镇
+  [110.185, 20.325],        // 近港区
+];
+
+// 拥堵段样式配置
+const SEGMENT_STYLES = [
+  { color: '#2ed573', weight: 4, label: '畅通' },
+  { color: '#00D0E9', weight: 6, label: '缓行' },
+  { color: '#ffa502', weight: 8, label: '拥堵' },
+  { color: '#ff4757', weight: 10, label: '严重拥堵' },
+  { color: '#d63031', weight: 12, label: '严重拥堵' },
+  { color: '#a00', weight: 14, label: '极度拥堵' },
+];
+
+interface Particle {
+  progress: number;
+  offset: number;
+}
 
 export default function CommandMap() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
-  const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
-  const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
-  const startCall = useCommandStore((s) => s.startCall);
-  const openChatWith = useCommandStore((s) => s.openChatWith);
-  const strategies = useCommandStore((s) => s.commandState.strategies);
+  const mapInstance = useRef<any>(null);
+  const particlesRef = useRef<Particle[]>([]);
+  const animationFrameRef = useRef<number>();
+  const [mapReady, setMapReady] = useState(false);
+
   const setActiveModal = useUIStore((s) => s.setActiveModal);
-  const isDroneDeployed = useCommandStore((s) => s.commandState.isDroneDeployed);
 
-  const [selectedPerson, setSelectedPerson] = useState<FieldPerson | null>(null);
-  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    if (!mapRef.current || mapInstance.current) return;
 
-  const {
-    showIncomingCall,
-    incomingCallMessage,
-    incomingCallPerson,
-    setShowIncomingCall,
-  } = useIncomingCallHandler(commandFeed, fieldPersons);
+    // 动态加载高德地图 API
+    const script = document.createElement('script');
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_KEY}`;
+    script.async = true;
+    script.onload = () => {
+      const AMap = (window as any).AMap;
 
-  const {
-    mapInstance,
-    mapReady,
-    diversionLineRef,
-    diversionLabelRef,
-    pulseLineRef,
-    droneMarkerRef,
-  } = useAMapInit(
-    mapRef,
-    () => {
-      setSelectedPerson(null);
-      setPopupPosition(null);
-    },
-    selectedPerson
-  );
+      const map = new AMap.Map(mapRef.current, {
+        center: [110.165, 20.285],
+        zoom: 11.5,
+        pitch: 0,
+        rotation: 0,
+        viewMode: '2D',
+        mapStyle: 'amap://styles/darkblue',
+        features: ['bg', 'road'],
+      });
 
-  const { handlePersonClick } = usePersonClickHandler(
-    mapInstance,
-    mapRef,
-    selectedPerson,
-    setSelectedPerson,
-    setPopupPosition
-  );
+      map.on('complete', () => {
+        // 渲染拥堵路段
+        for (let i = 0; i < JINGANG_ROAD.length - 1; i++) {
+          const style = SEGMENT_STYLES[i];
+          const path = [JINGANG_ROAD[i], JINGANG_ROAD[i + 1]];
 
-  useParticleAnimation(mapInstance.current, mapReady);
-  useStrategyPulseEffects(mapReady, strategies, diversionLineRef, diversionLabelRef, pulseLineRef);
-  useDronePatrol(mapReady, isDroneDeployed, droneMarkerRef, mapInstance);
+          // 南段（i>=3）先渲染发光层
+          if (i >= 3) {
+            const glowLine = new AMap.Polyline({
+              path,
+              strokeColor: style.color,
+              strokeWeight: style.weight + 8,
+              strokeOpacity: 0.15,
+              zIndex: 14,
+            });
+            map.add(glowLine);
+          }
 
-  const handleAcceptVideo = () => {
-    setShowIncomingCall(false);
-    if (incomingCallPerson) {
-      startCall(incomingCallPerson.id);
-      addCommandFeedItem(`已接通${incomingCallPerson.name}视频通话`);
-    }
-  };
+          // 主路段
+          const mainLine = new AMap.Polyline({
+            path,
+            strokeColor: style.color,
+            strokeWeight: style.weight,
+            strokeOpacity: 0.9,
+            zIndex: 15,
+          });
+          map.add(mainLine);
+        }
 
-  const handleAcceptVoice = () => {
-    setShowIncomingCall(false);
-    if (incomingCallPerson) {
-      addCommandFeedItem(`已接通${incomingCallPerson.name}语音通话`);
-    }
-  };
+        // 初始化粒子
+        particlesRef.current = Array.from({ length: 6 }, (_, i) => ({
+          progress: 0,
+          offset: i * 0.16,
+        }));
 
-  const handleDeclineCall = () => {
-    setShowIncomingCall(false);
-  };
+        // 粒子动画
+        const animateParticles = () => {
+          const now = Date.now();
 
-  const handleStartCall = (personId: string) => {
-    const person = fieldPersons.find(p => p.id === personId);
-    if (person) {
-      startCall(personId);
-      addCommandFeedItem(`发起与${person.name}的视频通话`);
-    }
-  };
+          particlesRef.current.forEach((particle, idx) => {
+            // 计算当前进度
+            particle.progress = ((now / 10000) + particle.offset) % 1;
 
-  const handleOpenChat = (personId: string) => {
-    openChatWith(personId);
-  };
+            // 根据进度计算位置
+            const segmentIndex = Math.floor(particle.progress * (JINGANG_ROAD.length - 1));
+            const segmentProgress = (particle.progress * (JINGANG_ROAD.length - 1)) % 1;
 
-  const closePopup = () => {
-    setSelectedPerson(null);
-    setPopupPosition(null);
-  };
+            const start = JINGANG_ROAD[segmentIndex];
+            const end = JINGANG_ROAD[Math.min(segmentIndex + 1, JINGANG_ROAD.length - 1)];
+            const lng = start[0] + (end[0] - start[0]) * segmentProgress;
+            const lat = start[1] + (end[1] - start[1]) * segmentProgress;
+
+            // 创建或更新 Marker
+            const markerId = `particle-${idx}`;
+            let marker = map.getAllOverlays('marker').find((m: any) => m.getExtData()?.id === markerId);
+
+            if (!marker) {
+              marker = new AMap.Marker({
+                position: [lng, lat],
+                content: `<div style="width:8px;height:8px;border-radius:50%;background:#00D0E9;box-shadow:0 0 8px #00D0E9;"></div>`,
+                offset: new AMap.Pixel(-4, -4),
+                zIndex: 20,
+                extData: { id: markerId },
+              });
+              map.add(marker);
+            } else {
+              marker.setPosition([lng, lat]);
+            }
+          });
+
+          animationFrameRef.current = requestAnimationFrame(animateParticles);
+        };
+        animateParticles();
+
+        mapInstance.current = map;
+        setMapReady(true);
+      });
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (mapInstance.current) {
+        mapInstance.current.destroy();
+        mapInstance.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div
       className="card"
       style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}
-      onClick={() => {
-        if (selectedPerson) {
-          setSelectedPerson(null);
-          setPopupPosition(null);
-        }
-      }}
     >
       {/* 地图容器 */}
       <div ref={mapRef} style={{ position: 'absolute', inset: 0 }} />
 
-      {/* PLACEHOLDER_REST_JSX */}
+      {/* 深色蒙层（增强科技感） */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'rgba(10,25,41,0.25)',
+        mixBlendMode: 'multiply',
+        pointerEvents: 'none',
+        zIndex: 1,
+      }} />
 
       {/* 加载状态 */}
       {!mapReady && (
@@ -124,18 +178,19 @@ export default function CommandMap() {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 12,
-          background: '#0D1B2A'
+          background: '#0D1B2A',
+          zIndex: 100,
         }}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#334155" strokeWidth="2">
             <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
             <line x1="8" y1="2" x2="8" y2="18"></line>
             <line x1="16" y1="6" x2="16" y2="22"></line>
           </svg>
-          <span style={{ fontSize: 14, color: '#475569' }}>加载高德地图...</span>
+          <span style={{ fontSize: 14, color: '#475569' }}>加载地图...</span>
         </div>
       )}
 
-      {/* 地图标题和聚焦提示 */}
+      {/* 地图标题 */}
       <div
         onClick={() => setActiveModal('congestion-detail')}
         style={{
@@ -148,7 +203,8 @@ export default function CommandMap() {
           background: 'rgba(10,15,25,0.9)',
           border: '1px solid rgba(0,208,233,0.15)',
           cursor: 'pointer',
-          transition: 'border-color 0.2s'
+          transition: 'border-color 0.2s',
+          backdropFilter: 'blur(10px)',
         }}
         onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(0,208,233,0.4)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(0,208,233,0.15)'; }}
@@ -157,63 +213,36 @@ export default function CommandMap() {
         <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>点击查看详情 · 路段车辆/危化品/流入趋势</div>
       </div>
 
+      {/* 图例 */}
+      <div style={{
+        position: 'absolute',
+        bottom: 16,
+        left: 16,
+        zIndex: 20,
+        padding: '8px 10px',
+        borderRadius: 6,
+        background: 'rgba(10,15,25,0.9)',
+        border: '1px solid rgba(0,208,233,0.12)',
+        backdropFilter: 'blur(10px)',
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: '#94A3B8', marginBottom: 6 }}>拥堵等级</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {SEGMENT_STYLES.map((style, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 24,
+                height: 3,
+                background: style.color,
+                borderRadius: 2,
+                boxShadow: i >= 3 ? `0 0 8px ${style.color}` : 'none',
+              }} />
+              <span style={{ fontSize: 10, color: '#64748B' }}>{style.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <MapVideoDock />
-
-      {/* 人员 Markers */}
-      {mapReady && fieldPersons.map(person => (
-        <PersonMarker
-          key={person.id}
-          person={person}
-          map={mapInstance.current}
-          onClick={handlePersonClick}
-          isSelected={selectedPerson?.id === person.id}
-        />
-      ))}
-
-      {/* PLACEHOLDER_MODALS */}
-
-      {/* 来电弹窗 */}
-      {showIncomingCall && incomingCallPerson && (
-        <IncomingCallModal
-          person={incomingCallPerson}
-          message={incomingCallMessage}
-          onAcceptVideo={handleAcceptVideo}
-          onAcceptVoice={handleAcceptVoice}
-          onDecline={handleDeclineCall}
-        />
-      )}
-
-      {/* 人员操作弹窗 */}
-      {selectedPerson && popupPosition && (
-        <PersonPopup
-          person={selectedPerson}
-          position={popupPosition}
-          onStartCall={handleStartCall}
-          onOpenChat={handleOpenChat}
-          onClose={closePopup}
-        />
-      )}
-
-      <style>{`
-        @keyframes dronePulse {
-          0%, 100% { box-shadow: 0 0 12px rgba(0,208,233,0.6); }
-          50% { box-shadow: 0 0 20px rgba(0,208,233,1), 0 0 30px rgba(0,208,233,0.4); }
-        }
-        @keyframes personPopupFadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes droneRotorSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
 
       {/* 地图控制按钮 */}
       <div style={{
@@ -233,7 +262,8 @@ export default function CommandMap() {
           background: 'rgba(10, 15, 25, 0.9)',
           color: '#94A3B8',
           cursor: 'pointer',
-          fontSize: 16
+          fontSize: 16,
+          backdropFilter: 'blur(10px)',
         }} onClick={() => mapInstance.current?.zoomIn()}>+</button>
         <button aria-label="缩小地图" style={{
           width: 32,
@@ -243,7 +273,8 @@ export default function CommandMap() {
           background: 'rgba(10, 15, 25, 0.9)',
           color: '#94A3B8',
           cursor: 'pointer',
-          fontSize: 16
+          fontSize: 16,
+          backdropFilter: 'blur(10px)',
         }} onClick={() => mapInstance.current?.zoomOut()}>-</button>
       </div>
     </div>

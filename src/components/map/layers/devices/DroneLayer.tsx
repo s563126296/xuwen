@@ -226,22 +226,6 @@ export default function DroneLayer() {
       .style({ opacity: 0.95, stroke: '#ffffff', strokeWidth: 1.5 });
     layers.push(airportCoreLayer);
 
-    const airportLabelLayer = new PointLayer({ zIndex: 36, depth: false })
-      .source(airportData, { parser: { type: 'json', x: 'lng', y: 'lat' } })
-      .shape('label', 'text')
-      .size(10)
-      .color('color')
-      .style({
-        textAnchor: 'center',
-        textOffset: [0, 18],
-        fontFamily: 'Noto Sans SC, sans-serif',
-        fontWeight: 600,
-        textAllowOverlap: true,
-        stroke: 'rgba(0,0,0,0.78)',
-        strokeWidth: 2,
-      });
-    layers.push(airportLabelLayer);
-
     const getFlyingData = (startedAt: number) => {
       const elapsed = performance.now() - startedAt;
       return droneRoutes.map((route, index) => {
@@ -252,7 +236,6 @@ export default function DroneLayer() {
         return {
           id: `${route.id}-flying`,
           name: route.name,
-          label: `${route.altitude ?? 120}m`,
           gcjLng,
           gcjLat,
           color: getRouteColor(route, index),
@@ -285,26 +268,9 @@ export default function DroneLayer() {
       .style({ opacity: 0.98, stroke: '#ffffff', strokeWidth: 1.5 });
     layers.push(flyingPointLayer);
 
-    const flyingLabelLayer = new PointLayer({ zIndex: 39, depth: false })
-      .source(initialFlyingData, { parser: { type: 'json', x: 'gcjLng', y: 'gcjLat' } })
-      .shape('label', 'text')
-      .size(10)
-      .color('color')
-      .style({
-        textAnchor: 'center',
-        textOffset: [0, -18],
-        fontFamily: 'JetBrains Mono, monospace',
-        fontWeight: 700,
-        textAllowOverlap: true,
-        stroke: 'rgba(0,0,0,0.78)',
-        strokeWidth: 2,
-      });
-    layers.push(flyingLabelLayer);
-
     const data = points.map((pt) => {
       const [gcjLng, gcjLat] = wgs84ToGcj02(pt.lng, pt.lat);
-      const label = `${pt.altitude}m`;
-      return { ...pt, gcjLng, gcjLat, label };
+      return { ...pt, gcjLng, gcjLat };
     });
 
     // 1) Patrol pulse rings (grow animation)
@@ -329,23 +295,6 @@ export default function DroneLayer() {
       layers.push(pulseLayer);
     });
 
-    // 2) Altitude label
-    const labelLayer = new PointLayer({ zIndex: 31, depth: false })
-      .source(data, { parser: { type: 'json', x: 'gcjLng', y: 'gcjLat' } })
-      .shape('label', 'text')
-      .size(10)
-      .color('#34d399')
-      .style({
-        textAnchor: 'center',
-        textOffset: [0, -20],
-        fontFamily: 'JetBrains Mono, monospace',
-        fontWeight: 600,
-        textAllowOverlap: true,
-        stroke: 'rgba(0,0,0,0.7)',
-        strokeWidth: 2,
-      });
-    layers.push(labelLayer);
-
     layers.forEach((l) => scene.addLayer(l));
     extraLayersRef.current = layers;
 
@@ -353,7 +302,6 @@ export default function DroneLayer() {
       const nextFlyingData = getFlyingData(startedAt);
       setLayerData(flyingHaloLayer, nextFlyingData);
       setLayerData(flyingPointLayer, nextFlyingData);
-      setLayerData(flyingLabelLayer, nextFlyingData);
       animationFrameRef.current = requestAnimationFrame(tick);
     };
     animationFrameRef.current = requestAnimationFrame(tick);

@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
+import CountUp from 'react-countup';
 import { usePortStore } from '../../../stores/portStore';
 
 const panelStyle: React.CSSProperties = {
-  background: 'rgba(0,20,40,0.85)',
-  border: '1px solid rgba(0,208,233,0.2)',
+  background: 'linear-gradient(135deg, rgba(0,20,40,0.95) 0%, rgba(10,30,50,0.9) 100%)',
+  border: '1px solid rgba(0,208,233,0.3)',
   borderRadius: 8,
   padding: '12px 14px',
-  backdropFilter: 'blur(8px)',
-  height: 260,
+  backdropFilter: 'blur(12px)',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
+  overflow: 'hidden',
+  boxShadow: '0 0 20px rgba(0,208,233,0.15), inset 0 0 20px rgba(0,208,233,0.05)',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -77,6 +81,20 @@ export const SchedulePanel: React.FC = () => {
 
   return (
     <div style={panelStyle}>
+      {/* 边框流光 */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 8,
+        padding: '1px',
+        background: 'linear-gradient(90deg, transparent, #00D0E9, transparent)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        animation: 'borderFlow 3s linear infinite',
+        pointerEvents: 'none',
+      }} />
+
       <div style={titleStyle}>
         <Clock size={14} />
         班次时刻表
@@ -97,7 +115,7 @@ export const SchedulePanel: React.FC = () => {
           {nextSchedule.lane} · {nextSchedule.vesselName}
         </div>
         <div style={{ fontSize: 11, color: '#F5A623' }}>
-          距发船 {countdown} 分钟
+          距发船 <CountUp end={countdown} duration={1} /> 分钟
         </div>
       </div>
 
@@ -140,6 +158,13 @@ export const SchedulePanel: React.FC = () => {
           </div>
         ))}
       </div>
+
+      <style>{`
+        @keyframes borderFlow {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 };

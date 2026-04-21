@@ -3,7 +3,7 @@ import DeviceIconLayer from './base/DeviceIconLayer';
 import CoverageAreaLayer from './base/CoverageAreaLayer';
 import StatusAnimLayer from './base/StatusAnimLayer';
 import cameraData from '../../../../data/geo/cameras.json';
-import securityCameraSvg from './assets/security-camera.svg';
+import securityCameraSvg from './assets/electronic-police.svg';
 
 const STATUS_COLORS = {
   normal: '#60a5fa',

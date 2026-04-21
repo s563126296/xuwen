@@ -4,14 +4,17 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { usePortStore } from '../../../stores/portStore';
 
 const panelStyle: React.CSSProperties = {
-  background: 'rgba(0,20,40,0.85)',
-  border: '1px solid rgba(0,208,233,0.2)',
+  background: 'linear-gradient(135deg, rgba(0,20,40,0.95) 0%, rgba(10,30,50,0.9) 100%)',
+  border: '1px solid rgba(0,208,233,0.3)',
   borderRadius: 8,
   padding: '12px 14px',
-  backdropFilter: 'blur(8px)',
-  height: 240,
+  backdropFilter: 'blur(12px)',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
+  overflow: 'hidden',
+  boxShadow: '0 0 20px rgba(0,208,233,0.15), inset 0 0 20px rgba(0,208,233,0.05)',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -45,15 +48,28 @@ export const WeatherImpactPanel: React.FC = () => {
 
   return (
     <div style={panelStyle}>
+      {/* 边框流光 */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 8,
+        padding: '1px',
+        background: 'linear-gradient(90deg, transparent, #00D0E9, transparent)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        animation: 'borderFlow 3s linear infinite',
+        pointerEvents: 'none',
+      }} />
+
       <div style={titleStyle}>
         <CloudRain size={14} />
         海洋气象
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
-        {/* 风力风向罗盘 */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <svg width="100" height="100" viewBox="0 0 100 100">
+      <div style={{ flex: 1, display: 'grid', gridTemplateRows: 'minmax(82px, 1fr) minmax(42px, 0.55fr)', gap: 8, minHeight: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '92px 1fr', gap: 10, minHeight: 0 }}>
+          <svg width="90" height="90" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,208,233,0.2)" strokeWidth="1" />
             <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(0,208,233,0.1)" strokeWidth="1" />
             <text x="50" y="12" textAnchor="middle" style={{ fontSize: 10, fill: '#00D0E9' }}>N</text>
@@ -85,35 +101,33 @@ export const WeatherImpactPanel: React.FC = () => {
             </text>
             <text x="50" y="62" textAnchor="middle" style={{ fontSize: 9, fill: 'rgba(255,255,255,0.5)' }}>m/s</text>
           </svg>
+
+          <div style={{ display: 'grid', gap: 6, alignContent: 'center', minWidth: 0 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '18px 1fr auto', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.035)', borderRadius: 6, padding: '6px 8px' }}>
+              <Eye size={14} style={{ color: '#00D0E9' }} />
+              <span style={labelStyle}>能见度</span>
+              <span style={{ fontSize: 13, color: '#fff', fontWeight: 600 }}>
+                {weather.forecast[0]?.visibility || 0} km
+              </span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '18px 1fr auto', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.035)', borderRadius: 6, padding: '6px 8px' }}>
+              <Waves size={14} style={{ color: '#00D0E9' }} />
+              <span style={labelStyle}>浪高</span>
+              <span style={{ fontSize: 13, color: '#fff', fontWeight: 600 }}>
+                {weather.forecast[0]?.waveHeight || 0} m
+              </span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '18px 1fr auto', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.035)', borderRadius: 6, padding: '6px 8px' }}>
+              <ArrowUpDown size={14} style={{ color: '#00D0E9' }} />
+              <span style={labelStyle}>潮汐</span>
+              <span style={{ fontSize: 13, color: '#fff', fontWeight: 600 }}>
+                {getTideText(weather.tideStatus)}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* 3 行数据 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Eye size={14} style={{ color: '#00D0E9' }} />
-            <span style={labelStyle}>能见度</span>
-            <span style={{ fontSize: 13, color: '#fff', fontWeight: 600, marginLeft: 'auto' }}>
-              {weather.forecast[0]?.visibility || 0} km
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Waves size={14} style={{ color: '#00D0E9' }} />
-            <span style={labelStyle}>浪高</span>
-            <span style={{ fontSize: 13, color: '#fff', fontWeight: 600, marginLeft: 'auto' }}>
-              {weather.forecast[0]?.waveHeight || 0} m
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <ArrowUpDown size={14} style={{ color: '#00D0E9' }} />
-            <span style={labelStyle}>潮汐</span>
-            <span style={{ fontSize: 13, color: '#fff', fontWeight: 600, marginLeft: 'auto' }}>
-              {getTideText(weather.tideStatus)}
-            </span>
-          </div>
-        </div>
-
-        {/* 未来 6 小时气象趋势 */}
-        <div style={{ height: 60, marginTop: 4 }}>
+        <div style={{ minHeight: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={weather.forecast}>
               <XAxis
@@ -163,6 +177,11 @@ export const WeatherImpactPanel: React.FC = () => {
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+
+        @keyframes borderFlow {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
       `}</style>
     </div>

@@ -1,17 +1,21 @@
 import React from 'react';
 import { TrendingUp, ArrowUp, ArrowDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import CountUp from 'react-countup';
 import { usePortStore } from '../../../stores/portStore';
 
 const panelStyle: React.CSSProperties = {
-  background: 'rgba(0,20,40,0.85)',
-  border: '1px solid rgba(0,208,233,0.2)',
+  background: 'linear-gradient(135deg, rgba(0,20,40,0.95) 0%, rgba(10,30,50,0.9) 100%)',
+  border: '1px solid rgba(0,208,233,0.3)',
   borderRadius: 8,
   padding: '12px 14px',
-  backdropFilter: 'blur(8px)',
+  backdropFilter: 'blur(12px)',
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
+  overflow: 'hidden',
+  boxShadow: '0 0 20px rgba(0,208,233,0.15), inset 0 0 20px rgba(0,208,233,0.05)',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -62,6 +66,20 @@ export default function CrossingStatsPanel() {
 
   return (
     <div style={panelStyle}>
+      {/* 边框流光 */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 8,
+        padding: '1px',
+        background: 'linear-gradient(90deg, transparent, #00D0E9, transparent)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        animation: 'borderFlow 3s linear infinite',
+        pointerEvents: 'none',
+      }} />
+
       <div style={titleStyle}>
         <TrendingUp size={14} />
         车辆过海统计
@@ -71,7 +89,7 @@ export default function CrossingStatsPanel() {
         {/* 左侧：今日总量 */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80 }}>
           <div style={bigNumberStyle}>
-            {crossingStats.todayTotal.toLocaleString()}
+            <CountUp end={crossingStats.todayTotal} duration={1.5} separator="," />
             <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.5)', marginLeft: 2 }}>辆</span>
           </div>
           <div style={{
@@ -144,6 +162,13 @@ export default function CrossingStatsPanel() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes borderFlow {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 }

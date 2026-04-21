@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { Ship } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import CountUp from 'react-countup';
 import { usePortStore } from '../../../stores/portStore';
 
 const panelStyle: React.CSSProperties = {
-  background: 'rgba(0,20,40,0.85)',
-  border: '1px solid rgba(0,208,233,0.2)',
+  background: 'linear-gradient(135deg, rgba(0,20,40,0.95) 0%, rgba(10,30,50,0.9) 100%)',
+  border: '1px solid rgba(0,208,233,0.3)',
   borderRadius: 8,
   padding: '12px 14px',
-  backdropFilter: 'blur(8px)',
+  backdropFilter: 'blur(12px)',
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
   minHeight: 0,
+  position: 'relative',
+  overflow: 'hidden',
+  boxShadow: '0 0 20px rgba(0,208,233,0.15), inset 0 0 20px rgba(0,208,233,0.05)',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -74,6 +78,20 @@ export const PortCapacityPanel: React.FC = () => {
 
   return (
     <div style={panelStyle}>
+      {/* 边框流光 */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 8,
+        padding: '1px',
+        background: 'linear-gradient(90deg, transparent, #00D0E9, transparent)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        animation: 'borderFlow 3s linear infinite',
+        pointerEvents: 'none',
+      }} />
+
       <div style={titleStyle}>
         <Ship size={14} />
         港口运力
@@ -100,7 +118,7 @@ export const PortCapacityPanel: React.FC = () => {
             textAlign: 'center',
           }}>
             <div style={bigNumberStyle}>
-              {data.availableVessels}
+              <CountUp end={data.availableVessels} duration={1.5} />
               <span style={{ fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.6)', marginLeft: 4 }}>艘</span>
             </div>
             <div style={labelStyle}>可运船舶</div>
@@ -113,7 +131,7 @@ export const PortCapacityPanel: React.FC = () => {
             textAlign: 'center',
           }}>
             <div style={bigNumberStyle}>
-              {data.availableSlots}
+              <CountUp end={data.availableSlots} duration={1.5} />
               <span style={{ fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.6)', marginLeft: 4 }}>位</span>
             </div>
             <div style={labelStyle}>可运车位</div>
@@ -134,13 +152,29 @@ export const PortCapacityPanel: React.FC = () => {
             background: 'rgba(0,208,233,0.1)',
             borderRadius: 4,
             overflow: 'hidden',
+            position: 'relative',
+            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)',
           }}>
             <div style={{
               width: `${data.loadRate}%`,
               height: '100%',
-              background: `linear-gradient(90deg, ${loadColor}, ${loadColor}dd)`,
+              background: `linear-gradient(90deg, ${loadColor}cc, ${loadColor}ff, ${loadColor}cc)`,
+              backgroundSize: '200% 100%',
+              animation: 'progressShine 2s ease-in-out infinite',
+              position: 'relative',
+              boxShadow: `0 0 10px ${loadColor}, inset 0 0 5px ${loadColor}`,
               transition: 'width 0.5s ease',
-            }} />
+            }}>
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                width: '30%',
+                height: '100%',
+                background: `linear-gradient(90deg, transparent, ${loadColor}ff)`,
+                animation: 'progressGlow 1.5s ease-in-out infinite',
+              }} />
+            </div>
           </div>
         </div>
 
@@ -166,6 +200,23 @@ export const PortCapacityPanel: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
+
+      <style>{`
+        @keyframes borderFlow {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+
+        @keyframes progressShine {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
+        @keyframes progressGlow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };

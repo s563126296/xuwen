@@ -25,7 +25,7 @@ export default function Header({ time, children }: Props) {
           </div>
           <div>
             <div className="logo-text">徐闻智慧交通大屏</div>
-            <div className="header-subtitle">XUWEN INTELLIGENT TRANSPORTATION DASHBOARD</div>
+            <div className="header-subtitle">琼州海峡北岸智慧交通综合管控平台</div>
           </div>
         </div>
       </div>
@@ -62,10 +62,10 @@ export default function Header({ time, children }: Props) {
           text-shadow: 0 0 15px var(--color-primary-glow, rgba(77,166,255,0.5));
         }
         .header-subtitle {
-          font-family: var(--font-display, 'Orbitron'), sans-serif;
-          font-size: 9px;
+          font-family: 'Noto Sans SC', sans-serif;
+          font-size: 10px;
           color: var(--text-tertiary, rgba(140,160,180,0.45));
-          letter-spacing: 3px; margin-top: 2px;
+          letter-spacing: 2px; margin-top: 2px;
         }
         .header-time { text-align: right; }
         .time-value {

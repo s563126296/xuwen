@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PointLayer } from '@antv/l7';
 import type { ILayer } from '@antv/l7-core';
 import { useMapScene } from '../../../MapSceneContext';
@@ -30,6 +30,12 @@ export interface DeviceIconLayerProps {
   entityType?: string;
   /** Tooltip formatter -- receives point properties, returns display string */
   tooltipFormatter?: (props: Record<string, unknown>) => string;
+}
+
+interface DomHitPoint {
+  id: string;
+  x: number;
+  y: number;
 }
 
 // ── Tooltip helpers (shared singleton DOM element) ──────────────────────
@@ -115,13 +121,34 @@ export default function DeviceIconLayer({
   const scene = useMapScene();
   const layersRef = useRef<ILayer[]>([]);
   const tooltipFormatterRef = useRef(tooltipFormatter);
+  const [domHitPoints, setDomHitPoints] = useState<DomHitPoint[]>([]);
+  const domRafRef = useRef<number | null>(null);
+
+  const gcjPoints = useMemo(
+    () =>
+      points.map((pt) => {
+        const [gcjLng, gcjLat] = wgs84ToGcj02(pt.lng, pt.lat);
+        return { ...pt, gcjLng, gcjLat };
+      }),
+    [points],
+  );
+
+  const handleEntityClick = useCallback(
+    (id: string) => {
+      if (!id) return;
+      const state = useUIStore.getState();
+      state.setSelectedEntity({ type: entityType, id });
+      openDeviceModal(entityType, id);
+    },
+    [entityType],
+  );
 
   useEffect(() => {
     tooltipFormatterRef.current = tooltipFormatter;
   }, [tooltipFormatter]);
 
   useEffect(() => {
-    if (!scene || points.length === 0) {
+    if (!scene || gcjPoints.length === 0) {
       layersRef.current.forEach((layer) => scene?.removeLayer(layer));
       layersRef.current = [];
       return;
@@ -134,35 +161,33 @@ export default function DeviceIconLayer({
       if (cancelled) return;
 
       // Transform WGS84 -> GCJ02
-      const data = points.map((pt) => {
-        const [gcjLng, gcjLat] = wgs84ToGcj02(pt.lng, pt.lat);
-        return { ...pt, gcjLng, gcjLat, _imageId: imageId };
-      });
+      const data = gcjPoints.map((pt) => ({ ...pt, _imageId: imageId }));
 
       const iconLayer = new PointLayer({ zIndex })
         .source(data, { parser: { type: 'json', x: 'gcjLng', y: 'gcjLat' } })
         .shape(imageId, 'image')
         .size(size)
-        .style({ opacity });
+        .style({ opacity })
+        .active(true);
 
       const hitLayer = new PointLayer({ zIndex: Math.max(zIndex + 40, 48), depth: false })
         .source(data, { parser: { type: 'json', x: 'gcjLng', y: 'gcjLat' } })
         .shape('circle')
-        .size(Math.max(size + 18, 38))
+        .size(Math.max(size + 28, 52))
         .color('#ffffff')
         .style({
-          opacity: 0.01,
+          opacity: 0.001,
           strokeWidth: 0,
           textAllowOverlap: true,
-        });
+        })
+        .active(true);
 
       // ── Interaction ──
       const handleClick = (e: any) => {
         const p = e.feature?.properties;
         if (p) {
-          const id = p.id || p.name || '';
-          useUIStore.getState().setSelectedEntity({ type: entityType, id });
-          openDeviceModal(entityType, id);
+          const id = String(p.id ?? p.name ?? '');
+          handleEntityClick(id);
         }
       };
 
@@ -182,6 +207,8 @@ export default function DeviceIconLayer({
       };
 
       iconLayer.on('click', handleClick);
+      iconLayer.on('mousemove', handleMouseMove);
+      iconLayer.on('mouseout', handleMouseOut);
       hitLayer.on('click', handleClick);
       hitLayer.on('mousemove', handleMouseMove);
       hitLayer.on('mouseout', handleMouseOut);
@@ -198,7 +225,79 @@ export default function DeviceIconLayer({
       document.body.style.cursor = '';
       hideTooltip();
     };
-  }, [scene, svgPath, points, size, opacity, zIndex, entityType]);
+  }, [scene, svgPath, gcjPoints, size, opacity, zIndex, entityType, handleEntityClick]);
 
-  return null;
+  useEffect(() => {
+    if (!scene || gcjPoints.length === 0) {
+      setDomHitPoints([]);
+      return;
+    }
+
+    const updateDomHits = () => {
+      const nextPoints = gcjPoints
+        .map((point) => {
+          const projected = scene.lngLatToContainer([point.gcjLng, point.gcjLat] as [number, number]) as
+            | { x?: number; y?: number }
+            | [number, number]
+            | null;
+          const x = Array.isArray(projected) ? projected[0] : projected?.x;
+          const y = Array.isArray(projected) ? projected[1] : projected?.y;
+          if (typeof x !== 'number' || !Number.isFinite(x)) return null;
+          if (typeof y !== 'number' || !Number.isFinite(y)) return null;
+          return { id: point.id, x, y };
+        })
+        .filter((item): item is DomHitPoint => item !== null);
+      setDomHitPoints(nextPoints);
+    };
+
+    const scheduleUpdate = () => {
+      if (domRafRef.current !== null) {
+        cancelAnimationFrame(domRafRef.current);
+      }
+      domRafRef.current = requestAnimationFrame(() => {
+        domRafRef.current = null;
+        updateDomHits();
+      });
+    };
+
+    const events = ['mapmove', 'move', 'moveend', 'zoom', 'zoomend', 'resize', 'pitch', 'rotate'];
+    updateDomHits();
+    events.forEach((eventName) => scene.on(eventName as any, scheduleUpdate));
+
+    return () => {
+      events.forEach((eventName) => scene.off(eventName as any, scheduleUpdate));
+      if (domRafRef.current !== null) {
+        cancelAnimationFrame(domRafRef.current);
+        domRafRef.current = null;
+      }
+      setDomHitPoints([]);
+    };
+  }, [scene, gcjPoints]);
+
+  if (domHitPoints.length === 0) return null;
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: Math.max(zIndex + 120, 180), pointerEvents: 'none' }}>
+      {domHitPoints.map((hitPoint) => (
+        <button
+          key={`${entityType}-${hitPoint.id}`}
+          type="button"
+          aria-label={`打开设备${hitPoint.id}详情`}
+          onClick={() => handleEntityClick(hitPoint.id)}
+          style={{
+            position: 'absolute',
+            left: hitPoint.x - 20,
+            top: hitPoint.y - 20,
+            width: 40,
+            height: 40,
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            pointerEvents: 'auto',
+            padding: 0,
+          }}
+        />
+      ))}
+    </div>
+  );
 }

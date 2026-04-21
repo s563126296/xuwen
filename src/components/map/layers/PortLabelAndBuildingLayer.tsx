@@ -40,7 +40,17 @@ interface PoiPoint {
   importance: number;
 }
 
-interface LabelPoint extends PoiPoint {
+interface LabelPoint {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  category: string;
+  color: string;
+}
+
+interface HitPoint {
+  id: string;
   x: number;
   y: number;
 }
@@ -73,6 +83,9 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
   const layersRef = useRef<ILayer[]>([]);
   const [initialized, setInitialized] = useState(false);
   const [labelPoints, setLabelPoints] = useState<LabelPoint[]>([]);
+  const [hitPoints, setHitPoints] = useState<HitPoint[]>([]);
+  const labelRafRef = useRef<number | null>(null);
+  const labelLoopRef = useRef<number | null>(null);
   const setSelectedEntity = useUIStore((s) => s.setSelectedEntity);
   const setActiveModal = useUIStore((s) => s.setActiveModal);
   const setSelectedPort = useUIStore((s) => s.setSelectedPort);
@@ -99,24 +112,83 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
     setActiveModal('poi-detail');
   }, [setActiveModal, setSelectedEntity, setSelectedPort]);
 
-  const updateLabelPositions = useCallback(() => {
-    if (!scene || !visible) {
+  const refreshLabelPositions = useCallback(() => {
+    if (!scene || !visible || !initialized) {
       setLabelPoints([]);
       return;
     }
 
-    const nextPoints = gcjPoints
-      .map((point) => {
-        const pixel = scene.lngLatToContainer([point.lng, point.lat] as [number, number]) as any;
-        const x = typeof pixel?.x === 'number' ? pixel.x : pixel?.[0];
-        const y = typeof pixel?.y === 'number' ? pixel.y : pixel?.[1];
-        if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-        return { ...point, x, y };
-      })
-      .filter(Boolean) as LabelPoint[];
+    const zoom = typeof scene.getZoom === 'function' ? scene.getZoom() : 11;
+    const mapSize = scene.getMapService?.()?.getSize?.() as unknown;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    if (Array.isArray(mapSize) && mapSize.length >= 2) {
+      const maybeWidth = mapSize[0];
+      const maybeHeight = mapSize[1];
+      if (typeof maybeWidth === 'number' && Number.isFinite(maybeWidth)) width = maybeWidth;
+      if (typeof maybeHeight === 'number' && Number.isFinite(maybeHeight)) height = maybeHeight;
+    } else if (mapSize && typeof mapSize === 'object') {
+      const rect = mapSize as { width?: number; height?: number };
+      if (typeof rect.width === 'number' && Number.isFinite(rect.width)) width = rect.width;
+      if (typeof rect.height === 'number' && Number.isFinite(rect.height)) height = rect.height;
+    }
 
-    setLabelPoints(nextPoints);
-  }, [gcjPoints, scene, visible]);
+    const nextLabels = gcjPoints
+      .map((point) => {
+        // 只保留港口/码头标签，避免调度/服务等次级标签造成碎片化视觉。
+        if (point.category !== 'port' && point.category !== 'terminal') return null;
+        // 中低缩放下仅显示核心港口名，减少跨海区域文字重叠。
+        if (point.category === 'terminal' && zoom < 11.5) return null;
+
+        const projected = scene.lngLatToContainer([point.lng, point.lat] as [number, number]) as
+          | { x?: number; y?: number }
+          | [number, number]
+          | null;
+        const x = Array.isArray(projected) ? projected[0] : projected?.x;
+        const y = Array.isArray(projected) ? projected[1] : projected?.y;
+        if (typeof x !== 'number' || !Number.isFinite(x)) return null;
+        if (typeof y !== 'number' || !Number.isFinite(y)) return null;
+        if (x < -120 || x > width + 120 || y < -80 || y > height + 80) return null;
+
+        return {
+          id: point.id,
+          name: point.name,
+          x,
+          y,
+          category: point.category,
+          color: point.color,
+        };
+      })
+      .filter((item): item is LabelPoint => item !== null);
+
+    const nextHits = gcjPoints
+      .map((point) => {
+        const projected = scene.lngLatToContainer([point.lng, point.lat] as [number, number]) as
+          | { x?: number; y?: number }
+          | [number, number]
+          | null;
+        const x = Array.isArray(projected) ? projected[0] : projected?.x;
+        const y = Array.isArray(projected) ? projected[1] : projected?.y;
+        if (typeof x !== 'number' || !Number.isFinite(x)) return null;
+        if (typeof y !== 'number' || !Number.isFinite(y)) return null;
+        if (x < -120 || x > width + 120 || y < -80 || y > height + 80) return null;
+        return { id: point.id, x, y };
+      })
+      .filter((item): item is HitPoint => item !== null);
+
+    setLabelPoints(nextLabels);
+    setHitPoints(nextHits);
+  }, [gcjPoints, initialized, scene, visible]);
+
+  const scheduleLabelRefresh = useCallback(() => {
+    if (labelRafRef.current !== null) {
+      cancelAnimationFrame(labelRafRef.current);
+    }
+    labelRafRef.current = requestAnimationFrame(() => {
+      labelRafRef.current = null;
+      refreshLabelPositions();
+    });
+  }, [refreshLabelPositions]);
 
   useEffect(() => {
     if (!scene) return;
@@ -138,8 +210,9 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
     if (!scene || !initialized) return;
 
     const layers: ILayer[] = [];
+    const interactiveLayers: ILayer[] = [];
 
-    // 第1层：静态外圈光晕。不要给所有 POI 做呼吸动画，避免误判为刷新。
+    // 第1层：静态外圈光晕
     const outerRing = new PointLayer({ zIndex: 15 })
       .source(gcjPoints, { parser: { type: 'json', x: 'lng', y: 'lat' } })
       .shape('circle')
@@ -156,6 +229,7 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
       .color('color')
       .style({ opacity: 0.9, strokeWidth: 1.5, stroke: '#fff' });
     layers.push(innerRing);
+    interactiveLayers.push(innerRing);
 
     // 第3层：分类图标（按类别分别创建图层）
     const portPoints = gcjPoints.filter(p => p.category === 'port');
@@ -171,6 +245,7 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
         .color('#fff')
         .style({ opacity: 0.95 });
       layers.push(portIconLayer);
+      interactiveLayers.push(portIconLayer);
     }
 
     if (terminalPoints.length > 0) {
@@ -181,6 +256,7 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
         .color('#fff')
         .style({ opacity: 0.95 });
       layers.push(terminalIconLayer);
+      interactiveLayers.push(terminalIconLayer);
     }
 
     if (dispatchPoints.length > 0) {
@@ -191,6 +267,7 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
         .color('#fff')
         .style({ opacity: 0.95 });
       layers.push(dispatchIconLayer);
+      interactiveLayers.push(dispatchIconLayer);
     }
 
     if (servicePoints.length > 0) {
@@ -201,19 +278,21 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
         .color('#fff')
         .style({ opacity: 0.95 });
       layers.push(serviceIconLayer);
+      interactiveLayers.push(serviceIconLayer);
     }
 
-    // 第4层：透明命中层，解决小图标难点中和 text label 点击无反馈问题。
+    // 第4层：透明命中层，提升点击体验
     const hitLayer = new PointLayer({ zIndex: 120, depth: false })
       .source(gcjPoints, { parser: { type: 'json', x: 'lng', y: 'lat' } })
       .shape('circle')
       .size('importance', [34, 48])
       .color('#ffffff')
       .style({
-        opacity: 0.01,
+        opacity: 0.001,
         strokeWidth: 0,
       });
     layers.push(hitLayer);
+    interactiveLayers.push(hitLayer);
 
     // 交互
     const handleMouseMove = (e: any) => {
@@ -232,12 +311,11 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
       handlePoiClick(p as PoiPoint);
     };
 
-    innerRing.on('mousemove', handleMouseMove);
-    innerRing.on('mouseout', handleMouseOut);
-    innerRing.on('click', handleClick);
-    hitLayer.on('mousemove', handleMouseMove);
-    hitLayer.on('mouseout', handleMouseOut);
-    hitLayer.on('click', handleClick);
+    interactiveLayers.forEach((layer) => {
+      layer.on('mousemove', handleMouseMove);
+      layer.on('mouseout', handleMouseOut);
+      layer.on('click', handleClick);
+    });
 
     // 添加所有图层
     layers.forEach((layer) => {
@@ -257,25 +335,64 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
         } catch { /* noop */ }
       });
       layersRef.current = [];
+      if (labelRafRef.current !== null) {
+        cancelAnimationFrame(labelRafRef.current);
+        labelRafRef.current = null;
+      }
+      if (labelLoopRef.current !== null) {
+        cancelAnimationFrame(labelLoopRef.current);
+        labelLoopRef.current = null;
+      }
       document.body.style.cursor = '';
       hideTooltip();
+      setLabelPoints([]);
+      setHitPoints([]);
     };
   }, [scene, initialized, gcjPoints, handlePoiClick, visible]);
 
   useEffect(() => {
     if (!scene || !initialized) return;
 
-    updateLabelPositions();
-    scene.on('moveend', updateLabelPositions);
-    scene.on('zoomend', updateLabelPositions);
-    scene.on('resize', updateLabelPositions);
+    const updateEvents = ['mapmove', 'move', 'moveend', 'zoom', 'zoomend', 'resize', 'pitch', 'rotate'];
+    scheduleLabelRefresh();
+
+    updateEvents.forEach((eventName) => {
+      scene.on(eventName as any, scheduleLabelRefresh);
+    });
 
     return () => {
-      scene.off('moveend', updateLabelPositions);
-      scene.off('zoomend', updateLabelPositions);
-      scene.off('resize', updateLabelPositions);
+      updateEvents.forEach((eventName) => {
+        scene.off(eventName as any, scheduleLabelRefresh);
+      });
+      if (labelRafRef.current !== null) {
+        cancelAnimationFrame(labelRafRef.current);
+        labelRafRef.current = null;
+      }
     };
-  }, [scene, initialized, updateLabelPositions]);
+  }, [scene, initialized, scheduleLabelRefresh]);
+
+  // 兜底循环：低频刷新标签位置，避免拖动时出现“漂移后回位”
+  useEffect(() => {
+    if (!scene || !initialized || !visible) return;
+
+    let lastTs = 0;
+    const tick = (ts: number) => {
+      if (ts - lastTs >= 80) {
+        lastTs = ts;
+        refreshLabelPositions();
+      }
+      labelLoopRef.current = requestAnimationFrame(tick);
+    };
+
+    labelLoopRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (labelLoopRef.current !== null) {
+        cancelAnimationFrame(labelLoopRef.current);
+        labelLoopRef.current = null;
+      }
+    };
+  }, [scene, initialized, visible, refreshLabelPositions]);
 
   // 控制显示/隐藏
   useEffect(() => {
@@ -288,21 +405,47 @@ export default function PortLabelAndBuildingLayer({ visible }: Props) {
         layer.hide();
       }
     });
-    updateLabelPositions();
-  }, [visible]);
+    scheduleLabelRefresh();
+  }, [visible, scheduleLabelRefresh]);
 
-  if (!visible || labelPoints.length === 0) return null;
+  if (!visible) return null;
 
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 140, pointerEvents: 'none' }}>
+      {hitPoints.map((hit) => {
+        const poi = gcjPoints.find((item) => item.id === hit.id);
+        if (!poi) return null;
+        return (
+          <button
+            key={`hit-${hit.id}`}
+            type="button"
+            aria-label={`打开${poi.name}详情`}
+            onClick={() => handlePoiClick(poi)}
+            style={{
+              position: 'absolute',
+              left: hit.x - 18,
+              top: hit.y - 18,
+              width: 36,
+              height: 36,
+              border: 'none',
+              background: 'transparent',
+              pointerEvents: 'auto',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+          />
+        );
+      })}
       {labelPoints.map((point) => {
+        const poi = gcjPoints.find((item) => item.id === point.id);
+        if (!poi) return null;
         const isPort = point.category === 'port';
         return (
           <button
             key={point.id}
             type="button"
             aria-label={`查看${point.name}`}
-            onClick={() => handlePoiClick(point)}
+            onClick={() => handlePoiClick(poi)}
             style={{
               position: 'absolute',
               left: point.x,

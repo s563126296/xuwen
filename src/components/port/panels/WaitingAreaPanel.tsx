@@ -1,16 +1,20 @@
 import React from 'react';
 import { ParkingCircle } from 'lucide-react';
+import CountUp from 'react-countup';
 import { usePortStore } from '../../../stores/portStore';
 
 const panelStyle: React.CSSProperties = {
-  background: 'rgba(0,20,40,0.85)',
-  border: '1px solid rgba(0,208,233,0.2)',
+  background: 'linear-gradient(135deg, rgba(0,20,40,0.95) 0%, rgba(10,30,50,0.9) 100%)',
+  border: '1px solid rgba(0,208,233,0.3)',
   borderRadius: 8,
   padding: '12px 14px',
-  backdropFilter: 'blur(8px)',
+  backdropFilter: 'blur(12px)',
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
+  overflow: 'hidden',
+  boxShadow: '0 0 20px rgba(0,208,233,0.15), inset 0 0 20px rgba(0,208,233,0.05)',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -52,6 +56,20 @@ export default function WaitingAreaPanel() {
 
   return (
     <div style={panelStyle}>
+      {/* 边框流光 */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 8,
+        padding: '1px',
+        background: 'linear-gradient(90deg, transparent, #00D0E9, transparent)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        animation: 'borderFlow 3s linear infinite',
+        pointerEvents: 'none',
+      }} />
+
       <div style={titleStyle}>
         <ParkingCircle size={14} />
         待渡区监控
@@ -61,7 +79,7 @@ export default function WaitingAreaPanel() {
         {/* 顶部：总待渡车辆 */}
         <div style={{ textAlign: 'center', flexShrink: 0 }}>
           <div style={bigNumberStyle}>
-            {totalWaiting.toLocaleString()}
+            <CountUp end={totalWaiting} duration={1.5} separator="," />
             <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.5)', marginLeft: 2 }}>辆</span>
           </div>
           <div style={labelStyle}>当前待渡总量</div>
@@ -90,13 +108,28 @@ export default function WaitingAreaPanel() {
                     borderRadius: 6,
                     overflow: 'hidden',
                     position: 'relative',
+                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)',
                   }}>
                     <div style={{
                       width: `${percentage}%`,
                       height: '100%',
-                      background: `linear-gradient(90deg, ${color}, ${color}dd)`,
+                      background: `linear-gradient(90deg, ${color}cc, ${color}ff, ${color}cc)`,
+                      backgroundSize: '200% 100%',
+                      animation: 'progressShine 2s ease-in-out infinite',
+                      position: 'relative',
+                      boxShadow: `0 0 10px ${color}, inset 0 0 5px ${color}`,
                       transition: 'width 0.5s ease',
-                    }} />
+                    }}>
+                      <div style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: 0,
+                        width: '30%',
+                        height: '100%',
+                        background: `linear-gradient(90deg, transparent, ${color}ff)`,
+                        animation: 'progressGlow 1.5s ease-in-out infinite',
+                      }} />
+                    </div>
                     <div style={{
                       position: 'absolute',
                       top: 0,
@@ -189,6 +222,23 @@ export default function WaitingAreaPanel() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes borderFlow {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+
+        @keyframes progressShine {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
+        @keyframes progressGlow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

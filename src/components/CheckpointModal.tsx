@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Camera, TrendingUp, Clock, Gauge, Video, X, Monitor, Type, ImageIcon, Plane, Battery, Signal, MapPin, Wind, Thermometer, AlertTriangle, BarChart3, Timer } from 'lucide-react';
 import Modal from './Modal';
 import { useUIStore } from '../stores';
@@ -427,7 +427,9 @@ export default function CheckpointModal() {
   const selectedDeviceType = useUIStore((s) => s.selectedDeviceType);
   const selectedEntity = useUIStore((s) => s.selectedEntity);
   const activeModal = useUIStore((s) => s.activeModal);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
   const [videoOpen, setVideoOpen] = useState(false);
+  const lastAutoOpenedEntityRef = useRef<string | null>(null);
 
   const selectedCamera = getCameraDevice(selectedEntity);
   const selectedDrone = getDroneRoute(selectedEntity);
@@ -464,6 +466,24 @@ export default function CheckpointModal() {
     const cameraLikeTypes = ['police', 'speed', 'parking', 'checkpoint', 'monitor'];
     setVideoOpen(cameraLikeTypes.includes(effectiveDeviceType || ''));
   }, [activeModal, effectiveDeviceType, selectedEntity]);
+
+  useEffect(() => {
+    if (!selectedEntity) {
+      lastAutoOpenedEntityRef.current = null;
+      return;
+    }
+    if (!ENTITY_DEVICE_TYPE[selectedEntity.type]) return;
+
+    const entityKey = `${selectedEntity.type}:${selectedEntity.id}`;
+    if (activeModal === 'checkpoint') {
+      lastAutoOpenedEntityRef.current = entityKey;
+      return;
+    }
+    if (lastAutoOpenedEntityRef.current === entityKey) return;
+
+    setActiveModal('checkpoint');
+    lastAutoOpenedEntityRef.current = entityKey;
+  }, [selectedEntity, activeModal, setActiveModal]);
 
   return (
     <Modal id="checkpoint" title={cfg.title} width={effectiveDeviceType === 'drone' ? 760 : 680}>

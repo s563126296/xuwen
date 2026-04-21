@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { LineLayer, PointLayer } from '@antv/l7';
+import { LineLayer } from '@antv/l7';
 import type { ILayer } from '@antv/l7-core';
 import { useMapScene } from '../MapSceneContext';
-import { mapFeatureCollectionToGcj, mapRowsToGcj } from '../../../utils/coordTransform';
+import { mapFeatureCollectionToGcj } from '../../../utils/coordTransform';
 import laneData from '../../../data/geo/lanes.json';
 
 const LANE_COLORS: Record<string, string> = {
@@ -34,7 +34,6 @@ export default function ShippingLaneLayer() {
   const glowRef = useRef<ILayer | null>(null);
   const lineRef = useRef<ILayer | null>(null);
   const flowRef = useRef<ILayer | null>(null);
-  const labelRef = useRef<ILayer | null>(null);
 
   useEffect(() => {
     if (!scene) return;
@@ -89,35 +88,6 @@ export default function ShippingLaneLayer() {
         duration: 3,
       });
 
-    // Layer 4: Lane name labels
-    const labelPoints = (laneData as any[]).map((lane) => {
-      const mid = Math.floor(lane.coordinates.length / 2);
-      return {
-        lng: lane.coordinates[mid][0],
-        lat: lane.coordinates[mid][1],
-        name: lane.name,
-        frequency: lane.frequency || 30,
-        color: LANE_COLORS[lane.type] || '#a78bfa',
-      };
-    });
-
-    const gcjLabelPts = mapRowsToGcj(labelPoints);
-
-    const labelLayer = new PointLayer({ zIndex: 30, depth: false })
-      .source(gcjLabelPts, { parser: { type: 'json', x: 'lng', y: 'lat' } })
-      .shape('name', 'text')
-      .size(10)
-      .color('color')
-      .style({
-        textAnchor: 'center',
-        textOffset: [0, -10],
-        fontFamily: 'Noto Sans SC',
-        fontWeight: 400,
-        stroke: '#060d1a',
-        strokeWidth: 2,
-        opacity: 0.5,
-      });
-
     line.on('mousemove', (e: any) => {
       const p = e.feature?.properties;
       if (!p) return;
@@ -128,15 +98,13 @@ export default function ShippingLaneLayer() {
     scene.addLayer(glow);
     scene.addLayer(line);
     scene.addLayer(flow);
-    scene.addLayer(labelLayer);
 
     glowRef.current = glow;
     lineRef.current = line;
     flowRef.current = flow;
-    labelRef.current = labelLayer;
 
     return () => {
-      [glowRef, lineRef, flowRef, labelRef].forEach((ref) => {
+      [glowRef, lineRef, flowRef].forEach((ref) => {
         if (ref.current) { scene.removeLayer(ref.current); ref.current = null; }
       });
       hideTooltip();
