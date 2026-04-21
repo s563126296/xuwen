@@ -49,6 +49,7 @@ export default function CorridorPressureCard() {
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="进出城通道"
       icon={<Activity size={14} style={{ color: '#4da6ff' }} />}
       summary={summary}

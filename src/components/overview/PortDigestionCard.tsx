@@ -43,6 +43,7 @@ export default function PortDigestionCard() {
       icon={<Anchor size={14} style={{ color: '#4da6ff' }} />}
       summary={summary}
       delay="0s"
+      defaultExpanded={true}
     >
       <div style={{ display: 'flex', gap: 10 }}>
         {ports.map((p) => (

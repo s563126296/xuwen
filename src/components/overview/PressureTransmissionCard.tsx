@@ -32,6 +32,7 @@ export default function PressureTransmissionCard({ delay = '0s' }: { delay?: str
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="拥堵扩散情况"
       icon={<GitBranch size={14} color="#4da6ff" />}
       summary={summary}

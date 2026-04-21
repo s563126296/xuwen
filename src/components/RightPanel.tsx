@@ -47,6 +47,7 @@ export default function RightPanel() {
       <WeatherCouplingCard delay="0.25s" />
 
       <CollapsibleCard
+        defaultExpanded={true}
         title="拥堵预警"
         icon={<AlertTriangle size={14} color="#f87171" />}
         summary={congestionSummary}

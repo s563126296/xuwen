@@ -28,6 +28,7 @@ export default function WeatherCouplingCard({ delay = '0s' }: { delay?: string }
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="天气影响程度"
       icon={<CloudRain size={14} color="#4da6ff" />}
       summary={summary}

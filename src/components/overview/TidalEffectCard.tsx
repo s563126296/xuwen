@@ -32,6 +32,7 @@ export default function TidalEffectCard() {
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="进出港流量对比"
       icon={<ArrowLeftRight size={14} style={{ color: '#4da6ff' }} />}
       summary={summary}

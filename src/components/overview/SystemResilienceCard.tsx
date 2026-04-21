@@ -43,6 +43,7 @@ export default function SystemResilienceCard({ delay = '0s' }: { delay?: string 
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="应急承受能力"
       icon={<Shield size={14} color="#4da6ff" />}
       summary={summary}

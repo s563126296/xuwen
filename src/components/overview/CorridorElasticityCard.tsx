@@ -29,6 +29,7 @@ export default function CorridorElasticityCard({ delay = '0s' }: { delay?: strin
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="道路剩余容量"
       icon={<Gauge size={14} color="#4da6ff" />}
       summary={summary}

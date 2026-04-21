@@ -30,6 +30,7 @@ export default function ShutdownProbabilityCard({ delay = '0s' }: { delay?: stri
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="停航风险预测"
       icon={<AlertTriangle size={14} color="#4da6ff" />}
       summary={summary}

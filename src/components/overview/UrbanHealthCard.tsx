@@ -35,6 +35,7 @@ export default function UrbanHealthCard() {
 
   return (
     <CollapsibleCard
+      defaultExpanded={true}
       title="城区道路状况"
       icon={<Heart size={14} style={{ color: '#4da6ff' }} />}
       summary={summary}
