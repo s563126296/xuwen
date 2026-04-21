@@ -200,8 +200,8 @@ function App() {
             <div style={{
               position: 'absolute',
               bottom: 8,
-              left: 12,
-              right: 12,
+              left: 364,
+              right: 364,
               height: 94,
               zIndex: 20,
               pointerEvents: 'auto',
@@ -213,8 +213,7 @@ function App() {
             <div style={{
               position: 'absolute',
               bottom: 110,
-              left: '50%',
-              transform: 'translateX(-50%)',
+              right: 364,
               zIndex: 25,
               pointerEvents: 'auto',
             }}>
