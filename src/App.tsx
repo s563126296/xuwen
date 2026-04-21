@@ -5,12 +5,14 @@ import AiSummaryBar from './components/overview/AiSummaryBar';
 import LeftPanel from './components/LeftPanel';
 import RightPanel from './components/RightPanel';
 import ModeSwitcher from './components/ModeSwitcher';
+import PortMode from './components/port/PortMode';
 import CommandMode from './components/command/CommandMode';
 import EmergencyMode from './components/emergency/EmergencyMode';
 import AnalysisMode from './components/analysis/AnalysisMode';
 import AIDecisionMode from './components/ai-decision/AIDecisionMode';
 import CheckpointModal from './components/CheckpointModal';
 import CongestionPredictionModal from './components/CongestionPredictionModal';
+import PoiDetailModal from './components/PoiDetailModal';
 import StrategyModal from './components/StrategyModal';
 import ResilienceInfoModal from './components/overview/ResilienceInfoModal';
 import Modal from './components/Modal';
@@ -108,6 +110,7 @@ function App() {
   const deviceData: DeviceData[] = [
     { name: '电子警察', count: 49, online: 48, offline: 1 },
     { name: '违停抓拍', count: 25, online: 24, offline: 1 },
+    { name: '治安监控', count: 4, online: 4, offline: 0 },
     { name: '治安卡口', count: 31, online: 30, offline: 1 },
     { name: '超速抓拍', count: 4, online: 4, offline: 0 },
     { name: '信号灯控制', count: 8, online: 8, offline: 0 },
@@ -222,6 +225,7 @@ function App() {
           </>
         )}
 
+        {systemMode === 'port' && <PortMode />}
         {systemMode === 'command' && <CommandMode />}
         {systemMode === 'emergency' && <EmergencyMode />}
         {systemMode === 'analysis' && <AnalysisMode />}
@@ -229,6 +233,7 @@ function App() {
 
         {/* Modals */}
         <CheckpointModal />
+        <PoiDetailModal />
         <CongestionPredictionModal />
         <StrategyModal />
         <Modal id="resilience-info" title="交通系统韧性指标说明" width={520}>

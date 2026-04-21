@@ -224,3 +224,10 @@
 .stat-mini:hover {
   border-color: rgba(77, 166, 255, 0.1);
 }
+
+/* 玻璃背景 */
+.glass-bg {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}

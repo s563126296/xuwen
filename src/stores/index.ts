@@ -107,5 +107,20 @@ export type {
   AIDecisionState,
 } from './aiDecisionStore';
 
+// Port Store
+export { usePortStore } from './portStore';
+export type {
+  StraitIndex,
+  WeatherData,
+  PortCapacity,
+  PortVessel,
+  ScheduleItem,
+  QueueData,
+  PortComparison,
+  CrossingStats,
+  WaitingArea,
+  PortState,
+} from './portStore';
+
 // Shared Types
 export type { PortType, DirectionType, ViewMode, SystemMode, BaselineMode } from './types';

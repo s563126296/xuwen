@@ -421,3 +421,68 @@
   0% { left: -30%; }
   100% { left: 100%; }
 }
+
+/* 数据扫描线 */
+@keyframes data-scan {
+  0% { background-position: -200% 0; opacity: 0; }
+  50% { opacity: 1; }
+  100% { background-position: 200% 0; opacity: 0; }
+}
+
+.data-scan-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.data-scan-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(77, 166, 255, 0.4) 30%,
+    rgba(77, 166, 255, 0.8) 50%,
+    rgba(77, 166, 255, 0.4) 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: data-scan 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 雷达扫描 */
+@keyframes radar-scan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-radar-scan {
+  animation: radar-scan 3s linear infinite;
+  transform-origin: center;
+}
+
+/* 边缘光晕 */
+.edge-glow {
+  box-shadow:
+    inset 0 0 20px rgba(77, 166, 255, 0.1),
+    0 0 20px rgba(77, 166, 255, 0.2),
+    0 0 40px rgba(77, 166, 255, 0.1);
+}
+
+/* 霓虹文字 */
+.neon-text {
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* 六边形网格背景 */
+.hex-grid {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(77, 166, 255, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 0% 100%, rgba(77, 166, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+}

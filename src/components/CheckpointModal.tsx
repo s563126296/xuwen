@@ -1,7 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Camera, TrendingUp, Clock, Gauge, Video, X, Monitor, Type, ImageIcon, Plane, Battery, Signal, MapPin, Wind, Thermometer, AlertTriangle, BarChart3, Timer } from 'lucide-react';
 import Modal from './Modal';
 import { useUIStore } from '../stores';
+import cameraData from '../data/geo/cameras.json';
+import droneRoutes from '../data/geo/droneRoutes.json';
+
+type CameraDevice = (typeof cameraData)[number];
+type DroneRoute = (typeof droneRoutes)[number];
+
+const ENTITY_DEVICE_TYPE: Record<string, string> = {
+  'electronic-police': 'police',
+  'parking-violation': 'parking',
+  'speed-camera': 'speed',
+  'security-camera': 'monitor',
+  'checkpoint-gate': 'checkpoint',
+  'traffic-light': 'signal',
+  'info-screen': 'screen',
+  drone: 'drone',
+};
+
+function getCameraDevice(entity: { type: string; id: string } | null): CameraDevice | undefined {
+  if (!entity || !ENTITY_DEVICE_TYPE[entity.type] || entity.type === 'drone') return undefined;
+  return cameraData.find((device) => device.id === entity.id);
+}
+
+function getDroneRoute(entity: { type: string; id: string } | null): DroneRoute | undefined {
+  if (!entity || entity.type !== 'drone') return undefined;
+  return droneRoutes.find((route) => route.id === entity.id);
+}
+
+function formatLocation(device?: CameraDevice) {
+  if (!device) return '';
+  const [lng, lat] = device.coordinates;
+  return `${device.type}点位 | ${lng.toFixed(5)}, ${lat.toFixed(5)}`;
+}
+
+function getStatusMeta(status?: string) {
+  if (status === 'offline') return { label: '离线', color: '#FF4757', bg: 'rgba(255,71,87,0.15)' };
+  if (status === 'triggered') return { label: '抓拍中', color: '#F5A623', bg: 'rgba(245,166,35,0.15)' };
+  return { label: '在线', color: '#2ED573', bg: 'rgba(46,213,115,0.15)' };
+}
 
 // ============ 模拟视频画面组件 ============
 function MockVideoFeed({ title, onClose }: { title: string; onClose: () => void }) {
@@ -233,25 +271,33 @@ function ScreenContent() {
 }
 
 // ============ 无人机详情 ============
-function DroneContent() {
+function DroneContent({ route }: { route?: DroneRoute }) {
+  const routeName = route?.name ?? 'G207主通道巡航';
+  const baseName = route?.baseName ?? '徐城中队无人机机场';
+  const altitude = route?.altitude ?? 120;
+  const battery = route?.battery ?? 78;
+  const speed = route?.speed ?? 35;
+
   return (
     <>
       {/* 基本信息 */}
       <div style={{ padding: 14, background: 'rgba(0,0,0,0.2)', borderRadius: 10, border: '1px solid rgba(74,144,217,0.2)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <Plane size={16} color="#4A90D9" />
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#FFF' }}>无人机-01</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#FFF' }}>{route?.id.toUpperCase() ?? '无人机-01'}</span>
           <span style={{ padding: '2px 8px', background: 'rgba(46,213,115,0.15)', borderRadius: 4, fontSize: 11, color: '#2ED573' }}>巡航中</span>
           <span style={{ marginLeft: 'auto', fontSize: 11, color: '#A0A8B4' }}>DJI Matrice 350 RTK</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-          <MetricCard icon={Battery} label="电量" value="78" unit="%" color="#2ED573" />
-          <MetricCard icon={MapPin} label="高度" value="120" unit="m" color="#00D0E9" />
+          <MetricCard icon={Battery} label="电量" value={battery} unit="%" color="#2ED573" />
+          <MetricCard icon={MapPin} label="高度" value={altitude} unit="m" color="#00D0E9" />
           <MetricCard icon={Wind} label="风速" value="3.2" unit="m/s" color="#C9CDD4" />
           <MetricCard icon={Signal} label="信号" value="强" color="#2ED573" />
         </div>
-        <div style={{ display: 'flex', gap: 16, marginTop: 10, fontSize: 11, color: '#A0A8B4' }}>
-          <span>巡航: <span style={{ color: '#C9CDD4' }}>G207全线</span></span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', marginTop: 10, fontSize: 11, color: '#A0A8B4' }}>
+          <span>机场: <span style={{ color: '#C9CDD4' }}>{baseName}</span></span>
+          <span>巡航: <span style={{ color: '#C9CDD4' }}>{routeName}</span></span>
+          <span>速度: <span style={{ color: '#C9CDD4' }}>{speed}km/h</span></span>
           <span>已飞: <span style={{ color: '#C9CDD4' }}>42分钟</span></span>
           <span>续航: <span style={{ color: '#2ED573' }}>68分钟</span></span>
         </div>
@@ -280,7 +326,7 @@ function DroneContent() {
           {/* HUD */}
           <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.7)', borderRadius: 5, padding: '5px 10px', border: '1px solid rgba(74,144,217,0.2)' }}>
             <div style={{ fontSize: 11, color: '#4A90D9', fontFamily: 'monospace', fontWeight: 600 }}>无人机-01 | 实时画面</div>
-            <div style={{ fontSize: 11, color: '#A0A8B4', fontFamily: 'monospace', marginTop: 1 }}>{new Date().toLocaleTimeString('zh-CN', { hour12: false })} | 120m | G207</div>
+            <div style={{ fontSize: 11, color: '#A0A8B4', fontFamily: 'monospace', marginTop: 1 }}>{new Date().toLocaleTimeString('zh-CN', { hour12: false })} | {altitude}m | {routeName}</div>
           </div>
           <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', borderRadius: 5, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#FF4757', fontFamily: 'monospace' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF4757', animation: 'blink 1s infinite' }} />REC
@@ -317,14 +363,60 @@ function DroneContent() {
 }
 
 // ============ 电子警察 / 超速抓拍 — 通用监控详情 ============
-function GenericCameraContent({ name, videoOpen, setVideoOpen }: { name: string; videoOpen: boolean; setVideoOpen: (v: boolean) => void }) {
+function GenericCameraContent({
+  name,
+  device,
+  videoOpen,
+  setVideoOpen,
+}: {
+  name: string;
+  device?: CameraDevice;
+  videoOpen: boolean;
+  setVideoOpen: (v: boolean) => void;
+}) {
+  const metadata = device?.metadata as Record<string, number> | undefined;
+  const isMonitor = device?.type === '治安监控';
+  const todayViolations = metadata?.todayViolations ?? metadata?.alertsToday ?? 37;
+  const captureCount = metadata?.captureCount ?? 1286;
+  const speedLimit = metadata?.speedLimit ?? 80;
+  const avgSpeed = device?.type === '超速抓拍' ? Math.max(28, speedLimit - 12) : 42;
+  const reviewRate = Math.min(98, 82 + todayViolations);
+  const hourValues = [12, 18, 24, 17, 29, 34, todayViolations + 12, todayViolations + 18];
+  const maxHour = Math.max(...hourValues);
+
   return (
     <>
       {videoOpen ? <MockVideoFeed title={name} onClose={() => setVideoOpen(false)} /> : <VideoPlaceholder onOpen={() => setVideoOpen(true)} />}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-        <MetricCard icon={TrendingUp} label="今日抓拍" value="1,286" unit="次" color="#00D0E9" />
-        <MetricCard icon={Gauge} label="平均车速" value="42" unit="km/h" color="#C9CDD4" />
-        <MetricCard icon={AlertTriangle} label="今日违法" value="37" unit="起" color="#FF4757" />
+        <MetricCard icon={TrendingUp} label={isMonitor ? '今日巡检' : '今日抓拍'} value={captureCount.toLocaleString()} unit="次" color="#00D0E9" />
+        <MetricCard icon={Gauge} label="平均车速" value={avgSpeed} unit="km/h" color="#C9CDD4" />
+        <MetricCard icon={AlertTriangle} label={isMonitor ? 'AI告警' : '今日违法'} value={todayViolations} unit="起" color="#FF4757" />
+      </div>
+      <div style={{ padding: 14, background: 'rgba(0,0,0,0.2)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 12, color: '#A0A8B4' }}>近 8 小时抓拍趋势</span>
+          <span style={{ fontSize: 11, color: '#00D0E9', padding: '2px 8px', borderRadius: 4, background: 'rgba(0,208,233,0.1)' }}>
+            复核率 {reviewRate}%
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 62 }}>
+          {hourValues.map((value, index) => (
+            <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'DIN, monospace' }}>{value}</span>
+              <div
+                style={{
+                  width: '100%',
+                  height: `${(value / maxHour) * 42}px`,
+                  minHeight: 4,
+                  borderRadius: 3,
+                  background: value >= maxHour * 0.8 ? '#FF4757' : '#00D0E9',
+                  boxShadow: value >= maxHour * 0.8 ? '0 0 8px rgba(255,71,87,0.3)' : 'none',
+                }}
+              />
+              <span style={{ fontSize: 11, color: '#A0A8B4' }}>{`${8 + index}:00`}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
@@ -333,7 +425,13 @@ function GenericCameraContent({ name, videoOpen, setVideoOpen }: { name: string;
 // ============ 主导出组件 ============
 export default function CheckpointModal() {
   const selectedDeviceType = useUIStore((s) => s.selectedDeviceType);
+  const selectedEntity = useUIStore((s) => s.selectedEntity);
+  const activeModal = useUIStore((s) => s.activeModal);
   const [videoOpen, setVideoOpen] = useState(false);
+
+  const selectedCamera = getCameraDevice(selectedEntity);
+  const selectedDrone = getDroneRoute(selectedEntity);
+  const effectiveDeviceType = selectedEntity ? ENTITY_DEVICE_TYPE[selectedEntity.type] || selectedDeviceType : selectedDeviceType;
 
   const typeConfig: Record<string, { title: string; name: string; location: string }> = {
     drone: { title: '无人机详情', name: 'DJI M300 RTK', location: '徐闻港上空' },
@@ -343,31 +441,52 @@ export default function CheckpointModal() {
     parking: { title: '违停抓拍详情', name: '港口入口违停抓拍', location: '港口入口广场' },
     police: { title: '电子警察详情', name: '城区路口电子警察', location: '徐闻县城主干道路口' },
     speed: { title: '超速抓拍详情', name: '进港大道测速点', location: '进港大道K5+200' },
+    monitor: { title: '治安监控详情', name: '港区道路视频监控', location: '港区周边道路' },
   };
-  const cfg = typeConfig[selectedDeviceType || 'checkpoint'] || typeConfig.checkpoint;
+  const fallbackCfg = typeConfig[effectiveDeviceType || 'checkpoint'] || typeConfig.checkpoint;
+  const cfg = selectedCamera
+    ? {
+      title: `${selectedCamera.type}详情`,
+      name: selectedCamera.name,
+      location: formatLocation(selectedCamera),
+    }
+    : selectedDrone
+    ? {
+      title: '无人机详情',
+      name: selectedDrone.name,
+      location: `起降点 | ${selectedDrone.coordinates[0][0].toFixed(5)}, ${selectedDrone.coordinates[0][1].toFixed(5)}`,
+    }
+    : fallbackCfg;
+  const statusMeta = getStatusMeta(selectedCamera?.status);
+
+  useEffect(() => {
+    if (activeModal !== 'checkpoint') return;
+    const cameraLikeTypes = ['police', 'speed', 'parking', 'checkpoint', 'monitor'];
+    setVideoOpen(cameraLikeTypes.includes(effectiveDeviceType || ''));
+  }, [activeModal, effectiveDeviceType, selectedEntity]);
 
   return (
-    <Modal id="checkpoint" title={cfg.title} width={selectedDeviceType === 'drone' ? 760 : 680}>
+    <Modal id="checkpoint" title={cfg.title} width={effectiveDeviceType === 'drone' ? 760 : 680}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* 设备基本信息头 — 非无人机/发布屏显示 */}
-        {selectedDeviceType !== 'drone' && selectedDeviceType !== 'screen' && (
+        {effectiveDeviceType !== 'drone' && effectiveDeviceType !== 'screen' && (
           <div style={{ padding: 14, background: 'rgba(0,0,0,0.2)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Camera size={16} color="#00D0E9" />
               <span style={{ fontSize: 15, fontWeight: 600, color: '#FFF' }}>{cfg.name}</span>
-              <span style={{ padding: '2px 8px', background: 'rgba(46,213,115,0.15)', borderRadius: 4, fontSize: 11, color: '#2ED573' }}>在线</span>
+              <span style={{ padding: '2px 8px', background: statusMeta.bg, borderRadius: 4, fontSize: 11, color: statusMeta.color }}>{statusMeta.label}</span>
             </div>
             <div style={{ fontSize: 12, color: '#A0A8B4' }}>{cfg.location}</div>
           </div>
         )}
 
         {/* 按设备类型渲染不同内容 */}
-        {selectedDeviceType === 'drone' && <DroneContent />}
-        {selectedDeviceType === 'screen' && <ScreenContent />}
-        {selectedDeviceType === 'signal' && <SignalContent name={cfg.name} />}
-        {selectedDeviceType === 'checkpoint' && <CheckpointContent name={cfg.name} videoOpen={videoOpen} setVideoOpen={setVideoOpen} />}
-        {selectedDeviceType === 'parking' && <ParkingContent name={cfg.name} videoOpen={videoOpen} setVideoOpen={setVideoOpen} />}
-        {(selectedDeviceType === 'police' || selectedDeviceType === 'speed') && <GenericCameraContent name={cfg.name} videoOpen={videoOpen} setVideoOpen={setVideoOpen} />}
+        {effectiveDeviceType === 'drone' && <DroneContent route={selectedDrone} />}
+        {effectiveDeviceType === 'screen' && <ScreenContent />}
+        {effectiveDeviceType === 'signal' && <SignalContent name={cfg.name} />}
+        {effectiveDeviceType === 'checkpoint' && <CheckpointContent name={cfg.name} videoOpen={videoOpen} setVideoOpen={setVideoOpen} />}
+        {effectiveDeviceType === 'parking' && <ParkingContent name={cfg.name} videoOpen={videoOpen} setVideoOpen={setVideoOpen} />}
+        {(effectiveDeviceType === 'police' || effectiveDeviceType === 'speed' || effectiveDeviceType === 'monitor') && <GenericCameraContent name={cfg.name} device={selectedCamera} videoOpen={videoOpen} setVideoOpen={setVideoOpen} />}
       </div>
     </Modal>
   );

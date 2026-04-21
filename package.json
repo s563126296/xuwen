@@ -12,19 +12,27 @@
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@antv/l7": "^2.25.4",
     "@antv/l7-maps": "^2.25.4",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.6",
+    "framer-motion": "^11.18.2",
     "lucide-react": "^0.400.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.12.7",
+    "three": "^0.170.0",
     "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.2.3",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.5.0",
     "less": "^4.6.4",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^4.2.3",
     "typescript": "^5.4.5",
     "vite": "^5.4.0"
   }

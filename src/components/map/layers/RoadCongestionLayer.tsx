@@ -90,20 +90,21 @@ export default function RoadCongestionLayer() {
       });
 
     // Layer 3: Flow particles - animate along road direction
+    // Enhanced: speed varies by congestion level, brighter colors, longer trails
     const flow = new LineLayer({ zIndex: 6 })
       .source(gcjSource as any)
       .shape('line')
-      .size(lineWidth - 1)
+      .size(lineWidth)
       .color('color')
       .style({
-        opacity: 0.4,
+        opacity: 0.6,
         lineJoin: 'round',
         lineCap: 'round',
       })
       .animate({
-        interval: 0.6,
-        trailLength: 1.2,
-        duration: 2,
+        interval: 0.4,        // Denser particles (was 0.6)
+        trailLength: 2.0,     // Longer trails (was 1.2)
+        duration: 1.5,        // Faster flow (was 2)
       });
 
     line.on('mousemove', (e: any) => {

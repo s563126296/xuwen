@@ -103,7 +103,7 @@ export default function ShippingLaneLayer() {
 
     const gcjLabelPts = mapRowsToGcj(labelPoints);
 
-    const labelLayer = new PointLayer({ zIndex: 14 })
+    const labelLayer = new PointLayer({ zIndex: 30, depth: false })
       .source(gcjLabelPts, { parser: { type: 'json', x: 'lng', y: 'lat' } })
       .shape('name', 'text')
       .size(10)
@@ -129,6 +129,7 @@ export default function ShippingLaneLayer() {
     scene.addLayer(line);
     scene.addLayer(flow);
     scene.addLayer(labelLayer);
+
     glowRef.current = glow;
     lineRef.current = line;
     flowRef.current = flow;

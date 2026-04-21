@@ -4,6 +4,7 @@ import { GaodeMap } from '@antv/l7-maps';
 import { MapSceneContext } from './MapSceneContext';
 import { mapPointToGcj } from '../../utils/coordTransform';
 import LayerController from './LayerController';
+import MapLegend from './MapLegend';
 
 const AMAP_KEY = import.meta.env.VITE_AMAP_KEY;
 
@@ -147,6 +148,7 @@ export default function MapContainer({ children }: { children?: React.ReactNode 
       {ready && (
         <>
           <LayerController />
+          <MapLegend />
           {children}
         </>
       )}

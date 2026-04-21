@@ -31,6 +31,14 @@ interface UIState {
   // Selected road for prediction modal
   selectedRoad: string | null;
   setSelectedRoad: (road: string | null) => void;
+
+  // Selected entity (device click on map)
+  selectedEntity: { type: string; id: string } | null;
+  setSelectedEntity: (entity: { type: string; id: string } | null) => void;
+
+  // Device layer filter (null = show all, string = show only this type)
+  deviceFilter: string | null;
+  setDeviceFilter: (filter: string | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -63,4 +71,12 @@ export const useUIStore = create<UIState>((set) => ({
   // Selected road
   selectedRoad: null,
   setSelectedRoad: (road) => set({ selectedRoad: road }),
+
+  // Selected entity
+  selectedEntity: null,
+  setSelectedEntity: (entity) => set({ selectedEntity: entity }),
+
+  // Device filter
+  deviceFilter: null,
+  setDeviceFilter: (filter) => set({ deviceFilter: filter }),
 }));
