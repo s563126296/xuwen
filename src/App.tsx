@@ -156,12 +156,12 @@ function App() {
             {/* AI Summary Bar */}
             <AiSummaryBar />
 
-            {/* Left Panel */}
+            {/* Left Panel — 延伸到底部 */}
             <div style={{
               position: 'absolute',
               top: 80,
               left: 12,
-              bottom: 110,
+              bottom: 8,
               width: 340,
               zIndex: 20,
               pointerEvents: 'auto',
@@ -178,12 +178,12 @@ function App() {
               />
             </div>
 
-            {/* Right Panel */}
+            {/* Right Panel — 延伸到底部 */}
             <div style={{
               position: 'absolute',
               top: 80,
               right: 12,
-              bottom: 110,
+              bottom: 8,
               width: 340,
               zIndex: 20,
               pointerEvents: 'auto',
@@ -196,14 +196,14 @@ function App() {
               <RightPanel />
             </div>
 
-            {/* Bottom Charts */}
+            {/* Bottom Charts — 叠在面板上方 */}
             <div style={{
               position: 'absolute',
               bottom: 8,
               left: 364,
               right: 364,
               height: 94,
-              zIndex: 20,
+              zIndex: 30,
               pointerEvents: 'auto',
             }}>
               <BottomChartsBar />
@@ -214,7 +214,7 @@ function App() {
               position: 'absolute',
               bottom: 110,
               right: 364,
-              zIndex: 25,
+              zIndex: 30,
               pointerEvents: 'auto',
             }}>
               <StraitTransitIndex />
