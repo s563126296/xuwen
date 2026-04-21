@@ -16,8 +16,7 @@ import ResilienceInfoModal from './components/overview/ResilienceInfoModal';
 import Modal from './components/Modal';
 import MapContainer from './components/map/MapContainer';
 import StraitTransitIndex from './components/overview/StraitTransitIndex';
-import PressurePredictionChart from './components/overview/PressurePredictionChart';
-import HourlyChart from './components/HourlyChart';
+import BottomChartsBar from './components/overview/BottomChartsBar';
 import { useUIStore, useOverviewStore } from './stores';
 import { computeAiSummary } from './utils/aiSummaryEngine';
 import './App.css';
@@ -205,22 +204,8 @@ function App() {
               right: 368,
               zIndex: 20,
               pointerEvents: 'auto',
-              display: 'flex',
-              gap: 12,
             }}>
-              <div style={{ flex: 1 }}>
-                <PressurePredictionChart compact />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div className="module-card" style={{ padding: '8px 12px' }}>
-                  <div className="module-header">
-                    <span className="module-title">24h车流趋势</span>
-                  </div>
-                  <div style={{ height: 60 }}>
-                    <HourlyChart />
-                  </div>
-                </div>
-              </div>
+              <BottomChartsBar />
             </div>
 
             {/* Strait Transit Index */}

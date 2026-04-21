@@ -1,5 +1,6 @@
-import { Building2 } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const getSatColor = (v: number) => {
   if (v < 0.6) return '#2ED573';
@@ -21,16 +22,29 @@ export default function UrbanHealthCard() {
   const lc = levelColors[level] || levelColors['健康'];
   const top4 = intersections.slice(0, 4);
 
+  // Find max saturation intersection for summary
+  const maxIntersection = intersections.reduce((max, curr) =>
+    curr.saturation > max.saturation ? curr : max
+  , intersections[0]);
+
+  const summary = (
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      健康度 <span style={{ color: '#4da6ff', fontWeight: 600 }}>{score}</span> · {maxIntersection.name} <span style={{ color: getSatColor(maxIntersection.saturation), fontWeight: 600 }}>{(maxIntersection.saturation * 100).toFixed(0)}%</span> · 热点 <span style={{ color: '#fbbf24', fontWeight: 600 }}>{hotspots.length}处</span>
+    </div>
+  );
+
   return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <span className="module-title"><Building2 size={14} style={{ marginRight: 4 }} />城区道路状况</span>
-        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: lc.bg, color: lc.color, border: `1px solid ${lc.color}33` }}>{level}</span>
-      </div>
+    <CollapsibleCard
+      title="城区道路状况"
+      icon={<Heart size={14} style={{ color: '#4da6ff' }} />}
+      summary={summary}
+      delay="0.3s"
+    >
       {/* Score */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 10 }}>
         <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 28, color: '#00D0E9' }}>{score}</span>
         <span style={{ fontSize: 12, color: '#A0A8B4' }}>/ 100</span>
+        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: lc.bg, color: lc.color, border: `1px solid ${lc.color}33`, marginLeft: 8 }}>{level}</span>
       </div>
       {/* Intersections */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
@@ -69,6 +83,6 @@ export default function UrbanHealthCard() {
           ))}
         </div>
       )}
-    </div>
+    </CollapsibleCard>
   );
 }

@@ -1,6 +1,7 @@
-import { CloudLightning } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import type { ShutdownLevel } from '../../stores/overviewStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const levelColors: Record<ShutdownLevel, string> = {
   low: '#2ED573',
@@ -9,15 +10,31 @@ const levelColors: Record<ShutdownLevel, string> = {
   danger: '#FF4757',
 };
 
-export default function ShutdownProbabilityCard() {
+export default function ShutdownProbabilityCard({ delay = '0s' }: { delay?: string }) {
   const shutdownProbability = useOverviewStore((s) => s.shutdownProbability);
   const { windows, drivingFactor } = shutdownProbability;
 
+  const summary = (
+    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+      {windows.map((w, i) => {
+        const color = levelColors[w.level];
+        return (
+          <span key={i}>
+            {w.hours}h <span style={{ color }}>{w.probability}%</span>
+            {i < windows.length - 1 && <span style={{ color: '#A0A8B4' }}> · </span>}
+          </span>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <span className="module-title"><CloudLightning size={14} style={{ marginRight: 4 }} />停航风险预测</span>
-      </div>
+    <CollapsibleCard
+      title="停航风险预测"
+      icon={<AlertTriangle size={14} color="#4da6ff" />}
+      summary={summary}
+      delay={delay}
+    >
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {windows.map((w, i) => {
           const color = levelColors[w.level];
@@ -40,6 +57,6 @@ export default function ShutdownProbabilityCard() {
       <div style={{ marginTop: 8, fontSize: 12, color: '#A0A8B4', padding: '4px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
         驱动因素：{drivingFactor}
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

@@ -1,6 +1,7 @@
-import { Compass } from 'lucide-react';
+import { Activity, Compass } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import type { CorridorDirection } from '../../stores/overviewStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 function pressureColor(p: number): string {
   if (p < 50) return '#2ED573';
@@ -34,37 +35,45 @@ function PressureItem({ direction }: { direction: CorridorDirection }) {
 }
 
 export default function CorridorPressureCard() {
+  const corridorPressure = useOverviewStore((s) => s.corridorPressure);
+  const s = corridorPressure.south.pressure;
+  const w = corridorPressure.west.pressure;
+  const n = corridorPressure.north.pressure;
+  const e = corridorPressure.east.pressure;
+
+  const summary = (
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      南向 <span style={{ color: pressureColor(s), fontWeight: 600 }}>{s}%</span> · 西向 <span style={{ color: pressureColor(w), fontWeight: 600 }}>{w}%</span> · 北向 <span style={{ color: pressureColor(n), fontWeight: 600 }}>{n}%</span> · 东向 <span style={{ color: pressureColor(e), fontWeight: 600 }}>{e}%</span>
+    </div>
+  );
+
   return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <span className="module-title">进出城通道</span>
-        <div className="module-icon"><Compass size={16} /></div>
-      </div>
+    <CollapsibleCard
+      title="进出城通道"
+      icon={<Activity size={14} style={{ color: '#4da6ff' }} />}
+      summary={summary}
+      delay="0.2s"
+    >
       {/* Cross layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: 'auto auto auto', gap: 8, padding: '4px 0' }}>
-        {/* Top: North */}
         <div style={{ gridColumn: '2 / 3', gridRow: '1 / 2' }}>
           <PressureItem direction="north" />
         </div>
-        {/* Left: West */}
         <div style={{ gridColumn: '1 / 2', gridRow: '2 / 3' }}>
           <PressureItem direction="west" />
         </div>
-        {/* Center compass icon */}
         <div style={{ gridColumn: '2 / 3', gridRow: '2 / 3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,208,233,0.1)', border: '1px solid rgba(0,208,233,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Compass size={16} style={{ color: '#00D0E9' }} />
           </div>
         </div>
-        {/* Right: East */}
         <div style={{ gridColumn: '3 / 4', gridRow: '2 / 3' }}>
           <PressureItem direction="east" />
         </div>
-        {/* Bottom: South */}
         <div style={{ gridColumn: '2 / 3', gridRow: '3 / 4' }}>
           <PressureItem direction="south" />
         </div>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

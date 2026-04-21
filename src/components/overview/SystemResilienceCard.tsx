@@ -1,6 +1,7 @@
 import { Shield, Info } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import { useUIStore } from '../../stores/uiStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const getArcColor = (score: number) => {
   if (score > 80) return '#2ED573';
@@ -16,42 +17,37 @@ const subLabels: { key: 'corridorRedundancy' | 'alternateRoutes' | 'controlCapac
   { key: 'portBuffer', label: '港口缓冲' },
 ];
 
-export default function SystemResilienceCard() {
+export default function SystemResilienceCard({ delay = '0s' }: { delay?: string }) {
   const systemResilience = useOverviewStore((s) => s.systemResilience);
   const setActiveModal = useUIStore((s) => s.setActiveModal);
   const { score, subScores, weakestDimension } = systemResilience;
   const arcColor = getArcColor(score);
+  const weakestKey = subLabels.reduce((min, cur) => subScores[cur.key] < subScores[min.key] ? cur : min, subLabels[0]);
   const r = 38;
   const circ = 2 * Math.PI * r;
   const arcLen = circ * 0.75;
   const offset = arcLen * (1 - score / 100);
 
+  const summary = (
+    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+      <span>韧性 <span style={{ color: arcColor }}>{score}</span>/100</span>
+      <span style={{ color: '#A0A8B4' }}>·</span>
+      <span>薄弱: <span style={{ color: '#F5A623' }}>{weakestKey.label} {subScores[weakestKey.key]}</span></span>
+      <Info
+        size={12}
+        style={{ color: '#A0A8B4', cursor: 'pointer', marginLeft: 2 }}
+        onClick={(e) => { e.stopPropagation(); setActiveModal('resilience-info'); }}
+      />
+    </div>
+  );
+
   return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <div
-          role="button"
-          tabIndex={0}
-          aria-label="查看韧性指标说明"
-          onClick={() => setActiveModal('resilience-info')}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#00D0E9';
-            const infoIcon = e.currentTarget.querySelector('.resilience-info-icon') as HTMLElement;
-            if (infoIcon) infoIcon.style.opacity = '1';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = '';
-            const infoIcon = e.currentTarget.querySelector('.resilience-info-icon') as HTMLElement;
-            if (infoIcon) infoIcon.style.opacity = '0.5';
-          }}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', transition: 'color 0.2s' }}
-        >
-          <span className="module-title">
-            <Shield size={14} style={{ marginRight: 4 }} />应急承受能力
-          </span>
-          <Info className="resilience-info-icon" size={14} style={{ color: '#A0A8B4', opacity: 0.5, transition: 'opacity 0.2s' }} />
-        </div>
-      </div>
+    <CollapsibleCard
+      title="应急承受能力"
+      icon={<Shield size={14} color="#4da6ff" />}
+      summary={summary}
+      delay={delay}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {/* Arc gauge */}
         <div style={{ position: 'relative', width: 90, height: 90, flexShrink: 0 }}>
@@ -62,7 +58,6 @@ export default function SystemResilienceCard() {
             <circle cx="50" cy="50" r={r} fill="none" stroke={arcColor} strokeWidth="7"
               strokeDasharray={`${arcLen - offset} ${circ - (arcLen - offset)}`} strokeLinecap="round"
               transform="rotate(135 50 50)" style={{ transition: 'stroke-dasharray 0.5s ease' }} />
-            {/* Threshold tick marks: 40, 60, 80 */}
             {[40, 60, 80].map((threshold) => {
               const angle = 135 + (270 * threshold / 100);
               const rad = (angle * Math.PI) / 180;
@@ -102,6 +97,6 @@ export default function SystemResilienceCard() {
       <div style={{ marginTop: 6, fontSize: 11, color: '#F5A623', textAlign: 'center' }}>
         薄弱环节：{weakestDimension}
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

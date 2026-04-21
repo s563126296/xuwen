@@ -1,5 +1,6 @@
-import { Ship } from 'lucide-react';
+import { Anchor } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 function digestionColor(minutes: number): string {
   if (minutes < 120) return '#2ED573';
@@ -30,12 +31,19 @@ export default function PortDigestionCard() {
     { key: '海安新港', data: ha },
   ];
 
+  const summary = (
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      徐闻港 <span style={{ color: '#4da6ff', fontWeight: 600 }}>{xw.waitingVehicles}辆</span> · 消化 <span style={{ color: digestionColor(xw.digestionMinutes) }}>{formatTime(xw.digestionMinutes)}</span> | 海安 <span style={{ color: '#4da6ff', fontWeight: 600 }}>{ha.waitingVehicles}辆</span> · <span style={{ color: digestionColor(ha.digestionMinutes) }}>{formatTime(ha.digestionMinutes)}</span>
+    </div>
+  );
+
   return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <span className="module-title">港口排队情况</span>
-        <div className="module-icon"><Ship size={16} /></div>
-      </div>
+    <CollapsibleCard
+      title="港口排队情况"
+      icon={<Anchor size={14} style={{ color: '#4da6ff' }} />}
+      summary={summary}
+      delay="0s"
+    >
       <div style={{ display: 'flex', gap: 10 }}>
         {ports.map((p) => (
           <div key={p.key} style={{ flex: 1, background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: 10 }}>
@@ -55,6 +63,6 @@ export default function PortDigestionCard() {
       <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(0,208,233,0.08)', border: '1px solid rgba(0,208,233,0.15)', borderRadius: 6, fontSize: 11, color: '#00D0E9' }}>
         {suggestion}
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

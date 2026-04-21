@@ -1,5 +1,6 @@
-import { Route } from 'lucide-react';
+import { Gauge } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const getBarColor = (pct: number) => {
   if (pct >= 50) return '#2ED573';
@@ -8,15 +9,31 @@ const getBarColor = (pct: number) => {
   return '#FF4757';
 };
 
-export default function CorridorElasticityCard() {
+export default function CorridorElasticityCard({ delay = '0s' }: { delay?: string }) {
   const corridorElasticity = useOverviewStore((s) => s.corridorElasticity);
   const critical = corridorElasticity.filter(c => c.remainingPercent < 20);
 
+  const summary = (
+    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+      {corridorElasticity.map((item, i) => {
+        const color = getBarColor(item.remainingPercent);
+        return (
+          <span key={i}>
+            {item.name} <span style={{ color }}>{item.remainingPercent}%</span>
+            {i < corridorElasticity.length - 1 && <span style={{ color: '#A0A8B4' }}> · </span>}
+          </span>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <span className="module-title"><Route size={14} style={{ marginRight: 4 }} />道路剩余容量</span>
-      </div>
+    <CollapsibleCard
+      title="道路剩余容量"
+      icon={<Gauge size={14} color="#4da6ff" />}
+      summary={summary}
+      delay={delay}
+    >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {corridorElasticity.map((item, i) => {
           const color = getBarColor(item.remainingPercent);
@@ -37,6 +54,6 @@ export default function CorridorElasticityCard() {
           {critical[0].name}接近饱和，+{critical[0].remainingVehicles}辆/h即拥堵
         </div>
       )}
-    </div>
+    </CollapsibleCard>
   );
 }

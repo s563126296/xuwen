@@ -1,6 +1,7 @@
 import { CloudRain } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import type { WeatherCouplingLevel } from '../../stores/overviewStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const levelConfig: Record<WeatherCouplingLevel, { label: string; color: string; bg: string; border: string }> = {
   none: { label: '无影响', color: '#2ED573', bg: 'rgba(46,213,115,0.15)', border: 'rgba(46,213,115,0.3)' },
@@ -9,17 +10,29 @@ const levelConfig: Record<WeatherCouplingLevel, { label: string; color: string; 
   severe: { label: '严重', color: '#FF4757', bg: 'rgba(255,71,87,0.15)', border: 'rgba(255,71,87,0.3)' },
 };
 
-export default function WeatherCouplingCard() {
+export default function WeatherCouplingCard({ delay = '0s' }: { delay?: string }) {
   const weatherCoupling = useOverviewStore((s) => s.weatherCoupling);
   const cfg = levelConfig[weatherCoupling.level];
 
-  return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <span className="module-title">天气影响程度</span>
-        <div className="module-icon"><CloudRain size={16} /></div>
-      </div>
+  const summary = (
+    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+      <span>海况 <span style={{ color: '#4da6ff' }}>{weatherCoupling.seaScore}</span></span>
+      <span style={{ color: '#A0A8B4' }}>·</span>
+      <span>陆况 <span style={{ color: '#4da6ff' }}>{weatherCoupling.landScore}</span></span>
+      <span style={{ color: '#A0A8B4' }}>·</span>
+      <span>综合 <span style={{ color: cfg.color }}>{weatherCoupling.overallScore}</span></span>
+      <span style={{ color: '#A0A8B4' }}>·</span>
+      <span style={{ color: cfg.color }}>{cfg.label}</span>
+    </div>
+  );
 
+  return (
+    <CollapsibleCard
+      title="天气影响程度"
+      icon={<CloudRain size={14} color="#4da6ff" />}
+      summary={summary}
+      delay={delay}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <span style={{
           display: 'inline-block', padding: '3px 10px', borderRadius: 12,
@@ -46,6 +59,6 @@ export default function WeatherCouplingCard() {
       <div style={{ fontSize: 12, color: '#A0A8B4', padding: '6px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
         {weatherCoupling.trend}
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

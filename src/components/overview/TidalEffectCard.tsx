@@ -1,6 +1,7 @@
 import { ArrowLeftRight } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import type { TidalStatus, TidalIntensity } from '../../stores/overviewStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const statusLabel: Record<TidalStatus, string> = {
   inbound_tide: '进港潮',
@@ -19,12 +20,23 @@ export default function TidalEffectCard() {
   const total = tidalEffect.inboundFlow + tidalEffect.outboundFlow;
   const inPct = total > 0 ? (tidalEffect.inboundFlow / total) * 100 : 50;
 
+  const ratio = tidalEffect.outboundFlow > 0
+    ? (tidalEffect.inboundFlow / tidalEffect.outboundFlow).toFixed(1)
+    : '0.0';
+
+  const summary = (
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      进城 <span style={{ color: '#4da6ff', fontWeight: 600 }}>{tidalEffect.inboundFlow}</span> · 出城 <span style={{ color: '#f0b429', fontWeight: 600 }}>{tidalEffect.outboundFlow}</span> · 比值 <span style={{ color: '#34d399', fontWeight: 600 }}>{ratio}</span> · 潮汐{intensityLabel[tidalEffect.intensity]}
+    </div>
+  );
+
   return (
-    <div className="module-card animate-in">
-      <div className="module-header">
-        <span className="module-title">进出港流量对比</span>
-        <div className="module-icon"><ArrowLeftRight size={16} /></div>
-      </div>
+    <CollapsibleCard
+      title="进出港流量对比"
+      icon={<ArrowLeftRight size={14} style={{ color: '#4da6ff' }} />}
+      summary={summary}
+      delay="0.1s"
+    >
 
       {/* Balance bar */}
       <div style={{ marginBottom: 8 }}>
@@ -71,6 +83,6 @@ export default function TidalEffectCard() {
       <div style={{ fontSize: 12, color: '#A0A8B4', marginTop: 4 }}>
         预计翻转时间：<span style={{ fontFamily: 'DIN, sans-serif', color: '#00D0E9', fontWeight: 600 }}>{tidalEffect.reversalTime}</span>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

@@ -5,6 +5,7 @@ import CorridorElasticityCard from './overview/CorridorElasticityCard';
 import SystemResilienceCard from './overview/SystemResilienceCard';
 import ShutdownProbabilityCard from './overview/ShutdownProbabilityCard';
 import WeatherCouplingCard from './overview/WeatherCouplingCard';
+import CollapsibleCard from './common/CollapsibleCard';
 import { TRAFFIC_STATUS_COLORS } from '../constants';
 
 const getLevelColor = (level: string) => {
@@ -22,20 +23,35 @@ export default function RightPanel() {
   const roadCongestions = useOverviewStore((s) => s.roadCongestions);
   const top3 = [...roadCongestions].sort((a, b) => b.index - a.index).slice(0, 3);
 
+  const congestionSummary = (
+    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+      {top3.map((item, i) => {
+        const color = getLevelColor(item.level);
+        return (
+          <span key={i}>
+            {item.road.length > 8 ? item.road.slice(0, 8) + '...' : item.road}
+            <span style={{ color, marginLeft: 4 }}>{item.level}</span>
+            {i < top3.length - 1 && <span style={{ color: '#A0A8B4' }}> · </span>}
+          </span>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="panel-right" style={{ gap: 12 }}>
-      <div style={{ animationDelay: '0.05s' }}><PressureTransmissionCard /></div>
-      <div style={{ animationDelay: '0.10s' }}><CorridorElasticityCard /></div>
-      <div style={{ animationDelay: '0.15s' }}><SystemResilienceCard /></div>
-      <div style={{ animationDelay: '0.20s' }}><ShutdownProbabilityCard /></div>
-      <div style={{ animationDelay: '0.25s' }}><WeatherCouplingCard /></div>
+      <PressureTransmissionCard delay="0.05s" />
+      <CorridorElasticityCard delay="0.10s" />
+      <SystemResilienceCard delay="0.15s" />
+      <ShutdownProbabilityCard delay="0.20s" />
+      <WeatherCouplingCard delay="0.25s" />
 
-      {/* Simplified congestion alerts */}
-      <div className="module-card animate-in" style={{ animationDelay: '0.30s' }}>
-        <div className="module-header">
-          <span className="module-title"><AlertTriangle size={14} style={{ marginRight: 4 }} />拥堵预警</span>
-          <span style={{ fontSize: 11, color: '#A0A8B4' }}>TOP 3</span>
-        </div>
+      <CollapsibleCard
+        title="拥堵预警"
+        icon={<AlertTriangle size={14} color="#f87171" />}
+        summary={congestionSummary}
+        delay="0.30s"
+      >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {top3.map((item, i) => {
             const color = getLevelColor(item.level);
@@ -54,7 +70,7 @@ export default function RightPanel() {
             );
           })}
         </div>
-      </div>
+      </CollapsibleCard>
     </div>
   );
 }
