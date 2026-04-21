@@ -160,13 +160,14 @@ function App() {
             {/* Left Panel */}
             <div style={{
               position: 'absolute',
-              top: 120,
+              top: 80,
               left: 16,
+              bottom: 12,
               width: 340,
-              bottom: 100,
               zIndex: 20,
               pointerEvents: 'auto',
-              overflow: 'hidden',
+              overflowY: 'auto',
+              overflowX: 'hidden',
               display: 'flex',
               flexDirection: 'column',
               gap: 8,
@@ -181,13 +182,14 @@ function App() {
             {/* Right Panel */}
             <div style={{
               position: 'absolute',
-              top: 120,
+              top: 80,
               right: 16,
+              bottom: 12,
               width: 340,
-              bottom: 100,
               zIndex: 20,
               pointerEvents: 'auto',
-              overflow: 'hidden',
+              overflowY: 'auto',
+              overflowX: 'hidden',
               display: 'flex',
               flexDirection: 'column',
               gap: 8,
@@ -201,24 +203,30 @@ function App() {
               bottom: 12,
               left: 368,
               right: 368,
-              height: 80,
               zIndex: 20,
               pointerEvents: 'auto',
               display: 'flex',
               gap: 12,
             }}>
-              <div className="module-card" style={{ flex: 1, padding: '8px 12px' }}>
+              <div style={{ flex: 1 }}>
                 <PressurePredictionChart compact />
               </div>
-              <div className="module-card" style={{ flex: 1, padding: '8px 12px' }}>
-                <HourlyChart />
+              <div style={{ flex: 1 }}>
+                <div className="module-card" style={{ padding: '8px 12px' }}>
+                  <div className="module-header">
+                    <span className="module-title">24h车流趋势</span>
+                  </div>
+                  <div style={{ height: 60 }}>
+                    <HourlyChart />
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Strait Transit Index */}
             <div style={{
               position: 'absolute',
-              bottom: 100,
+              bottom: 120,
               right: 368,
               zIndex: 25,
               pointerEvents: 'auto',
