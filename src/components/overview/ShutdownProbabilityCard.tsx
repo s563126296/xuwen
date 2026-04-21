@@ -15,7 +15,7 @@ export default function ShutdownProbabilityCard({ delay = '0s' }: { delay?: stri
   const { windows, drivingFactor } = shutdownProbability;
 
   const summary = (
-    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
       {windows.map((w, i) => {
         const color = levelColors[w.level];
         return (
@@ -32,11 +32,11 @@ export default function ShutdownProbabilityCard({ delay = '0s' }: { delay?: stri
     <CollapsibleCard
       defaultExpanded={true}
       title="停航风险预测"
-      icon={<AlertTriangle size={14} color="#4da6ff" />}
+      icon={<AlertTriangle size={12} color="#4da6ff" />}
       summary={summary}
       delay={delay}
     >
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
         {windows.map((w, i) => {
           const color = levelColors[w.level];
           return (
@@ -44,18 +44,18 @@ export default function ShutdownProbabilityCard({ delay = '0s' }: { delay?: stri
               padding: '8px 10px', borderRadius: 6,
               background: 'rgba(0, 208, 233, 0.08)', border: '1px solid rgba(0, 208, 233, 0.15)',
             }}>
-              <div style={{ fontSize: 12, color: '#A0A8B4', marginBottom: 4 }}>{w.hours}h内</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 11, color: '#A0A8B4', marginBottom: 4 }}>{w.hours}h内</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ flex: 1, height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 4, overflow: 'hidden' }}>
                   <div style={{ width: `${w.probability}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />
                 </div>
-                <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 14, color, minWidth: 32, textAlign: 'right' }}>{w.probability}%</span>
+                <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 12, color, minWidth: 32, textAlign: 'right' }}>{w.probability}%</span>
               </div>
             </div>
           );
         })}
       </div>
-      <div style={{ marginTop: 8, fontSize: 12, color: '#A0A8B4', padding: '4px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
+      <div style={{ marginTop: 6, fontSize: 11, color: '#A0A8B4', padding: '4px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
         驱动因素：{drivingFactor}
       </div>
     </CollapsibleCard>

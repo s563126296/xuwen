@@ -15,7 +15,7 @@ export default function WeatherCouplingCard({ delay = '0s' }: { delay?: string }
   const cfg = levelConfig[weatherCoupling.level];
 
   const summary = (
-    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
       <span>海况 <span style={{ color: '#4da6ff' }}>{weatherCoupling.seaScore}</span></span>
       <span style={{ color: '#A0A8B4' }}>·</span>
       <span>陆况 <span style={{ color: '#4da6ff' }}>{weatherCoupling.landScore}</span></span>
@@ -30,34 +30,34 @@ export default function WeatherCouplingCard({ delay = '0s' }: { delay?: string }
     <CollapsibleCard
       defaultExpanded={true}
       title="天气影响程度"
-      icon={<CloudRain size={14} color="#4da6ff" />}
+      icon={<CloudRain size={12} color="#4da6ff" />}
       summary={summary}
       delay={delay}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
         <span style={{
-          display: 'inline-block', padding: '3px 10px', borderRadius: 12,
-          fontSize: 12, fontWeight: 500, color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
+          display: 'inline-block', padding: '3px 8px', borderRadius: 12,
+          fontSize: 11, fontWeight: 500, color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
         }}>
           {cfg.label}
         </span>
-        <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 14, fontWeight: 700, color: cfg.color }}>
+        <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 12, fontWeight: 700, color: cfg.color }}>
           {weatherCoupling.overallScore}
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-        <div style={{ fontSize: 12, color: '#C9CDD4' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 6 }}>
+        <div style={{ fontSize: 11, color: '#C9CDD4' }}>
           <span style={{ color: '#A0A8B4' }}>海峡：</span>
           {weatherCoupling.seaFactors.join('、')}
         </div>
-        <div style={{ fontSize: 12, color: '#C9CDD4' }}>
+        <div style={{ fontSize: 11, color: '#C9CDD4' }}>
           <span style={{ color: '#A0A8B4' }}>陆地：</span>
           {weatherCoupling.landFactors.join('、')}
         </div>
       </div>
 
-      <div style={{ fontSize: 12, color: '#A0A8B4', padding: '6px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
+      <div style={{ fontSize: 11, color: '#A0A8B4', padding: '6px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
         {weatherCoupling.trend}
       </div>
     </CollapsibleCard>

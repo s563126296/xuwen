@@ -25,11 +25,11 @@ function PressureItem({ direction }: { direction: CorridorDirection }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-      <div style={{ fontSize: 12, color: '#A0A8B4' }}>{info.label} ({info.road})</div>
+      <div style={{ fontSize: 11, color: '#A0A8B4' }}>{info.label} ({info.road})</div>
       <div style={{ width: '100%', height: 6, background: 'rgba(0,0,0,0.3)', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ width: `${item.pressure}%`, height: '100%', background: color, borderRadius: 3, transition: 'width 0.5s ease' }} />
       </div>
-      <div style={{ fontFamily: 'DIN, sans-serif', fontSize: 14, fontWeight: 700, color }}>{item.pressure}%</div>
+      <div style={{ fontFamily: 'DIN, sans-serif', fontSize: 12, fontWeight: 700, color }}>{item.pressure}%</div>
     </div>
   );
 }
@@ -42,7 +42,7 @@ export default function CorridorPressureCard() {
   const e = corridorPressure.east.pressure;
 
   const summary = (
-    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+    <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
       南向 <span style={{ color: pressureColor(s), fontWeight: 600 }}>{s}%</span> · 西向 <span style={{ color: pressureColor(w), fontWeight: 600 }}>{w}%</span> · 北向 <span style={{ color: pressureColor(n), fontWeight: 600 }}>{n}%</span> · 东向 <span style={{ color: pressureColor(e), fontWeight: 600 }}>{e}%</span>
     </div>
   );
@@ -51,12 +51,12 @@ export default function CorridorPressureCard() {
     <CollapsibleCard
       defaultExpanded={true}
       title="进出城通道"
-      icon={<Activity size={14} style={{ color: '#4da6ff' }} />}
+      icon={<Activity size={12} style={{ color: '#4da6ff' }} />}
       summary={summary}
       delay="0.2s"
     >
       {/* Cross layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: 'auto auto auto', gap: 8, padding: '4px 0' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: 'auto auto auto', gap: 6, padding: '4px 0' }}>
         <div style={{ gridColumn: '2 / 3', gridRow: '1 / 2' }}>
           <PressureItem direction="north" />
         </div>

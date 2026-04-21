@@ -12,24 +12,24 @@ export default function StraitTransitIndex() {
       background: 'rgba(10, 15, 25, 0.95)',
       border: `1px solid ${statusColor}40`,
       borderRadius: 10,
-      padding: '10px 14px',
+      padding: '8px 10px',
     }}>
       {/* 标题 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-        <Ship size={13} color="#00D0E9" />
-        <span style={{ fontSize: 11, color: '#C9CDD4', fontWeight: 500 }}>琼州海峡通行指数</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <Ship size={11} color="#00D0E9" />
+        <span style={{ fontSize: 10, color: '#C9CDD4', fontWeight: 500 }}>琼州海峡通行指数</span>
       </div>
 
       {/* 指数 + 状态 */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
         <span style={{
-          fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 32,
+          fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 26,
           color: statusColor, lineHeight: 1,
         }}>
           {indexValue}
         </span>
         <span style={{
-          fontSize: 11, color: statusColor,
+          fontSize: 10, color: statusColor,
           padding: '2px 8px', background: `${statusColor}18`,
           borderRadius: 4, fontWeight: 500,
         }}>
@@ -41,29 +41,29 @@ export default function StraitTransitIndex() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Wind size={10} color="#A0A8B4" />
-            <span style={{ fontSize: 11, color: '#A0A8B4' }}>海面风力</span>
+            <Wind size={9} color="#A0A8B4" />
+            <span style={{ fontSize: 10, color: '#A0A8B4' }}>海面风力</span>
           </div>
-          <span style={{ fontSize: 11, color: '#C9CDD4', fontWeight: 500 }}>5级</span>
+          <span style={{ fontSize: 10, color: '#C9CDD4', fontWeight: 500 }}>5级</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Eye size={10} color="#A0A8B4" />
-            <span style={{ fontSize: 11, color: '#A0A8B4' }}>能见度</span>
+            <Eye size={9} color="#A0A8B4" />
+            <span style={{ fontSize: 10, color: '#A0A8B4' }}>能见度</span>
           </div>
-          <span style={{ fontSize: 11, color: '#2ED573', fontWeight: 500 }}>良好</span>
+          <span style={{ fontSize: 10, color: '#2ED573', fontWeight: 500 }}>良好</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Anchor size={10} color="#A0A8B4" />
-            <span style={{ fontSize: 11, color: '#A0A8B4' }}>通航状态</span>
+            <Anchor size={9} color="#A0A8B4" />
+            <span style={{ fontSize: 10, color: '#A0A8B4' }}>通航状态</span>
           </div>
-          <span style={{ fontSize: 11, color: '#2ED573', fontWeight: 500 }}>正常</span>
+          <span style={{ fontSize: 10, color: '#2ED573', fontWeight: 500 }}>正常</span>
         </div>
       </div>
 
       {/* 底部说明 */}
-      <div style={{ marginTop: 6, fontSize: 9, color: '#4B5563', lineHeight: 1.4 }}>
+      <div style={{ marginTop: 6, fontSize: 8, color: '#4B5563', lineHeight: 1.4 }}>
         综合风力、能见度、潮汐、船舶密度计算，≤40通畅 / ≤60一般 / &gt;60拥堵
       </div>
     </div>

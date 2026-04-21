@@ -29,12 +29,12 @@ export default function SystemResilienceCard({ delay = '0s' }: { delay?: string 
   const offset = arcLen * (1 - score / 100);
 
   const summary = (
-    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
       <span>韧性 <span style={{ color: arcColor }}>{score}</span>/100</span>
       <span style={{ color: '#A0A8B4' }}>·</span>
       <span>薄弱: <span style={{ color: '#F5A623' }}>{weakestKey.label} {subScores[weakestKey.key]}</span></span>
       <Info
-        size={12}
+        size={11}
         style={{ color: '#A0A8B4', cursor: 'pointer', marginLeft: 2 }}
         onClick={(e) => { e.stopPropagation(); setActiveModal('resilience-info'); }}
       />
@@ -45,7 +45,7 @@ export default function SystemResilienceCard({ delay = '0s' }: { delay?: string 
     <CollapsibleCard
       defaultExpanded={true}
       title="应急承受能力"
-      icon={<Shield size={14} color="#4da6ff" />}
+      icon={<Shield size={12} color="#4da6ff" />}
       summary={summary}
       delay={delay}
     >
@@ -74,8 +74,8 @@ export default function SystemResilienceCard({ delay = '0s' }: { delay?: string 
             })}
           </svg>
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -45%)', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 24, color: arcColor }}>{score}</div>
-            <div style={{ fontSize: 11, color: '#A0A8B4' }}>/ 100</div>
+            <div style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 20, color: arcColor }}>{score}</div>
+            <div style={{ fontSize: 10, color: '#A0A8B4' }}>/ 100</div>
           </div>
         </div>
         {/* Sub scores */}
@@ -85,17 +85,17 @@ export default function SystemResilienceCard({ delay = '0s' }: { delay?: string 
             const c = getArcColor(val);
             return (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 11, color: '#A0A8B4', width: 48, flexShrink: 0 }}>{label}</span>
+                <span style={{ fontSize: 10, color: '#A0A8B4', width: 48, flexShrink: 0 }}>{label}</span>
                 <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
                   <div style={{ width: `${val}%`, height: '100%', background: c, borderRadius: 3 }} />
                 </div>
-                <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 11, fontWeight: 700, color: c, width: 24, textAlign: 'right' }}>{val}</span>
+                <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 10, fontWeight: 700, color: c, width: 24, textAlign: 'right' }}>{val}</span>
               </div>
             );
           })}
         </div>
       </div>
-      <div style={{ marginTop: 6, fontSize: 11, color: '#F5A623', textAlign: 'center' }}>
+      <div style={{ marginTop: 6, fontSize: 10, color: '#F5A623', textAlign: 'center' }}>
         薄弱环节：{weakestDimension}
       </div>
     </CollapsibleCard>

@@ -19,7 +19,7 @@ export default function PressureTransmissionCard({ delay = '0s' }: { delay?: str
   const st = statusMap[pressureTransmission.overallStatus];
 
   const summary = (
-    <div style={{ fontSize: 12, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+    <div style={{ fontSize: 11, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
       <span>港口 <span style={{ color: '#4da6ff' }}>{pressureTransmission.port.score}</span></span>
       <span style={{ color: '#A0A8B4' }}>→</span>
       <span>通道 <span style={{ color: '#4da6ff' }}>{pressureTransmission.corridor.score}</span></span>
@@ -34,7 +34,7 @@ export default function PressureTransmissionCard({ delay = '0s' }: { delay?: str
     <CollapsibleCard
       defaultExpanded={true}
       title="拥堵扩散情况"
-      icon={<GitBranch size={14} color="#4da6ff" />}
+      icon={<GitBranch size={12} color="#4da6ff" />}
       summary={summary}
       delay={delay}
     >
@@ -49,18 +49,18 @@ export default function PressureTransmissionCard({ delay = '0s' }: { delay?: str
                 border: n.active ? '2px solid #00D0E9' : '1px solid rgba(255,255,255,0.15)',
                 boxShadow: n.active ? '0 0 12px rgba(0, 208, 233, 0.4)' : 'none',
               }}>
-                <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 14, color: n.active ? '#00D0E9' : '#A0A8B4' }}>{n.score}</span>
+                <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 12, color: n.active ? '#00D0E9' : '#A0A8B4' }}>{n.score}</span>
               </div>
-              <span style={{ fontSize: 11, color: n.active ? '#C9CDD4' : '#A0A8B4' }}>{n.label}</span>
+              <span style={{ fontSize: 10, color: n.active ? '#C9CDD4' : '#A0A8B4' }}>{n.label}</span>
             </div>
             {i < nodes.length - 1 && (
-              <div style={{ margin: '0 6px', marginBottom: 16, color: nodes[i + 1].active ? '#00D0E9' : '#A0A8B4', fontSize: 14, fontWeight: 700 }}>→</div>
+              <div style={{ margin: '0 6px', marginBottom: 16, color: nodes[i + 1].active ? '#00D0E9' : '#A0A8B4', fontSize: 12, fontWeight: 700 }}>→</div>
             )}
           </div>
         ))}
       </div>
       {/* Status text */}
-      <div style={{ fontSize: 12, color: '#A0A8B4', textAlign: 'center', padding: '4px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
+      <div style={{ fontSize: 11, color: '#A0A8B4', textAlign: 'center', padding: '4px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 4 }}>
         传导中：港口待舶{pressureTransmission.port.score >= 40 ? '450辆' : '正常'} → 进港大道排队850m
       </div>
     </CollapsibleCard>

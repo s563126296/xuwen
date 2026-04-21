@@ -160,8 +160,8 @@ function App() {
             <div style={{
               position: 'absolute',
               top: 80,
-              left: 16,
-              bottom: 12,
+              left: 12,
+              bottom: 110,
               width: 340,
               zIndex: 20,
               pointerEvents: 'auto',
@@ -169,7 +169,7 @@ function App() {
               overflowX: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              gap: 8,
+              gap: 6,
             }}>
               <LeftPanel
                 deviceData={deviceData}
@@ -182,8 +182,8 @@ function App() {
             <div style={{
               position: 'absolute',
               top: 80,
-              right: 16,
-              bottom: 12,
+              right: 12,
+              bottom: 110,
               width: 340,
               zIndex: 20,
               pointerEvents: 'auto',
@@ -191,7 +191,7 @@ function App() {
               overflowX: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              gap: 8,
+              gap: 6,
             }}>
               <RightPanel />
             </div>
@@ -199,9 +199,10 @@ function App() {
             {/* Bottom Charts */}
             <div style={{
               position: 'absolute',
-              bottom: 12,
-              left: 368,
-              right: 368,
+              bottom: 8,
+              left: 12,
+              right: 12,
+              height: 94,
               zIndex: 20,
               pointerEvents: 'auto',
             }}>
@@ -211,8 +212,9 @@ function App() {
             {/* Strait Transit Index */}
             <div style={{
               position: 'absolute',
-              bottom: 120,
-              right: 368,
+              bottom: 110,
+              left: '50%',
+              transform: 'translateX(-50%)',
               zIndex: 25,
               pointerEvents: 'auto',
             }}>

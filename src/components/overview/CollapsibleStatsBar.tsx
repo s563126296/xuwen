@@ -71,44 +71,44 @@ export default function CollapsibleStatsBar({ deviceData, trafficData, violation
     >
       {/* Collapsed summary row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Cpu size={14} style={{ color: '#00D0E9' }} />
-            <span style={{ fontSize: 12, color: '#C9CDD4' }}>设备</span>
+            <Cpu size={12} style={{ color: '#00D0E9' }} />
+            <span style={{ fontSize: 11, color: '#C9CDD4' }}>设备</span>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2ED573', display: 'inline-block' }} />
-            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 13, color: '#00D0E9' }}>{totalOnline}/{totalDevices}</span>
-            <span style={{ fontSize: 12, color: '#A0A8B4' }}>{onlineRate}%</span>
+            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 11, color: '#00D0E9' }}>{totalOnline}/{totalDevices}</span>
+            <span style={{ fontSize: 11, color: '#A0A8B4' }}>{onlineRate}%</span>
           </div>
-          <span style={{ color: '#A0A8B4', fontSize: 12 }}>|</span>
+          <span style={{ color: '#A0A8B4', fontSize: 11 }}>|</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Car size={14} style={{ color: '#00D0E9' }} />
-            <span style={{ fontSize: 12, color: '#C9CDD4' }}>进城</span>
-            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 13, color: '#00D0E9' }}>{trafficData.inbound.toLocaleString()}</span>
-            <span style={{ fontSize: 11, color: trafficData.change > 0 ? '#2ED573' : '#FF4757' }}>({inChange})</span>
-            <span style={{ fontSize: 12, color: '#C9CDD4', marginLeft: 4 }}>出城</span>
-            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 13, color: '#F5A623' }}>{trafficData.outbound.toLocaleString()}</span>
+            <Car size={12} style={{ color: '#00D0E9' }} />
+            <span style={{ fontSize: 11, color: '#C9CDD4' }}>进城</span>
+            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 11, color: '#00D0E9' }}>{trafficData.inbound.toLocaleString()}</span>
+            <span style={{ fontSize: 10, color: trafficData.change > 0 ? '#2ED573' : '#FF4757' }}>({inChange})</span>
+            <span style={{ fontSize: 11, color: '#C9CDD4', marginLeft: 4 }}>出城</span>
+            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 11, color: '#F5A623' }}>{trafficData.outbound.toLocaleString()}</span>
             {holidayContext && (
               <>
-                <span style={{ fontSize: 11, color: '#F5A623', background: 'rgba(245,166,35,0.15)', padding: '1px 5px', borderRadius: 3, marginLeft: 4 }}>
+                <span style={{ fontSize: 10, color: '#F5A623', background: 'rgba(245,166,35,0.15)', padding: '1px 5px', borderRadius: 3, marginLeft: 4 }}>
                   日常{holidayContext.multiplier}x
                 </span>
                 {lastYearDiff !== null && (
-                  <span style={{ fontSize: 11, color: lastYearDiff <= 0 ? '#2ED573' : '#FF4757', marginLeft: 2 }}>
+                  <span style={{ fontSize: 10, color: lastYearDiff <= 0 ? '#2ED573' : '#FF4757', marginLeft: 2 }}>
                     同比{lastYearDiff > 0 ? '+' : ''}{lastYearDiff}%
                   </span>
                 )}
               </>
             )}
           </div>
-          <span style={{ color: '#A0A8B4', fontSize: 12 }}>|</span>
+          <span style={{ color: '#A0A8B4', fontSize: 11 }}>|</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <AlertCircle size={14} style={{ color: '#F5A623' }} />
-            <span style={{ fontSize: 12, color: '#C9CDD4' }}>违法</span>
-            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 13, color: '#F5A623' }}>{totalViolations}</span>
-            <span style={{ fontSize: 11, color: avgViolationTrend < 0 ? '#2ED573' : '#FF4757' }}>{avgViolationTrend}%</span>
+            <AlertCircle size={12} style={{ color: '#F5A623' }} />
+            <span style={{ fontSize: 11, color: '#C9CDD4' }}>违法</span>
+            <span style={{ fontFamily: 'DIN, sans-serif', fontWeight: 700, fontSize: 11, color: '#F5A623' }}>{totalViolations}</span>
+            <span style={{ fontSize: 10, color: avgViolationTrend < 0 ? '#2ED573' : '#FF4757' }}>{avgViolationTrend}%</span>
           </div>
         </div>
-        {expanded ? <ChevronUp size={14} style={{ color: '#A0A8B4', flexShrink: 0 }} /> : <ChevronDown size={14} style={{ color: '#A0A8B4', flexShrink: 0 }} />}
+        {expanded ? <ChevronUp size={12} style={{ color: '#A0A8B4', flexShrink: 0 }} /> : <ChevronDown size={12} style={{ color: '#A0A8B4', flexShrink: 0 }} />}
       </div>
 
       {/* Expanded detail with animation */}
@@ -118,18 +118,18 @@ export default function CollapsibleStatsBar({ deviceData, trafficData, violation
         overflow: 'hidden',
         transition: 'max-height 0.35s ease, opacity 0.25s ease',
       }}>
-        <div ref={contentRef} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }} onClick={(e) => e.stopPropagation()}>
+        <div ref={contentRef} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }} onClick={(e) => e.stopPropagation()}>
           {/* Device list with filter */}
-          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <div style={{ fontSize: 12, color: '#A0A8B4' }}>设备明细</div>
+          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: '#A0A8B4' }}>设备明细</div>
               <div style={{ display: 'flex', gap: 4 }}>
                 {deviceCategories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setDeviceFilter(cat)}
                     style={{
-                      padding: '2px 8px', fontSize: 11, borderRadius: 4, cursor: 'pointer',
+                      padding: '2px 8px', fontSize: 10, borderRadius: 4, cursor: 'pointer',
                       border: '1px solid',
                       borderColor: deviceFilter === cat ? 'rgba(0,208,233,0.4)' : 'rgba(255,255,255,0.08)',
                       background: deviceFilter === cat ? 'rgba(0,208,233,0.12)' : 'transparent',
@@ -150,13 +150,13 @@ export default function CollapsibleStatsBar({ deviceData, trafficData, violation
                 borderLeft: d.offline > 0 ? '3px solid #FF4757' : '3px solid transparent',
                 paddingLeft: 8,
               }}>
-                <span style={{ fontSize: 12, color: '#C9CDD4' }}>{d.name}</span>
+                <span style={{ fontSize: 11, color: '#C9CDD4' }}>{d.name}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 13, fontWeight: 600, color: '#00D0E9' }}>{d.online}</span>
-                  <span style={{ fontSize: 11, color: '#A0A8B4' }}>/ {d.count}</span>
+                  <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 11, fontWeight: 600, color: '#00D0E9' }}>{d.online}</span>
+                  <span style={{ fontSize: 10, color: '#A0A8B4' }}>/ {d.count}</span>
                   {d.offline > 0 && (
                     <span style={{
-                      fontSize: 11, color: '#FF4757',
+                      fontSize: 10, color: '#FF4757',
                       background: 'rgba(255,71,87,0.15)', padding: '1px 6px', borderRadius: 3,
                       animation: 'offlineBlink 2s infinite',
                     }}>
@@ -168,25 +168,25 @@ export default function CollapsibleStatsBar({ deviceData, trafficData, violation
             ))}
           </div>
           {/* Traffic detail */}
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
             <div style={{ flex: 1, background: 'rgba(0,208,233,0.08)', border: '1px solid rgba(0,208,233,0.15)', borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: '#A0A8B4' }}>今日进城</div>
-              <div style={{ fontFamily: 'DIN, sans-serif', fontSize: 20, fontWeight: 700, color: '#00D0E9' }}>{trafficData.inbound.toLocaleString()}</div>
+              <div style={{ fontSize: 11, color: '#A0A8B4' }}>今日进城</div>
+              <div style={{ fontFamily: 'DIN, sans-serif', fontSize: 16, fontWeight: 700, color: '#00D0E9' }}>{trafficData.inbound.toLocaleString()}</div>
             </div>
             <div style={{ flex: 1, background: 'rgba(245,166,35,0.08)', border: '1px solid rgba(245,166,35,0.15)', borderRadius: 6, padding: '8px 10px', textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: '#A0A8B4' }}>今日出城</div>
-              <div style={{ fontFamily: 'DIN, sans-serif', fontSize: 20, fontWeight: 700, color: '#F5A623' }}>{trafficData.outbound.toLocaleString()}</div>
+              <div style={{ fontSize: 11, color: '#A0A8B4' }}>今日出城</div>
+              <div style={{ fontFamily: 'DIN, sans-serif', fontSize: 16, fontWeight: 700, color: '#F5A623' }}>{trafficData.outbound.toLocaleString()}</div>
             </div>
           </div>
           {/* Violation list */}
-          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: 10 }}>
-            <div style={{ fontSize: 12, color: '#A0A8B4', marginBottom: 6 }}>违法事件</div>
+          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: 8 }}>
+            <div style={{ fontSize: 11, color: '#A0A8B4', marginBottom: 6 }}>违法事件</div>
             {violationData.map((v, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: i < violationData.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                <span style={{ fontSize: 12, color: '#C9CDD4' }}>{v.type}</span>
+                <span style={{ fontSize: 11, color: '#C9CDD4' }}>{v.type}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 13, fontWeight: 600, color: '#F5A623' }}>{v.count}</span>
-                  <span style={{ fontSize: 11, color: v.trend < 0 ? '#2ED573' : '#FF4757' }}>{v.trend > 0 ? '+' : ''}{v.trend}%</span>
+                  <span style={{ fontFamily: 'DIN, sans-serif', fontSize: 11, fontWeight: 600, color: '#F5A623' }}>{v.count}</span>
+                  <span style={{ fontSize: 10, color: v.trend < 0 ? '#2ED573' : '#FF4757' }}>{v.trend > 0 ? '+' : ''}{v.trend}%</span>
                 </div>
               </div>
             ))}

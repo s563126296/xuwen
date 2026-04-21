@@ -45,15 +45,15 @@ export default function CollapsibleCard({
     >
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           {icon}
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{title}</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{title}</span>
         </div>
-        {expanded ? <ChevronUp size={14} color="var(--text-tertiary, #A0A8B4)" /> : <ChevronDown size={14} color="var(--text-tertiary, #A0A8B4)" />}
+        {expanded ? <ChevronUp size={12} color="var(--text-tertiary, #A0A8B4)" /> : <ChevronDown size={12} color="var(--text-tertiary, #A0A8B4)" />}
       </div>
 
       {/* Summary - always visible */}
-      <div style={{ marginTop: 6 }}>
+      <div style={{ marginTop: 4 }}>
         {summary}
       </div>
 
@@ -66,7 +66,7 @@ export default function CollapsibleCard({
           transition: 'max-height 0.3s ease',
         }}
       >
-        <div style={{ paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 8 }}>
+        <div style={{ paddingTop: 6, borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 6 }}>
           {children}
         </div>
       </div>
