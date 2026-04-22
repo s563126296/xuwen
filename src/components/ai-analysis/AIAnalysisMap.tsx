@@ -7,6 +7,7 @@ type SemanticOverlayGroups = {
   flows: any[];
   labels: any[];
   cards: any[];
+  connectors: any[];
 };
 
 const heatAreas = [
@@ -126,11 +127,29 @@ function createInsightCard(card: typeof insightCards[number]) {
   `;
 }
 
+function createConnector(
+  cardPosition: [number, number],
+  heatCenter: [number, number],
+  tone: string
+) {
+  const colorMap: Record<string, string> = {
+    primary: '#00D0E9',
+    warning: '#F5A623',
+    danger: '#FF4757',
+    success: '#2ED573'
+  };
+
+  return {
+    path: [cardPosition, heatCenter],
+    color: colorMap[tone] || '#00D0E9',
+  };
+}
+
 export default function AIAnalysisMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const heatmapLayerRef = useRef<any>(null);
-  const semanticOverlaysRef = useRef<SemanticOverlayGroups>({ heat: [], flows: [], labels: [], cards: [] });
+  const semanticOverlaysRef = useRef<SemanticOverlayGroups>({ heat: [], flows: [], labels: [], cards: [], connectors: [] });
   const [showHeatmap, setShowHeatmap] = useState(true);
   const [showAnalysisCards, setShowAnalysisCards] = useState(true);
   const [showTrafficFlow, setShowTrafficFlow] = useState(true);
@@ -222,11 +241,28 @@ export default function AIAnalysisMap() {
         bubble: true,
       }));
 
-      semanticOverlaysRef.current = { heat, flows, labels, cards };
-      map.add([...heat, ...flows, ...labels, ...cards]);
+      const connectors = insightCards.map((card, index) => {
+        const targetArea = heatAreas[index % heatAreas.length];
+        const connectorData = createConnector(card.position, targetArea.center, card.tone);
+
+        return new AMap.Polyline({
+          path: connectorData.path,
+          strokeColor: connectorData.color,
+          strokeOpacity: 0.35,
+          strokeWeight: 1,
+          strokeStyle: 'dashed',
+          strokeDasharray: [8, 4],
+          lineJoin: 'round',
+          zIndex: 40,
+          bubble: true,
+        });
+      });
+
+      semanticOverlaysRef.current = { heat, flows, labels, cards, connectors };
+      map.add([...heat, ...flows, ...connectors, ...labels, ...cards]);
       setVisible(heat, visibilityRef.current.showHeatmap);
       setVisible(flows, visibilityRef.current.showTrafficFlow);
-      setVisible([...labels, ...cards], visibilityRef.current.showAnalysisCards);
+      setVisible([...connectors, ...labels, ...cards], visibilityRef.current.showAnalysisCards);
     }).catch(() => {
       // Map loading failed
     });
@@ -243,7 +279,7 @@ export default function AIAnalysisMap() {
         mapInstance.current = null;
       }
       heatmapLayerRef.current = null;
-      semanticOverlaysRef.current = { heat: [], flows: [], labels: [], cards: [] };
+      semanticOverlaysRef.current = { heat: [], flows: [], labels: [], cards: [], connectors: [] };
     };
   }, []);
 
@@ -260,7 +296,7 @@ export default function AIAnalysisMap() {
   }, [showTrafficFlow]);
 
   useEffect(() => {
-    setVisible([...semanticOverlaysRef.current.labels, ...semanticOverlaysRef.current.cards], showAnalysisCards);
+    setVisible([...semanticOverlaysRef.current.connectors, ...semanticOverlaysRef.current.labels, ...semanticOverlaysRef.current.cards], showAnalysisCards);
   }, [showAnalysisCards]);
 
   return (
