@@ -392,11 +392,11 @@ const defaultUrbanHealth: UrbanHealth = {
 };
 
 const defaultPressureTransmission: PressureTransmission = {
-  port: { score: 62, active: true },
-  corridor: { score: 45, active: true },
-  city: { score: 28, active: false },
-  citywide: { score: 12, active: false },
-  overallStatus: 'transmitting',
+  port: { score: 82, active: true },
+  corridor: { score: 58, active: true },
+  city: { score: 35, active: true },
+  citywide: { score: 18, active: false },
+  overallStatus: 'spreading',
 };
 
 const defaultWeatherCoupling: WeatherCoupling = {

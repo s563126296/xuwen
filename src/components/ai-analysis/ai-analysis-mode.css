@@ -2033,6 +2033,273 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* 左侧分析要素列表 */
+.analysis-element-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.analysis-element-item {
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-left: 3px solid rgba(0, 208, 233, 0.72);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(7, 20, 38, 0.88), rgba(11, 29, 48, 0.82));
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: border-color 0.18s ease-out, background 0.18s ease-out, transform 0.18s ease-out;
+}
+
+.analysis-element-item:hover {
+  border-color: rgba(0, 208, 233, 0.35);
+  background: linear-gradient(135deg, rgba(7, 20, 38, 0.95), rgba(11, 29, 48, 0.9));
+  transform: translateX(2px);
+}
+
+.analysis-element-item.selected {
+  border-color: rgba(0, 208, 233, 0.6);
+  background: linear-gradient(135deg, rgba(0, 208, 233, 0.12), rgba(11, 29, 48, 0.9));
+  box-shadow: 0 8px 32px rgba(0, 208, 233, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.analysis-element-item__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.analysis-element-item__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  flex-shrink: 0;
+}
+
+.analysis-element-item__title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.analysis-element-item__category {
+  color: rgba(203, 226, 242, 0.5);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.analysis-element-item__title h4 {
+  margin: 0;
+  overflow: hidden;
+  color: #f5f9ff;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analysis-element-item__severity {
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.analysis-element-item__severity--critical {
+  background: #ff4757;
+}
+
+.analysis-element-item__severity--high {
+  background: #f5a623;
+}
+
+.analysis-element-item__severity--medium {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+.analysis-element-item__value {
+  margin-top: 4px;
+  color: #00d0e9;
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+/* 右侧策略建议面板 */
+.strategy-recommendation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.strategy-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid rgba(0, 208, 233, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(8, 24, 42, 0.86), rgba(7, 16, 30, 0.94));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px) saturate(135%);
+  flex-shrink: 0;
+}
+
+.strategy-panel-header h3 {
+  margin: 0;
+  color: #f5f9ff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.strategy-panel-badge {
+  padding: 2px 7px;
+  border: 1px solid rgba(0, 208, 233, 0.24);
+  border-radius: 4px;
+  color: #00d0e9;
+  background: rgba(0, 208, 233, 0.08);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.strategy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.strategy-card {
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-left: 3px solid rgba(245, 166, 35, 0.72);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(7, 20, 38, 0.88), rgba(11, 29, 48, 0.82));
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.18s ease-out, background 0.18s ease-out;
+}
+
+.strategy-card:hover {
+  border-color: rgba(245, 166, 35, 0.35);
+  background: linear-gradient(135deg, rgba(7, 20, 38, 0.95), rgba(11, 29, 48, 0.9));
+}
+
+.strategy-card--highlighted {
+  border-color: rgba(0, 208, 233, 0.5);
+  background: linear-gradient(135deg, rgba(0, 208, 233, 0.1), rgba(11, 29, 48, 0.9));
+  box-shadow: 0 8px 32px rgba(0, 208, 233, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.strategy-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.strategy-card__rank {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #f5a623;
+  background: rgba(245, 166, 35, 0.14);
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.strategy-card__title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.strategy-card__title h4 {
+  margin: 0;
+  overflow: hidden;
+  color: #f5f9ff;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.strategy-card__confidence {
+  color: #00d0e9;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.strategy-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.strategy-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 6px;
+  background: rgba(5, 14, 27, 0.48);
+  color: rgba(203, 226, 242, 0.7);
+}
+
+.strategy-metric span {
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.strategy-metric strong {
+  color: #f5f9ff;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.strategy-card__reasoning {
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.strategy-card__reasoning p {
+  margin: 0;
+  color: rgba(203, 226, 242, 0.64);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ai-analysis-map__scan,
   .sandbox-dataflow,
