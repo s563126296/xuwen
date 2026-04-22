@@ -219,7 +219,7 @@ export default function AIAnalysisMap() {
         strokeOpacity: 0.78,
         strokeWeight: flow.width,
         strokeStyle: 'dashed',
-        strokeDasharray: [14, 10],
+        strokeDasharray: [12, 6],
         lineJoin: 'round',
         lineCap: 'round',
         zIndex: 45,
