@@ -457,12 +457,24 @@
   grid-template-columns: 14px auto;
   gap: 2px 5px;
   min-width: 132px;
-  padding: 7px 9px;
-  border: 1px solid rgba(0, 208, 233, 0.24);
-  border-radius: 7px;
-  background: rgba(4, 14, 28, 0.84);
-  box-shadow: 0 0 18px rgba(0, 208, 233, 0.13);
-  backdrop-filter: blur(9px);
+  padding: 10px 14px;
+  border-radius: 8px;
+  /* 毛玻璃渐变背景 */
+  background: linear-gradient(
+    135deg,
+    rgba(7, 20, 38, 0.88),
+    rgba(11, 29, 48, 0.82)
+  );
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(0, 208, 233, 0.18);
+  /* 双层阴影 */
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  /* 类型色左边框 */
+  border-left: 3px solid var(--card-accent);
+  /* 入场动画 */
+  animation: cardFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .amap-twin-card__icon {
@@ -488,6 +500,11 @@
   font-size: 11px;
   font-weight: 800;
 }
+
+.amap-twin-card--primary  { --card-accent: #00D0E9; }
+.amap-twin-card--warning  { --card-accent: #F5A623; }
+.amap-twin-card--danger   { --card-accent: #FF4757; }
+.amap-twin-card--success  { --card-accent: #2ED573; }
 
 .amap-twin-card--warning {
   border-color: rgba(245, 166, 35, 0.3);
@@ -2009,6 +2026,11 @@
 .sandbox-recommendations::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: rgba(0, 208, 233, 0.22);
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
