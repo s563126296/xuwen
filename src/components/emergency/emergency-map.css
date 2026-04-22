@@ -1,0 +1,272 @@
+/* 应急地图图例 */
+.emergency-map-legend {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(5, 16, 29, 0.72);
+  border: 1px solid rgba(255, 71, 87, 0.2);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+.emergency-map-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emergency-map-legend__line {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.emergency-map-legend__dash {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    currentColor 0,
+    currentColor 8px,
+    transparent 8px,
+    transparent 14px
+  );
+}
+
+.emergency-map-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.emergency-map-legend__text {
+  font-size: 11px;
+  color: rgba(216, 239, 248, 0.75);
+  white-space: nowrap;
+}
+
+/* 应急节点 Marker */
+.emergency-node {
+  position: relative;
+  width: 80px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.emergency-node__halo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.emergency-node--pulse .emergency-node__halo {
+  animation: emergencyNodePulse 2s ease-in-out infinite;
+}
+
+.emergency-node__core {
+  position: relative;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  border: 2px solid;
+  transition: all 0.2s ease;
+}
+
+.emergency-node--circle .emergency-node__core {
+  border-radius: 50%;
+}
+
+.emergency-node--square .emergency-node__core {
+  border-radius: 8px;
+}
+
+.emergency-node--diamond .emergency-node__core {
+  border-radius: 6px;
+  transform: rotate(45deg);
+}
+
+.emergency-node--diamond .emergency-node__core > span {
+  transform: rotate(-45deg);
+}
+
+.emergency-node__pin {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 26px;
+  opacity: 0.4;
+}
+
+.emergency-node__label {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 120px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.emergency-node__label-bg {
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  border: 1px solid;
+  z-index: -1;
+}
+
+.emergency-node__label-text {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.emergency-node__caption-text {
+  font-size: 10px;
+  color: rgba(222, 244, 252, 0.65);
+  line-height: 1.3;
+}
+
+/* 资源点 Marker */
+.emergency-resource {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(10, 15, 25, 0.85);
+  border: 1px solid rgba(0, 208, 233, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.emergency-resource[data-status="warning"] {
+  border-color: rgba(245, 166, 35, 0.4);
+}
+
+.emergency-resource[data-status="critical"] {
+  border-color: rgba(255, 71, 87, 0.4);
+}
+
+.emergency-resource__core {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.emergency-resource__name {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* 特殊车辆 Marker */
+.emergency-vehicle {
+  pointer-events: auto;
+}
+
+.emergency-vehicle__core {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 2px solid;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.emergency-vehicle[data-alert="red"] .emergency-vehicle__core,
+.emergency-vehicle[data-alert="orange"] .emergency-vehicle__core {
+  animation: vehicleAlert 1.5s ease-in-out infinite;
+}
+
+/* 台风 Marker */
+.emergency-hazard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.emergency-hazard__symbol {
+  font-size: 32px;
+  animation: typhoonSpin 4s linear infinite;
+}
+
+.emergency-hazard__label {
+  position: relative;
+  text-align: center;
+  margin-top: 4px;
+  padding: 4px 10px;
+}
+
+.emergency-hazard__label-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 7px;
+  background: rgba(10, 15, 25, 0.88);
+  border: 1px solid rgba(255, 71, 87, 0.4);
+  z-index: -1;
+}
+
+.emergency-hazard__label-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FF4757;
+  line-height: 1.4;
+}
+
+.emergency-hazard__caption {
+  font-size: 10px;
+  color: rgba(222, 244, 252, 0.65);
+  line-height: 1.3;
+}
+
+@keyframes emergencyNodePulse {
+  0%, 100% { opacity: 0.15; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.35; transform: translateX(-50%) scale(1.15); }
+}
+
+@keyframes vehicleAlert {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 71, 87, 0); }
+}
+
+@keyframes typhoonSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
