@@ -66,11 +66,7 @@ export default function CommandMode() {
         {/* Strategy panel: 300px */}
         <div style={{
           width: 300, overflowY: 'auto',
-          background: 'rgba(10,15,25,0.95)',
-          border: '1px solid rgba(0,208,233,0.12)',
-          borderRadius: 6,
-          backdropFilter: 'blur(10px)',
-          padding: '12px 10px',
+          padding: '0 2px',
         }}>
           <StrategyCommandPanel />
         </div>
