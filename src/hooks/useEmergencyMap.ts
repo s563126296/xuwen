@@ -11,6 +11,9 @@ import {
   VEHICLE_POSITIONS_GEO,
   RECOVERY_PATH,
   G207_PATH,
+  HAIAN_DIVERSION_PATH,
+  S376_EAST_PATH,
+  EMERGENCY_LANE_PATH,
 } from '../constants/emergencyMapCoords';
 import { SEGMENT_STYLES } from '../constants/map';
 
@@ -48,7 +51,6 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
     typhoon,
   } = emergency;
 
-  // 台风位置计算
   const typhoonProgress = Math.max(0, Math.min(1, 1 - typhoon.distance / 85));
 
   // 初始化地图 + 绘制所有图层
@@ -60,8 +62,8 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       if (destroyed || !mapRef.current) return;
 
       const map = new AMap.Map(mapRef.current, {
-        zoom: 12.8,
-        center: [110.150, 20.265],
+        zoom: 12.2,
+        center: [110.170, 20.275],
         mapStyle: 'amap://styles/dark',
         viewMode: '2D',
         features: ['bg', 'road', 'building'],
@@ -69,43 +71,82 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       });
       mapInstance.current = map;
 
-      // ========== 图层 1: 周边道路网络 ==========
+      // ================================================================
+      // 图层 1: 周边道路网络（真实路网）
+      // ================================================================
 
-      // G207 国道
+      // G207 国道（徐城镇 → S548 交叉口）
       map.add(new AMap.Polyline({
         path: G207_PATH,
-        strokeColor: '#94A3B8',
-        strokeWeight: 5,
-        strokeOpacity: 0.5,
-        lineJoin: 'round', lineCap: 'round',
-        zIndex: 12,
+        strokeColor: '#94A3B8', strokeWeight: 5, strokeOpacity: 0.5,
+        lineJoin: 'round', lineCap: 'round', zIndex: 12,
       }));
       map.add(new AMap.Text({
         text: 'G207 国道',
         position: G207_PATH[0],
-        style: labelStyle('#94A3B8'),
-        zIndex: 110,
+        style: labelStyle('#94A3B8'), zIndex: 110,
       }));
 
-      // ========== 图层 2: S548 进港大道滞留链（分段拥堵）==========
+      // 海安港分流路线（G207 交叉口 → 海安港）
+      map.add(new AMap.Polyline({
+        path: HAIAN_DIVERSION_PATH,
+        strokeColor: '#60A5FA', strokeWeight: 4, strokeOpacity: 0.5,
+        lineJoin: 'round', lineCap: 'round',
+        strokeStyle: 'dashed', strokeDasharray: [12, 6],
+        showDir: true, zIndex: 12,
+      }));
+      map.add(new AMap.Text({
+        text: '海安港分流通道\n分流 ~600辆/h',
+        position: midpoint(HAIAN_DIVERSION_PATH[1], HAIAN_DIVERSION_PATH[2]),
+        style: labelStyle('#60A5FA', true), zIndex: 110,
+      }));
+
+      // S376 东向分流（华四村 → 徐城镇）
+      map.add(new AMap.Polyline({
+        path: S376_EAST_PATH,
+        strokeColor: '#2ED573', strokeWeight: 4, strokeOpacity: 0.5,
+        lineJoin: 'round', lineCap: 'round',
+        strokeStyle: 'dashed', strokeDasharray: [10, 6],
+        showDir: true, zIndex: 12,
+      }));
+      map.add(new AMap.Text({
+        text: 'S376 东向分流\n引导至徐城镇',
+        position: midpoint(S376_EAST_PATH[0], S376_EAST_PATH[1]),
+        style: labelStyle('#2ED573', true), zIndex: 110,
+      }));
+
+      // 应急车道（S548 反向借道，迈陈镇 → G207 交叉口）
+      map.add(new AMap.Polyline({
+        path: EMERGENCY_LANE_PATH,
+        strokeColor: '#F5A623', strokeWeight: 4, strokeOpacity: 0.6,
+        lineJoin: 'round', lineCap: 'round',
+        strokeStyle: 'dashed', strokeDasharray: [8, 8],
+        showDir: true, zIndex: 13,
+      }));
+      map.add(new AMap.Text({
+        text: '应急车道借用\n小客车专用 ~400辆/h',
+        position: midpoint(EMERGENCY_LANE_PATH[0], EMERGENCY_LANE_PATH[1]),
+        style: labelStyle('#F5A623', true), zIndex: 110,
+      }));
+
+      // ================================================================
+      // 图层 2: S548 进港大道滞留链（分段拥堵）
+      // ================================================================
 
       const segments: any[] = [];
       for (let i = 0; i < STRANDED_CHAIN_PATH.length - 1; i++) {
         const style = SEGMENT_STYLES[i];
         const seg = new AMap.Polyline({
           path: [STRANDED_CHAIN_PATH[i], STRANDED_CHAIN_PATH[i + 1]],
-          strokeColor: style.color,
-          strokeWeight: style.weight * 1.3,
+          strokeColor: style.color, strokeWeight: style.weight * 1.3,
           strokeOpacity: style.opacity,
-          lineJoin: 'round', lineCap: 'round',
-          zIndex: 15,
+          lineJoin: 'round', lineCap: 'round', zIndex: 15,
         });
         map.add(seg);
         segments.push(seg);
       }
       strandedSegmentsRef.current = segments;
 
-      // 滞留链标签
       const strandedLabel = new AMap.Text({
         text: formatStrandedLabel(forecast),
         position: midpoint(STRANDED_CHAIN_PATH[2], STRANDED_CHAIN_PATH[3], 0.006, 0),
@@ -115,41 +156,29 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       map.add(strandedLabel);
       strandedLabelRef.current = strandedLabel;
 
-      // ========== 图层 3: 停车区分拨线 ==========
+      // ================================================================
+      // 图层 3: 停车区分拨线
+      // ================================================================
 
       const p1Usage = calcUsage(forecast.currentStrandedVehicles, 350);
       const p2Usage = calcUsage(forecast.currentStrandedVehicles, 280, 0.56);
 
-      // P1 分拨线
-      map.add(new AMap.Polyline({
-        path: PARKING_TRANSFER_PATHS.toP1,
-        strokeColor: '#F5A623', strokeWeight: 4, strokeOpacity: 0.7,
-        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [10, 6],
-        zIndex: 14,
-      }));
-
-      // P2 分拨线
-      map.add(new AMap.Polyline({
-        path: PARKING_TRANSFER_PATHS.toP2,
-        strokeColor: '#F5A623', strokeWeight: 4, strokeOpacity: 0.7,
-        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [10, 6],
-        zIndex: 14,
-      }));
-
-      // P3 分拨线（应急停车区）
+      [PARKING_TRANSFER_PATHS.toP1, PARKING_TRANSFER_PATHS.toP2].forEach((path) => {
+        map.add(new AMap.Polyline({
+          path, strokeColor: '#F5A623', strokeWeight: 4, strokeOpacity: 0.7,
+          lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [10, 6], zIndex: 14,
+        }));
+      });
       map.add(new AMap.Polyline({
         path: PARKING_TRANSFER_PATHS.toP3,
         strokeColor: '#F5A623', strokeWeight: 3, strokeOpacity: 0.5,
-        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [8, 8],
-        zIndex: 14,
+        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [8, 8], zIndex: 14,
       }));
 
-      // 停车场标签
       const p1Label = new AMap.Text({
         text: `P1 停车场\n${p1Usage}% · 350车位`,
         position: EMERGENCY_NODES.parking1,
-        style: labelStyle(usageColor(p1Usage), true),
-        zIndex: 120,
+        style: labelStyle(usageColor(p1Usage), true), zIndex: 120,
       });
       map.add(p1Label);
       parkingLabelsRef.current['p1'] = p1Label;
@@ -157,8 +186,7 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       const p2Label = new AMap.Text({
         text: `P2 停车场\n${p2Usage}% · 280车位`,
         position: EMERGENCY_NODES.parking2,
-        style: labelStyle(usageColor(p2Usage), true),
-        zIndex: 120,
+        style: labelStyle(usageColor(p2Usage), true), zIndex: 120,
       });
       map.add(p2Label);
       parkingLabelsRef.current['p2'] = p2Label;
@@ -166,43 +194,41 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       const p3Label = new AMap.Text({
         text: `P3 应急停车区\n待启用 · 200车位`,
         position: EMERGENCY_NODES.parking3,
-        style: labelStyle('#94A3B8', true),
-        zIndex: 120,
+        style: labelStyle('#94A3B8', true), zIndex: 120,
       });
       map.add(p3Label);
       parkingLabelsRef.current['p3'] = p3Label;
 
-      // ========== 图层 4: 物资配送线 ==========
+      // ================================================================
+      // 图层 4: 物资配送线
+      // ================================================================
 
       map.add(new AMap.Polyline({
         path: SUPPLY_LINE_PATHS.main,
         strokeColor: '#2ED573', strokeWeight: 4, strokeOpacity: 0.6,
         lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [8, 6],
-        showDir: true,
-        zIndex: 14,
+        showDir: true, zIndex: 14,
       }));
       map.add(new AMap.Polyline({
         path: SUPPLY_LINE_PATHS.toParking,
         strokeColor: '#2ED573', strokeWeight: 3, strokeOpacity: 0.5,
-        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [6, 6],
-        zIndex: 14,
+        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [6, 6], zIndex: 14,
       }));
       map.add(new AMap.Text({
         text: '物资配送\n盒饭·饮水·燃油',
         position: EMERGENCY_NODES.supplyStation,
-        style: labelStyle('#2ED573', true),
-        zIndex: 120,
+        style: labelStyle('#2ED573', true), zIndex: 120,
       }));
 
-      // ========== 图层 5: 无人机巡查闭环 ==========
+      // ================================================================
+      // 图层 5: 无人机巡查闭环
+      // ================================================================
 
       const droneLine = new AMap.Polyline({
         path: DRONE_PATROL_PATH,
         strokeColor: isDroneDeployed ? '#00D0E9' : '#94A3B8',
-        strokeWeight: 3,
-        strokeOpacity: isDroneDeployed ? 0.6 : 0.3,
-        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [6, 8],
-        zIndex: 14,
+        strokeWeight: 3, strokeOpacity: isDroneDeployed ? 0.6 : 0.3,
+        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [6, 8], zIndex: 14,
       });
       map.add(droneLine);
       droneLineRef.current = droneLine;
@@ -210,43 +236,44 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       const droneLabel = new AMap.Text({
         text: isDroneDeployed ? '无人机巡查\nUAV-01 巡查中' : '无人机巡查\n待派出',
         position: EMERGENCY_NODES.droneBase,
-        style: labelStyle(isDroneDeployed ? '#00D0E9' : '#94A3B8', true),
-        zIndex: 120,
+        style: labelStyle(isDroneDeployed ? '#00D0E9' : '#94A3B8', true), zIndex: 120,
       });
       map.add(droneLabel);
       droneLabelRef.current = droneLabel;
 
-      // ========== 图层 6: 台风预测路径 ==========
+      // ================================================================
+      // 图层 6: 台风预测路径
+      // ================================================================
 
       map.add(new AMap.Polyline({
         path: TYPHOON_PATH,
         strokeColor: '#FF4757', strokeWeight: 3, strokeOpacity: 0.5,
-        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [8, 8],
-        zIndex: 12,
+        lineJoin: 'round', strokeStyle: 'dashed', strokeDasharray: [8, 8], zIndex: 12,
       }));
       map.add(new AMap.Text({
         text: '台风预测路径',
         position: midpoint(TYPHOON_PATH[0], TYPHOON_PATH[1]),
-        style: labelStyle('#FF4757'),
-        zIndex: 110,
+        style: labelStyle('#FF4757'), zIndex: 110,
       }));
 
-      // ========== 图层 7: 复航疏散方向 ==========
+      // ================================================================
+      // 图层 7: 复航疏散方向（沿 S548 反向）
+      // ================================================================
 
       map.add(new AMap.Polyline({
         path: RECOVERY_PATH,
-        strokeColor: '#00D0E9', strokeWeight: 3, strokeOpacity: 0.5,
-        lineJoin: 'round', showDir: true,
-        zIndex: 12,
+        strokeColor: '#00D0E9', strokeWeight: 4, strokeOpacity: 0.4,
+        lineJoin: 'round', showDir: true, zIndex: 12,
       }));
       map.add(new AMap.Text({
-        text: '复航疏散方向',
-        position: RECOVERY_PATH[2],
-        style: labelStyle('#00D0E9'),
-        zIndex: 110,
+        text: '复航疏散\n沿 S548 北向疏散',
+        position: RECOVERY_PATH[3],
+        style: labelStyle('#00D0E9', true), zIndex: 110,
       }));
 
-      // ========== 图层 8: 台风影响圈 + Marker ==========
+      // ================================================================
+      // 图层 8: 台风影响圈 + 停航影响圈
+      // ================================================================
 
       const tPos = interpolateTyphoon(typhoonProgress);
 
@@ -254,8 +281,7 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
         center: tPos, radius: 7000,
         strokeColor: '#FF4757', strokeWeight: 2, strokeOpacity: 0.5,
         strokeStyle: 'dashed', strokeDasharray: [8, 6],
-        fillColor: '#FF4757', fillOpacity: 0.06,
-        zIndex: 11,
+        fillColor: '#FF4757', fillOpacity: 0.06, zIndex: 11,
       });
       map.add(typhoonCircle);
       typhoonCircleRef.current = typhoonCircle;
@@ -263,8 +289,7 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       const typhoonInner = new AMap.Circle({
         center: tPos, radius: 4000,
         strokeColor: '#FF4757', strokeWeight: 1, strokeOpacity: 0.3,
-        fillColor: '#FF4757', fillOpacity: 0.1,
-        zIndex: 11,
+        fillColor: '#FF4757', fillOpacity: 0.1, zIndex: 11,
       });
       map.add(typhoonInner);
       typhoonInnerCircleRef.current = typhoonInner;
@@ -272,8 +297,7 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       const typhoonMarker = new AMap.Marker({
         position: tPos,
         content: buildTyphoonHTML(typhoon),
-        offset: new AMap.Pixel(-40, -70),
-        zIndex: 150,
+        offset: new AMap.Pixel(-40, -70), zIndex: 150,
       });
       map.add(typhoonMarker);
       typhoonMarkerRef.current = typhoonMarker;
@@ -282,11 +306,12 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       map.add(new AMap.Circle({
         center: EMERGENCY_NODES.xuwenPort, radius: 3000,
         strokeColor: '#FF4757', strokeWeight: 2, strokeOpacity: 0.4,
-        fillColor: '#FF4757', fillOpacity: 0.08,
-        zIndex: 11,
+        fillColor: '#FF4757', fillOpacity: 0.08, zIndex: 11,
       }));
 
-      // ========== 图层 9: 固定节点 ==========
+      // ================================================================
+      // 图层 9: 关键节点
+      // ================================================================
 
       const execCount = tasks.filter((t) => t.status === 'executing' || t.status === 'arrived').length;
 
@@ -294,23 +319,28 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
       const portMarker = new AMap.Marker({
         position: EMERGENCY_NODES.xuwenPort,
         content: buildNodeHTML('港', '徐闻港', portShutdown ? '已停航' : '可通行', portShutdown ? 'red' : 'green', 'square', portShutdown),
-        offset: new AMap.Pixel(-40, -90),
-        zIndex: 200,
+        offset: new AMap.Pixel(-40, -90), zIndex: 200,
       });
       map.add(portMarker);
       portMarkerRef.current = portMarker;
 
-      // 县应急指挥中心
+      // 县应急指挥中心（徐城镇）
       map.add(new AMap.Marker({
         position: EMERGENCY_NODES.commandCenter,
-        content: buildNodeHTML('指', '县应急指挥点', `${execCount}项执行中`, 'cyan', 'diamond', false),
-        offset: new AMap.Pixel(-40, -90),
-        zIndex: 200,
+        content: buildNodeHTML('指', '县应急指挥中心', `${execCount}项执行中`, 'cyan', 'diamond', false),
+        offset: new AMap.Pixel(-40, -90), zIndex: 200,
+      }));
+
+      // 海安港
+      map.add(new AMap.Marker({
+        position: EMERGENCY_NODES.haianPort,
+        content: buildNodeHTML('海', '海安港', '备用分流港', 'blue', 'square', false),
+        offset: new AMap.Pixel(-40, -90), zIndex: 200,
       }));
 
       // 路段关键节点
       const roadNodes = [
-        { pos: EMERGENCY_NODES.g207Gate, marker: 'G', label: 'G207交叉口', caption: '北端入口', tone: 'amber' },
+        { pos: EMERGENCY_NODES.g207Gate, marker: 'G', label: 'G207交叉口', caption: '北端入口管控', tone: 'amber' },
         { pos: EMERGENCY_NODES.huasiVillage, marker: 'H', label: '华四村', caption: '分流执行点', tone: 'green' },
         { pos: EMERGENCY_NODES.maichenTown, marker: 'M', label: '迈陈镇', caption: '停车引导', tone: 'amber' },
         { pos: EMERGENCY_NODES.nanshanTown, marker: 'N', label: '南山镇', caption: '物资发放', tone: 'green' },
@@ -320,36 +350,44 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
         map.add(new AMap.Marker({
           position: n.pos,
           content: buildNodeHTML(n.marker, n.label, n.caption, n.tone, 'circle', false),
-          offset: new AMap.Pixel(-40, -90),
-          zIndex: 190,
+          offset: new AMap.Pixel(-40, -90), zIndex: 190,
         }));
       });
 
-      // ========== 图层 10: 资源点 ==========
+      // ================================================================
+      // 图层 10: 资源点
+      // ================================================================
 
-      // 警力部署点
-      map.add(new AMap.Marker({
-        position: EMERGENCY_NODES.policePoint1,
-        content: buildResourceHTML('警', '中段执勤点', '#00D0E9'),
-        offset: new AMap.Pixel(-16, -16),
-        zIndex: 180,
-      }));
-      map.add(new AMap.Marker({
-        position: EMERGENCY_NODES.policePoint2,
-        content: buildResourceHTML('警', '迈陈镇执勤', '#00D0E9'),
-        offset: new AMap.Pixel(-16, -16),
-        zIndex: 180,
-      }));
+      // 警力部署点（3 个）
+      [
+        { pos: EMERGENCY_NODES.policePoint1, name: '中段执勤点' },
+        { pos: EMERGENCY_NODES.policePoint2, name: '迈陈镇执勤' },
+        { pos: EMERGENCY_NODES.policePoint3, name: 'G207 管控点' },
+      ].forEach((p) => {
+        map.add(new AMap.Marker({
+          position: p.pos,
+          content: buildResourceHTML('警', p.name, '#00D0E9'),
+          offset: new AMap.Pixel(-16, -16), zIndex: 180,
+        }));
+      });
 
       // 加油站
       map.add(new AMap.Marker({
         position: EMERGENCY_NODES.fuelStation,
         content: buildResourceHTML('油', '移动加油车', '#F5A623'),
-        offset: new AMap.Pixel(-16, -16),
-        zIndex: 180,
+        offset: new AMap.Pixel(-16, -16), zIndex: 180,
       }));
 
-      // ========== 图层 11: 特殊车辆 ==========
+      // 医疗救援点
+      map.add(new AMap.Marker({
+        position: EMERGENCY_NODES.medicalPoint,
+        content: buildResourceHTML('医', '南山镇医疗点', '#FF4757'),
+        offset: new AMap.Pixel(-16, -16), zIndex: 180,
+      }));
+
+      // ================================================================
+      // 图层 11: 特殊车辆
+      // ================================================================
 
       specialVehicles.forEach((v) => {
         const pos = VEHICLE_POSITIONS_GEO[v.id] || EMERGENCY_NODES.xuwenPort;
@@ -365,18 +403,19 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
               <div class="emergency-vehicle__plate" style="color:${color}">${v.plateNumber}</div>
             </div>
           `,
-          offset: new AMap.Pixel(-20, -20),
-          zIndex: 170,
+          offset: new AMap.Pixel(-20, -20), zIndex: 170,
         });
         map.add(vm);
         vehicleMarkersRef.current[v.id] = vm;
       });
 
-      // ========== 图层 12: 状态信息栏 ==========
+      // ================================================================
+      // 图层 12: 状态信息栏
+      // ================================================================
 
       map.add(new AMap.Text({
         text: `${phaseLabel} · ${emergencyLevel}级响应 · 滞留${forecast.currentStrandedVehicles.toLocaleString()}辆 · 冷链${forecast.coldChainVehicles}辆 · 危化${forecast.hazardousVehicles}辆`,
-        position: [110.130, 20.318],
+        position: [110.135, 20.335],
         style: {
           'background-color': 'rgba(10,15,25,0.85)',
           border: `1px solid ${emergencyLevel === 'I' || emergencyLevel === 'II' ? '#FF475755' : '#F5A62355'}`,
@@ -409,9 +448,7 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
     if (!mapReady) return;
     const AMap = (window as any).AMap;
     if (!AMap) return;
-
     const tPos = interpolateTyphoon(typhoonProgress);
-
     if (typhoonMarkerRef.current) {
       typhoonMarkerRef.current.setPosition(new AMap.LngLat(tPos[0], tPos[1]));
       typhoonMarkerRef.current.setContent(buildTyphoonHTML(typhoon));
