@@ -161,6 +161,7 @@ export default function AIAnalysisMap() {
 
   useEffect(() => {
     let destroyed = false;
+    let breatheInterval: NodeJS.Timeout | null = null;
 
     loadAMap(['AMap.HeatMap']).then((AMap: any) => {
       if (destroyed || !mapRef.current) return;
@@ -263,12 +264,24 @@ export default function AIAnalysisMap() {
       setVisible(heat, visibilityRef.current.showHeatmap);
       setVisible(flows, visibilityRef.current.showTrafficFlow);
       setVisible([...connectors, ...labels, ...cards], visibilityRef.current.showAnalysisCards);
+
+      // 热力图呼吸动画
+      let phase = 0;
+      breatheInterval = setInterval(() => {
+        if (!semanticOverlaysRef.current.heat.length) return;
+        phase += 0.03;
+        const opacity = 0.15 + Math.sin(phase) * 0.05; // 0.10 ~ 0.20
+        semanticOverlaysRef.current.heat.forEach(circle => {
+          circle.setOptions({ fillOpacity: opacity });
+        });
+      }, 60);
     }).catch(() => {
       // Map loading failed
     });
 
     return () => {
       destroyed = true;
+      if (breatheInterval) clearInterval(breatheInterval);
       const overlays = Object.values(semanticOverlaysRef.current).flat();
       if (mapInstance.current && overlays.length) {
         mapInstance.current.remove(overlays);
