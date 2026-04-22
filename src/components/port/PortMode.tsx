@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { Activity, Anchor, Gauge, ParkingCircle, Ship, Wind } from 'lucide-react';
-import PortRealMap from './PortRealMap';
+import PortSemanticStraitMap from './PortSemanticStraitMap';
 import StraitIndexPanel from './panels/StraitIndexPanel';
 import WeatherImpactPanel from './panels/WeatherImpactPanel';
 import PortCapacityPanel from './panels/PortCapacityPanel';
@@ -127,7 +127,7 @@ export default function PortMode() {
           </aside>
 
           <main className="port-mode__map-stage">
-            <PortRealMap />
+            <PortSemanticStraitMap />
           </main>
 
           <aside className="port-mode__rail port-mode__rail--right">

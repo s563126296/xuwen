@@ -24,10 +24,29 @@ export function loadAMap(plugins: string[] = ['AMap.Scale']): Promise<any> {
     console.log('[amapLoader] Security config set');
   }
 
-  // 如果已经加载过，直接返回 window.AMap
+  // 如果已经加载过，确保需要的插件也已加载
   if ((window as any).AMap) {
-    console.log('[amapLoader] AMap already loaded, returning existing instance');
-    return Promise.resolve((window as any).AMap);
+    console.log('[amapLoader] AMap already loaded, checking plugins:', plugins);
+    const AMap = (window as any).AMap;
+
+    // 检查是否需要加载新插件
+    const needsPlugins = plugins.some((plugin) => {
+      const pluginName = plugin.replace('AMap.', '');
+      return !(AMap as any)[pluginName];
+    });
+
+    if (!needsPlugins) {
+      console.log('[amapLoader] All plugins already loaded, returning existing instance');
+      return Promise.resolve(AMap);
+    }
+
+    // 加载缺失的插件
+    return new Promise((resolve) => {
+      AMap.plugin(plugins, () => {
+        console.log('[amapLoader] Plugins loaded successfully:', plugins);
+        resolve(AMap);
+      });
+    });
   }
 
   // 如果正在加载，返回现有的 Promise

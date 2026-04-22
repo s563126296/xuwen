@@ -24,8 +24,8 @@ export default function AlertRadarPanel() {
     <div className="ai-panel ai-panel--half" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <div className="ai-panel__header" style={{ flexShrink: 0 }}>
         <AlertTriangle size={15} />
-        <h3>实时智能预警</h3>
-        <span className="ai-panel__badge">象限B</span>
+        <h3>风险雷达预警</h3>
+        <span className="ai-panel__badge">预警</span>
       </div>
 
       <div className="ai-panel__body" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

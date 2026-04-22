@@ -35,8 +35,8 @@ export default function PanoramaPanel() {
     <div className="ai-panel" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <div className="ai-panel__header" style={{ flexShrink: 0 }}>
         <Activity size={15} />
-        <h3>交通态势全景</h3>
-        <span className="ai-panel__badge">象限D</span>
+        <h3>运行健康全景</h3>
+        <span className="ai-panel__badge">全景</span>
       </div>
 
       <div className="ai-panel__body" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

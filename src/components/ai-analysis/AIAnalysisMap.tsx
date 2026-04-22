@@ -263,11 +263,24 @@ export default function AIAnalysisMap() {
         });
       });
 
+      console.log('=== AI Analysis Map Debug ===');
+      console.log('heat circles:', heat.length);
+      console.log('flows:', flows.length);
+      console.log('labels:', labels.length);
+      console.log('cards:', cards.length);
+      console.log('connectors:', connectors.length);
+      console.log('visibility:', visibilityRef.current);
+
       semanticOverlaysRef.current = { heat, flows, labels, cards, connectors };
       map.add([...heat, ...flows, ...connectors, ...labels, ...cards]);
+
+      console.log('overlays added to map');
+
       setVisible(heat, visibilityRef.current.showHeatmap);
       setVisible(flows, visibilityRef.current.showTrafficFlow);
       setVisible([...connectors, ...labels, ...cards], visibilityRef.current.showAnalysisCards);
+
+      console.log('visibility set');
 
       // 热力图呼吸动画
       let phase = 0;
@@ -279,8 +292,8 @@ export default function AIAnalysisMap() {
           circle.setOptions({ fillOpacity: opacity });
         });
       }, 60);
-    }).catch(() => {
-      // Map loading failed
+    }).catch((error) => {
+      console.error('=== Map loading failed ===', error);
     });
 
     return () => {
@@ -347,7 +360,7 @@ export default function AIAnalysisMap() {
       </div>
 
       <div className="ai-analysis-map__badge">
-        <span>AI热力研判图</span>
+        <span>AI热力研判图 [新版本已加载]</span>
         <em>地图原生覆盖物 · 跟随缩放拖动</em>
       </div>
 

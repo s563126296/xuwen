@@ -15,8 +15,8 @@ export default function RiskPropagationPanel() {
     <div className="ai-panel ai-panel--half" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <div className="ai-panel__header" style={{ flexShrink: 0 }}>
         <Network size={15} />
-        <h3>风险传导路径</h3>
-        <span className="ai-panel__badge">象限B</span>
+        <h3>港城风险传导</h3>
+        <span className="ai-panel__badge">链路</span>
       </div>
 
       <div className="ai-panel__body" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

@@ -14,7 +14,6 @@ export default function PortStraitOverlay() {
   const scene = useMapScene();
   const weather = usePortStore((s) => s.weather);
   const straitIndex = usePortStore((s) => s.straitIndex);
-  const crossingStats = usePortStore((s) => s.crossingStats);
   const [centerPos, setCenterPos] = useState({ x: 0, y: 0 });
   const rafRef = useRef(0);
 
@@ -134,86 +133,102 @@ export default function PortStraitOverlay() {
         </div>
       </div>
 
-      {/* 右上角海峡实时数据 */}
-      <div style={{
-        position: 'absolute',
-        top: 20,
-        right: 20,
-        background: 'rgba(5,16,29,0.88)',
-        border: '1px solid rgba(0,208,233,0.3)',
-        borderRadius: 8,
-        padding: '10px 14px',
-        backdropFilter: 'blur(8px)',
-        minWidth: 180,
-      }}>
-        <div style={{ color: TONE_COLORS.cyan, fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
-          琼州海峡实时
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-            <span style={{ color: 'rgba(220,244,255,0.6)' }}>风力</span>
-            <span style={{ color: '#fff', fontWeight: 600 }}>{straitIndex.windLevel} 级</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-            <span style={{ color: 'rgba(220,244,255,0.6)' }}>能见度</span>
-            <span style={{ color: '#fff', fontWeight: 600 }}>{straitIndex.visibility} 千米</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-            <span style={{ color: 'rgba(220,244,255,0.6)' }}>浪高</span>
-            <span style={{ color: '#fff', fontWeight: 600 }}>{straitIndex.waveHeight} 米</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-            <span style={{ color: 'rgba(220,244,255,0.6)' }}>潮汐</span>
-            <span style={{ color: '#fff', fontWeight: 600 }}>
-              {{ rising: '涨潮', falling: '落潮', high: '高潮', low: '低潮' }[weather.tideStatus] || '-'}
-            </span>
-          </div>
-          <div style={{
-            marginTop: 6,
-            paddingTop: 6,
-            borderTop: '1px solid rgba(0,208,233,0.2)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: 11,
-          }}>
-            <span style={{ color: 'rgba(220,244,255,0.6)' }}>今日过海</span>
-            <span style={{ color: TONE_COLORS.green, fontWeight: 700 }}>
-              {crossingStats.todayTotal.toLocaleString()} 辆
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 未来6小时预报 */}
+      {/* 未来6小时预报 — 增强显示 */}
       {weather.forecast && weather.forecast.length > 0 && (
         <div style={{
           position: 'absolute',
-          bottom: 20,
+          top: 20,
           right: 20,
-          background: 'rgba(5,16,29,0.88)',
-          border: '1px solid rgba(0,208,233,0.3)',
-          borderRadius: 8,
-          padding: '10px 14px',
-          backdropFilter: 'blur(8px)',
-          minWidth: 200,
+          background: 'linear-gradient(145deg, rgba(6,16,31,0.95), rgba(8,31,49,0.92))',
+          border: '1px solid rgba(0,208,233,0.4)',
+          borderRadius: 10,
+          padding: '14px 18px',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(0,208,233,0.15)',
+          minWidth: 420,
         }}>
-          <div style={{ color: TONE_COLORS.cyan, fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
-            未来6小时预报
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginBottom: 12,
+            paddingBottom: 10,
+            borderBottom: '1px solid rgba(0,208,233,0.2)',
+          }}>
+            <div style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: TONE_COLORS.cyan,
+              boxShadow: `0 0 8px ${TONE_COLORS.cyan}`,
+            }} />
+            <span style={{ color: TONE_COLORS.cyan, fontSize: 13, fontWeight: 700 }}>
+              未来6小时通航窗口
+            </span>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {weather.forecast.slice(0, 6).map((f, i) => (
-              <div key={i} style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ color: 'rgba(220,244,255,0.5)', fontSize: 9, marginBottom: 4 }}>
-                  {f.hour}时
+          <div style={{ display: 'flex', gap: 12 }}>
+            {weather.forecast.slice(0, 6).map((f, i) => {
+              const isRisky = f.windLevel >= 6 || f.visibility <= 9.5;
+              const toneColor = isRisky ? TONE_COLORS.amber : TONE_COLORS.cyan;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    background: isRisky ? 'rgba(245,166,35,0.08)' : 'rgba(0,208,233,0.05)',
+                    border: `1px solid ${isRisky ? 'rgba(245,166,35,0.2)' : 'rgba(0,208,233,0.15)'}`,
+                    borderRadius: 6,
+                    padding: '8px 4px',
+                    position: 'relative',
+                  }}
+                >
+                  {isRisky && (
+                    <div style={{
+                      position: 'absolute',
+                      top: -4,
+                      right: -4,
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: TONE_COLORS.amber,
+                      boxShadow: `0 0 8px ${TONE_COLORS.amber}`,
+                      animation: 'pulse 2s ease-in-out infinite',
+                    }} />
+                  )}
+                  <div style={{
+                    color: 'rgba(220,244,255,0.6)',
+                    fontSize: 10,
+                    marginBottom: 6,
+                    fontWeight: 600,
+                  }}>
+                    {f.hour}:00
+                  </div>
+                  <div style={{
+                    color: toneColor,
+                    fontSize: 16,
+                    fontWeight: 700,
+                    marginBottom: 4,
+                  }}>
+                    {f.windLevel}
+                  </div>
+                  <div style={{
+                    color: 'rgba(220,244,255,0.5)',
+                    fontSize: 9,
+                    marginBottom: 6,
+                  }}>
+                    级风
+                  </div>
+                  <div style={{
+                    color: 'rgba(220,244,255,0.7)',
+                    fontSize: 10,
+                    fontWeight: 600,
+                  }}>
+                    {f.visibility}km
+                  </div>
                 </div>
-                <div style={{ color: '#fff', fontSize: 11, fontWeight: 600 }}>
-                  {f.windLevel}级
-                </div>
-                <div style={{ color: 'rgba(220,244,255,0.6)', fontSize: 9, marginTop: 2 }}>
-                  {f.visibility}km
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -245,6 +260,10 @@ export default function PortStraitOverlay() {
         @keyframes warningBlink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.85; }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(1.3); }
         }
       `}</style>
     </div>

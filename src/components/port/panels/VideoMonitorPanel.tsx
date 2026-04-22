@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Video, X, Maximize2 } from 'lucide-react';
 import '../modals/detail-modal.css';
 
@@ -9,7 +10,7 @@ const cameras = [
     resolution: '1080P',
     channel: 'CH-01',
     ip: '10.68.1.101',
-    videoUrl: 'https://videos.pexels.com/video-files/8575970/8575970-uhd_2560_1440_30fps.mp4',
+    videoUrl: 'https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4',
   },
   {
     name: '码头监控',
@@ -17,7 +18,7 @@ const cameras = [
     resolution: '1080P',
     channel: 'CH-03',
     ip: '10.68.2.203',
-    videoUrl: 'https://videos.pexels.com/video-files/30262131/12974415_3840_2160_60fps.mp4',
+    videoUrl: 'https://videos.pexels.com/video-files/3015512/3015512-uhd_2560_1440_24fps.mp4',
   },
 ];
 
@@ -50,7 +51,7 @@ export default function VideoMonitorPanel() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,208,233,0.35)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,208,233,0.12)'; }}
           >
-            {/* 缩略视频（静音自动播放） */}
+            {/* 缩略视频（静音自动播放），加载失败时显示占位 */}
             <video
               src={camera.videoUrl}
               muted
@@ -58,7 +59,10 @@ export default function VideoMonitorPanel() {
               loop
               playsInline
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
+              onError={(e) => { (e.currentTarget as HTMLVideoElement).style.display = 'none'; }}
             />
+            {/* 占位图标（视频加载失败时可见） */}
+            <Video size={20} color="rgba(255,255,255,0.15)" strokeWidth={1.5} style={{ zIndex: 0 }} />
             <div style={{ position: 'absolute', top: 4, left: 4, padding: '2px 5px', background: 'rgba(0,0,0,0.6)', borderRadius: 3, fontSize: 9, color: '#fff', zIndex: 1 }}>
               {camera.name}
             </div>
@@ -75,13 +79,13 @@ export default function VideoMonitorPanel() {
         ))}
       </div>
 
-      {/* 视频卡片弹窗 */}
-      {expandedCamera && currentCamera && (
+      {/* 视频详情弹窗 — Portal 到 body，确保在整个屏幕正中间 */}
+      {expandedCamera && currentCamera && createPortal(
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.7)',
-            backdropFilter: 'blur(8px)',
+            background: 'rgba(0,0,0,0.75)',
+            backdropFilter: 'blur(10px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             animation: 'fadeIn 0.2s ease',
           }}
@@ -90,24 +94,31 @@ export default function VideoMonitorPanel() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: 800, maxWidth: '90vw',
+              width: 840, maxWidth: '92vw', maxHeight: '88vh',
               background: 'linear-gradient(145deg, rgba(6,16,31,0.98), rgba(8,31,49,0.95))',
               border: '1px solid rgba(0,208,233,0.25)',
               borderRadius: 12,
               overflow: 'hidden',
               boxShadow: '0 32px 64px rgba(0,0,0,0.6), 0 0 40px rgba(0,208,233,0.1)',
               animation: 'slideUp 0.25s ease',
+              display: 'flex', flexDirection: 'column',
             }}
           >
             {/* 视频区域 */}
-            <div style={{ position: 'relative', background: '#000' }}>
+            <div style={{ position: 'relative', background: '#000', flexShrink: 0 }}>
               <video
+                key={currentCamera.videoUrl}
                 src={currentCamera.videoUrl}
                 autoPlay
                 loop
                 controls
                 playsInline
-                style={{ width: '100%', height: 420, objectFit: 'cover', display: 'block' }}
+                style={{ width: '100%', height: 460, objectFit: 'cover', display: 'block' }}
+                onError={(e) => {
+                  const el = e.currentTarget as HTMLVideoElement;
+                  el.style.background = '#0a1520';
+                  el.poster = '';
+                }}
               />
               {/* 顶部信息栏 */}
               <div style={{
@@ -144,15 +155,16 @@ export default function VideoMonitorPanel() {
                 fontSize: 12, color: 'rgba(255,255,255,0.7)',
                 fontFamily: "'DIN Alternate', 'Roboto Mono', monospace",
               }}>
-                {new Date().toLocaleString('zh-CN')} · LIVE
+                {new Date().toLocaleString('zh-CN')} · 实时
               </div>
             </div>
 
             {/* 底部信息栏 */}
             <div style={{
-              padding: '10px 14px',
-              display: 'flex', alignItems: 'center', gap: 20,
+              padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: 24,
               borderTop: '1px solid rgba(0,208,233,0.15)',
+              flexShrink: 0,
             }}>
               {[
                 { label: '位置', value: currentCamera.location },
@@ -167,7 +179,8 @@ export default function VideoMonitorPanel() {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       <style>{`

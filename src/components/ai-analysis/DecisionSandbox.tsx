@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, Gauge, TrendingUp } from 'lucide-react';
+import { AlertTriangle, ArrowRight, BrainCircuit, CheckCircle2, Gauge, Route } from 'lucide-react';
 import { useAIAnalysisStore } from '../../stores';
 
 export default function DecisionSandbox() {
@@ -14,20 +14,26 @@ export default function DecisionSandbox() {
   };
 
   const riskConfig = riskLevelConfig[currentState.riskLevel];
+  const primaryRecommendation = recommendations[0];
 
   return (
     <div className="decision-sandbox">
       <div className="decision-sandbox__header">
-        <h3>AI决策推演沙盘</h3>
-        <span>当前态势 → AI推演 → 决策建议</span>
+        <div>
+          <span className="decision-sandbox__eyebrow">AI推演沙盘</span>
+          <h3>从交通态势到可执行策略</h3>
+        </div>
+        <div className="decision-sandbox__impact">
+          <span>首选方案</span>
+          <strong>{primaryRecommendation?.title}</strong>
+        </div>
       </div>
 
       <div className="decision-sandbox__cards">
-        {/* 左卡片：当前态势 */}
-        <div className="sandbox-card">
+        <section className="sandbox-card sandbox-card--state">
           <div className="sandbox-card__title">
             <Gauge size={14} />
-            <span>当前态势</span>
+            <span>业务态势</span>
           </div>
           <div className="sandbox-card__metrics">
             <div className="sandbox-metric">
@@ -47,18 +53,23 @@ export default function DecisionSandbox() {
               <strong style={{ color: riskConfig.color }}>{riskConfig.label}</strong>
             </div>
           </div>
-        </div>
+          <div className="sandbox-card__route">
+            <Route size={14} />
+            <span>徐闻港 → 进港大道 → 城区主干道</span>
+          </div>
+        </section>
 
-        {/* 中卡片：AI推演过程 */}
-        <div className="sandbox-card sandbox-card--center">
+        <section className="sandbox-card sandbox-card--center">
           <div className="sandbox-card__title">
-            <TrendingUp size={14} />
-            <span>AI推演过程</span>
+            <BrainCircuit size={14} />
+            <span>模型研判链路</span>
           </div>
           <div className="sandbox-reasoning">
             {reasoningProcess.map((step, index) => (
               <div key={step.id} className={`reasoning-step reasoning-step--${step.status}`}>
-                <div className="reasoning-step__index">{index + 1}</div>
+                <div className="reasoning-step__index">
+                  {step.status === 'completed' ? <CheckCircle2 size={12} /> : index + 1}
+                </div>
                 <div className="reasoning-step__content">
                   <strong>{step.step}</strong>
                   <span>{step.description}</span>
@@ -66,17 +77,17 @@ export default function DecisionSandbox() {
                     <em>置信度 {step.confidence}%</em>
                   )}
                 </div>
+                <div className="reasoning-step__bar" style={{ ['--confidence' as string]: `${step.confidence || 34}%` }} />
               </div>
             ))}
           </div>
           <div className="sandbox-dataflow" />
-        </div>
+        </section>
 
-        {/* 右卡片：决策建议 */}
-        <div className="sandbox-card">
+        <section className="sandbox-card sandbox-card--recommend">
           <div className="sandbox-card__title">
             <AlertTriangle size={14} />
-            <span>决策建议</span>
+            <span>策略收益评估</span>
           </div>
           <div className="sandbox-recommendations">
             {recommendations.map((rec, index) => (
@@ -92,14 +103,17 @@ export default function DecisionSandbox() {
                     <span>预期影响</span>
                     <span>{rec.impact}</span>
                   </div>
+                  <div>
+                    <span>执行风险</span>
+                    <span>{rec.risk}</span>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* 数据流动箭头 */}
       <div className="sandbox-arrows">
         <ArrowRight className="sandbox-arrow" size={20} />
         <ArrowRight className="sandbox-arrow" size={20} />

@@ -261,7 +261,7 @@
 
 .port-mode__map-stage {
   border-radius: 8px;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.36);
+  box-shadow: none;
 }
 
 .port-mode__bottom-deck {
