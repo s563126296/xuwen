@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Users, Package, MessageCircle, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Package, MessageCircle, MapPin } from 'lucide-react';
 import { useCommandStore } from '../../stores/commandStore';
 import { playClickSound } from '../../utils/soundEffects';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const statusColors = {
   executing: '#2ED573',
@@ -16,7 +16,6 @@ const statusLabels = {
 } as const;
 
 export default function ExecutionResourcePanel() {
-  const [expanded, setExpanded] = useState(true);
   const executionResources = useCommandStore((s) => s.commandState.executionResources);
   const openChatWith = useCommandStore((s) => s.openChatWith);
   const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
@@ -26,45 +25,22 @@ export default function ExecutionResourcePanel() {
     // TODO: Implement map location logic
   };
 
-  if (!expanded) {
-    return (
-      <div
-        onClick={() => { playClickSound(); setExpanded(true); }}
-        style={{
-          marginTop: 12, padding: '8px 12px', borderRadius: 6,
-          background: 'rgba(13,27,42,0.5)', border: '1px solid rgba(0,208,233,0.15)',
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Package size={14} color="#00D0E9" />
-          <span style={{ fontSize: 12, color: '#94A3B8' }}>执行资源</span>
-        </div>
-        <ChevronDown size={14} color="#64748B" />
-      </div>
-    );
-  }
+  const countByStatus = (status: keyof typeof statusLabels) =>
+    executionResources.personnel.filter((p) => p.status === status).length;
+
+  const summary = (
+    <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      执行中 <span style={{ fontFamily: 'DIN, sans-serif', color: '#2ED573' }}>{countByStatus('executing')}</span> · 在途 <span style={{ fontFamily: 'DIN, sans-serif', color: '#F5A623' }}>{countByStatus('enroute')}</span> · 待命 <span style={{ fontFamily: 'DIN, sans-serif', color: '#94A3B8' }}>{countByStatus('standby')}</span>
+    </div>
+  );
 
   return (
-    <div style={{
-      marginTop: 12, padding: 12, borderRadius: 6,
-      background: 'rgba(13,27,42,0.5)', border: '1px solid rgba(0,208,233,0.15)',
-    }}>
-      {/* Header */}
-      <div
-        onClick={() => { playClickSound(); setExpanded(false); }}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: 10, cursor: 'pointer',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Package size={14} color="#00D0E9" />
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0' }}>执行资源</span>
-        </div>
-        <ChevronUp size={14} color="#64748B" />
-      </div>
-
+    <CollapsibleCard
+      title="执行资源"
+      icon={<Package size={12} style={{ color: '#4da6ff' }} />}
+      summary={summary}
+      defaultExpanded={true}
+    >
       {/* Personnel */}
       <div style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 10, color: '#64748B', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -75,6 +51,7 @@ export default function ExecutionResourcePanel() {
           {executionResources.personnel.map((person) => (
             <div
               key={person.id}
+              onClick={(e) => e.stopPropagation()}
               style={{
                 padding: 8, borderRadius: 4,
                 background: 'rgba(0,0,0,0.2)', border: `1px solid ${statusColors[person.status]}33`,
@@ -100,7 +77,8 @@ export default function ExecutionResourcePanel() {
               <div style={{ fontSize: 10, color: '#94A3B8', marginBottom: 6 }}>{person.task}</div>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     playClickSound();
                     const fieldPerson = fieldPersons.find((p) => p.name === person.name);
                     if (fieldPerson) openChatWith(fieldPerson.id);
@@ -114,7 +92,7 @@ export default function ExecutionResourcePanel() {
                   聊天
                 </button>
                 <button
-                  onClick={() => handleLocate(person.id)}
+                  onClick={(e) => { e.stopPropagation(); handleLocate(person.id); }}
                   style={{
                     flex: 1, padding: '4px 0', fontSize: 9, borderRadius: 3, cursor: 'pointer',
                     background: 'transparent', border: '1px solid rgba(148,163,184,0.3)', color: '#94A3B8',
@@ -154,7 +132,7 @@ export default function ExecutionResourcePanel() {
       {/* Quick actions */}
       <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
         <button
-          onClick={() => { playClickSound(); alert('增派警力功能（Mock）'); }}
+          onClick={(e) => { e.stopPropagation(); playClickSound(); alert('增派警力功能（Mock）'); }}
           style={{
             flex: 1, padding: '6px 0', fontSize: 10, borderRadius: 4, cursor: 'pointer',
             background: 'rgba(0,208,233,0.1)', border: '1px solid rgba(0,208,233,0.3)', color: '#00D0E9',
@@ -163,7 +141,7 @@ export default function ExecutionResourcePanel() {
           + 增派警力
         </button>
         <button
-          onClick={() => { playClickSound(); alert('调度拖车功能（Mock）'); }}
+          onClick={(e) => { e.stopPropagation(); playClickSound(); alert('调度拖车功能（Mock）'); }}
           style={{
             flex: 1, padding: '6px 0', fontSize: 10, borderRadius: 4, cursor: 'pointer',
             background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.3)', color: '#F5A623',
@@ -172,6 +150,6 @@ export default function ExecutionResourcePanel() {
           + 调度拖车
         </button>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

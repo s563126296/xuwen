@@ -1,6 +1,7 @@
-import { Plus } from 'lucide-react';
+import { Plus, Play, ListChecks } from 'lucide-react';
 import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
+import CollapsibleCard from '../common/CollapsibleCard';
 import ExecutionResourcePanel from './ExecutionResourcePanel';
 import HistoryStatsPanel from './HistoryStatsPanel';
 import { cornerStyles, getLinkedCamera, getLatestFieldFeedback } from './strategy/strategyConstants';
@@ -49,8 +50,16 @@ export default function StrategyCommandPanel() {
 
       {/* A. Current Executing Strategy */}
       {activeStrategy && (
-        <div className="module-card cmd-panel-section" style={{ padding: 14 }}>
-          <SectionHeader title="当前执行策略" />
+        <CollapsibleCard
+          title="当前执行策略"
+          icon={<Play size={12} style={{ color: '#4da6ff' }} />}
+          summary={
+            <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+              {activeStrategy.id} {activeStrategy.name} · <span style={{ color: activeStrategy.status === 'done' ? '#2ED573' : '#00D0E9' }}>{activeStrategy.status === 'done' ? '已完成' : '执行中'}</span>
+            </div>
+          }
+          defaultExpanded={true}
+        >
           <ActiveStrategyCard
             strategy={activeStrategy}
             currentStep={cmd.currentStep}
@@ -64,13 +73,21 @@ export default function StrategyCommandPanel() {
             onAcceptCall={handleAcceptCall}
             onViewPhoto={handleViewPhoto}
           />
-        </div>
+        </CollapsibleCard>
       )}
 
       {/* B. Alternative Strategies */}
       {altStrategies.length > 0 && (
-        <div className="module-card cmd-panel-section" style={{ padding: 14 }}>
-          <SectionHeader title="备选策略" />
+        <CollapsibleCard
+          title="备选策略"
+          icon={<ListChecks size={12} style={{ color: '#4da6ff' }} />}
+          summary={
+            <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+              {altStrategies.length} 个备选方案
+            </div>
+          }
+          defaultExpanded={true}
+        >
           {altStrategies.map((s, idx) => (
             <AltStrategyCard
               key={s.id}
@@ -79,7 +96,7 @@ export default function StrategyCommandPanel() {
               isFirst={idx === 0}
             />
           ))}
-        </div>
+        </CollapsibleCard>
       )}
 
       {/* History Effects */}
