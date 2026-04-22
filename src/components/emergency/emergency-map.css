@@ -195,6 +195,10 @@
 /* 特殊车辆 Marker */
 .emergency-vehicle {
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 .emergency-vehicle__core {
@@ -209,8 +213,17 @@
   font-weight: 800;
 }
 
-.emergency-vehicle[data-alert="red"] .emergency-vehicle__core,
-.emergency-vehicle[data-alert="orange"] .emergency-vehicle__core {
+.emergency-vehicle__plate {
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: rgba(10, 15, 25, 0.85);
+  border: 1px solid currentColor;
+}
+
+.emergency-vehicle--pulse .emergency-vehicle__core {
   animation: vehicleAlert 1.5s ease-in-out infinite;
 }
 
