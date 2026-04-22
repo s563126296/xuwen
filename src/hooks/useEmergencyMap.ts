@@ -11,7 +11,6 @@ import {
   VEHICLE_POSITIONS_GEO,
   RECOVERY_PATH,
   G207_PATH,
-  S376_PATH,
 } from '../constants/emergencyMapCoords';
 import { SEGMENT_STYLES } from '../constants/map';
 
@@ -85,27 +84,6 @@ export function useEmergencyMap(mapRef: React.RefObject<HTMLDivElement>) {
         text: 'G207 国道',
         position: G207_PATH[0],
         style: labelStyle('#94A3B8'),
-        zIndex: 110,
-      }));
-
-      // S376 省道（分流走廊）
-      map.add(new AMap.Polyline({
-        path: S376_PATH,
-        strokeColor: '#2ED573',
-        strokeWeight: 4,
-        strokeOpacity: 0.5,
-        lineJoin: 'round',
-        strokeStyle: 'dashed',
-        strokeDasharray: [12, 6],
-        zIndex: 12,
-      }));
-      map.add(new AMap.Text({
-        text: 'S376 分流走廊',
-        position: [
-          (S376_PATH[1][0] + S376_PATH[2][0]) / 2,
-          (S376_PATH[1][1] + S376_PATH[2][1]) / 2,
-        ],
-        style: labelStyle('#2ED573'),
         zIndex: 110,
       }));
 

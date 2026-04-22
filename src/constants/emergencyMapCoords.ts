@@ -8,7 +8,73 @@
 
 import { XUWEN_PORT, JINGANG_ROAD } from './map';
 
-// === 关键节点坐标 ===
+// ========== 真实路网（必须贴合实际道路）==========
+
+// S548 进港大道（真实采集点，用户确认）
+export const STRANDED_CHAIN_PATH = JINGANG_ROAD;
+
+// G207 国道（城区来车路径）
+export const G207_PATH: [number, number][] = [
+  [110.165, 20.320],  // 北端（城区方向）
+  [110.163, 20.312],
+  JINGANG_ROAD[0],    // 与 S548 交叉口
+];
+
+// 复航疏散方向（沿 S548 进港大道反向疏散至城区）
+export const RECOVERY_PATH: [number, number][] = [
+  XUWEN_PORT,           // 起点: 徐闻港
+  JINGANG_ROAD[5],      // 近港区
+  JINGANG_ROAD[4],      // 南山镇
+  JINGANG_ROAD[3],      // 中段
+  JINGANG_ROAD[2],      // 迈陈镇
+  JINGANG_ROAD[1],      // 华四村
+  JINGANG_ROAD[0],      // 终点: G207 交叉口（城区入口）
+];
+
+// ========== 业务示意线（不要求严格贴合路网）==========
+
+// 停车区分拨线路径（从主干道到停车场的示意线）
+export const PARKING_TRANSFER_PATHS = {
+  toP1: [
+    JINGANG_ROAD[1],  // 从华四村
+    [110.155, 20.285] as [number, number],  // P1 停车场
+  ] as [number, number][],
+  toP2: [
+    JINGANG_ROAD[2],  // 从迈陈镇
+    [110.152, 20.275] as [number, number],  // P2 停车场
+  ] as [number, number][],
+  toP3: [
+    JINGANG_ROAD[3],  // 从中段
+    [110.149, 20.268] as [number, number],  // P3 应急停车区
+  ] as [number, number][],
+};
+
+// 物资配送线路径（从物资站到各发放点的示意线）
+export const SUPPLY_LINE_PATHS = {
+  main: [
+    [110.148, 20.255] as [number, number],  // 南山镇物资站
+    JINGANG_ROAD[3],  // 中段
+    JINGANG_ROAD[4],  // 南山镇
+  ] as [number, number][],
+  toParking: [
+    [110.148, 20.255] as [number, number],  // 南山镇物资站
+    [110.152, 20.275] as [number, number],  // P2 停车场
+  ] as [number, number][],
+};
+
+// 无人机巡查闭环路径（8 个点，全程 12km，示意线）
+export const DRONE_PATROL_PATH: [number, number][] = [
+  [110.158, 20.295],  // 无人机基地
+  [110.165, 20.290],
+  [110.170, 20.275],
+  [110.165, 20.260],
+  [110.155, 20.255],
+  [110.150, 20.265],
+  [110.155, 20.280],
+  [110.158, 20.295],  // 回到基地
+];
+
+// ========== 关键节点坐标 ==========
 
 export const EMERGENCY_NODES = {
   // 徐闻港（停航影响中心）
@@ -46,7 +112,7 @@ export const EMERGENCY_NODES = {
   nearPort: JINGANG_ROAD[5],        // 近港区
 };
 
-// === 台风相关坐标 ===
+// ========== 台风相关坐标 ==========
 
 // 台风预测路径关键点（从东南向西北移动，共 5 个点）
 export const TYPHOON_PATH: [number, number][] = [
@@ -57,53 +123,7 @@ export const TYPHOON_PATH: [number, number][] = [
   XUWEN_PORT,         // T+6h: 终点，台风登陆徐闻港
 ];
 
-// === 走廊路径 ===
-
-// S548 进港大道滞留链（使用真实坐标，7 个关键点）
-export const STRANDED_CHAIN_PATH = JINGANG_ROAD;
-
-// 停车区分拨线路径
-export const PARKING_TRANSFER_PATHS = {
-  toP1: [
-    JINGANG_ROAD[1],  // 从华四村
-    EMERGENCY_NODES.parking1,
-  ] as [number, number][],
-  toP2: [
-    JINGANG_ROAD[2],  // 从迈陈镇
-    EMERGENCY_NODES.parking2,
-  ] as [number, number][],
-  toP3: [
-    JINGANG_ROAD[3],  // 从中段
-    EMERGENCY_NODES.parking3,
-  ] as [number, number][],
-};
-
-// 物资配送线路径（从物资站到各发放点）
-export const SUPPLY_LINE_PATHS = {
-  main: [
-    EMERGENCY_NODES.supplyStation,
-    JINGANG_ROAD[3],  // 中段
-    JINGANG_ROAD[4],  // 南山镇
-  ] as [number, number][],
-  toParking: [
-    EMERGENCY_NODES.supplyStation,
-    EMERGENCY_NODES.parking2,
-  ] as [number, number][],
-};
-
-// 无人机巡查闭环路径（8 个点，全程 12km）
-export const DRONE_PATROL_PATH: [number, number][] = [
-  EMERGENCY_NODES.droneBase,
-  [110.165, 20.290],
-  [110.170, 20.275],
-  [110.165, 20.260],
-  [110.155, 20.255],
-  [110.150, 20.265],
-  [110.155, 20.280],
-  EMERGENCY_NODES.droneBase,
-];
-
-// === 特殊车辆位置（沿滞留链分布，6 辆）===
+// ========== 特殊车辆位置（沿滞留链分布，6 辆）==========
 
 export const VEHICLE_POSITIONS_GEO: Record<string, [number, number]> = {
   'sv-1': [110.159, 20.300],  // 北段（冷链车）
@@ -114,41 +134,14 @@ export const VEHICLE_POSITIONS_GEO: Record<string, [number, number]> = {
   'sv-6': [110.144, 20.240],  // 近港区（危化品车）
 };
 
-// === 复航疏散方向 ===
-
-export const RECOVERY_PATH: [number, number][] = [
-  XUWEN_PORT,
-  [110.155, 20.245],
-  [110.170, 20.260],
-  [110.190, 20.280],  // 向东北疏散
-];
-
-// === 周边道路网络（G207、S376 等）===
-
-// G207 国道（城区来车路径）
-export const G207_PATH: [number, number][] = [
-  [110.165, 20.320],  // 北端（城区方向）
-  [110.163, 20.312],
-  JINGANG_ROAD[0],    // 与 S548 交叉口
-];
-
-// S376 省道（分流走廊）
-export const S376_PATH: [number, number][] = [
-  JINGANG_ROAD[1],    // 从华四村
-  [110.139, 20.276],  // 西侧
-  [110.135, 20.260],  // 西南
-  [110.138, 20.245],  // 接近港口
-  XUWEN_PORT,         // 徐闻港
-];
-
-// === 海域标注位置 ===
+// ========== 海域标注位置 ==========
 
 export const SEA_LABELS = {
   strait: [110.165, 20.200] as [number, number],  // 琼州海峡中心
   haikouCoast: [110.190, 20.180] as [number, number],  // 海口方向
 };
 
-// === 停车场容量配置 ===
+// ========== 停车场容量配置 ==========
 
 export const PARKING_CAPACITY = {
   p1: 350,  // P1 停车场容量
@@ -156,7 +149,7 @@ export const PARKING_CAPACITY = {
   p3: 200,  // P3 应急停车区容量
 };
 
-// === 物资站库存配置 ===
+// ========== 物资站库存配置 ==========
 
 export const SUPPLY_INVENTORY = {
   meals: 5000,   // 盒饭初始库存
