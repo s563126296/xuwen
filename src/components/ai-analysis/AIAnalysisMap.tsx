@@ -161,7 +161,7 @@ export default function AIAnalysisMap() {
 
   useEffect(() => {
     let destroyed = false;
-    let breatheInterval: NodeJS.Timeout | null = null;
+    let breatheInterval: ReturnType<typeof setInterval> | null = null;
 
     loadAMap(['AMap.HeatMap']).then((AMap: any) => {
       if (destroyed || !mapRef.current) return;
@@ -202,7 +202,7 @@ export default function AIAnalysisMap() {
       heatmapLayerRef.current.setDataSet({ data: heatmapData, max: 100 });
 
       const heat = heatAreas.map((area) => new AMap.Circle({
-        center: area.center,
+        center: area.center as [number, number],
         radius: area.radius,
         strokeColor: area.stroke,
         strokeWeight: 1,
@@ -227,7 +227,7 @@ export default function AIAnalysisMap() {
       }));
 
       const labels = heatAreas.map((area) => new AMap.Marker({
-        position: area.center,
+        position: area.center as [number, number],
         content: createHeatLabel(area),
         offset: new AMap.Pixel(-54, -14),
         zIndex: 60,
@@ -235,7 +235,7 @@ export default function AIAnalysisMap() {
       }));
 
       const cards = insightCards.map((card) => new AMap.Marker({
-        position: card.position,
+        position: card.position as [number, number],
         content: createInsightCard(card),
         offset: new AMap.Pixel(-74, -38),
         zIndex: 70,
@@ -244,7 +244,11 @@ export default function AIAnalysisMap() {
 
       const connectors = insightCards.map((card, index) => {
         const targetArea = heatAreas[index % heatAreas.length];
-        const connectorData = createConnector(card.position, targetArea.center, card.tone);
+        const connectorData = createConnector(
+          card.position as [number, number],
+          targetArea.center as [number, number],
+          card.tone
+        );
 
         return new AMap.Polyline({
           path: connectorData.path,
