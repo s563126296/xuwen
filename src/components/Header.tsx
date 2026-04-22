@@ -25,7 +25,7 @@ export default function Header({ time, children }: Props) {
           </div>
           <div>
             <div className="logo-text">徐闻智慧交通大屏</div>
-            <div className="header-subtitle">琼州海峡北岸智慧交通综合管控平台</div>
+            <div className="header-subtitle">徐闻智慧交通</div>
           </div>
         </div>
       </div>
@@ -63,8 +63,8 @@ export default function Header({ time, children }: Props) {
         }
         .header-subtitle {
           font-family: 'Noto Sans SC', sans-serif;
-          font-size: 10px;
-          color: var(--text-tertiary, rgba(140,160,180,0.45));
+          font-size: 13px;
+          color: var(--text-secondary, rgba(180,200,220,0.6));
           letter-spacing: 2px; margin-top: 2px;
         }
         .header-time { text-align: right; }

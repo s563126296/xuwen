@@ -1,0 +1,235 @@
+/* 指挥地图图例 */
+.command-map-legend {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(5, 16, 29, 0.72);
+  border: 1px solid rgba(0, 208, 233, 0.2);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+.command-map-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.command-map-legend__line {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.command-map-legend__dash {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    currentColor 0,
+    currentColor 8px,
+    transparent 8px,
+    transparent 14px
+  );
+}
+
+.command-map-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.command-map-legend__text {
+  font-size: 11px;
+  color: rgba(216, 239, 248, 0.75);
+  white-space: nowrap;
+}
+
+/* 节点 Marker 样式 */
+.command-node {
+  position: relative;
+  width: 80px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.command-node--clickable {
+  cursor: pointer;
+}
+
+.command-node--clickable:hover .command-node__core {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px currentColor;
+}
+
+.command-node__halo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.command-node__core {
+  position: relative;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  border: 2px solid;
+  transition: all 0.2s ease;
+}
+
+.command-node--circle .command-node__core {
+  border-radius: 50%;
+}
+
+.command-node--square .command-node__core {
+  border-radius: 8px;
+}
+
+.command-node--diamond .command-node__core {
+  border-radius: 6px;
+  transform: rotate(45deg);
+}
+
+.command-node--diamond .command-node__core::before {
+  content: attr(data-marker);
+  transform: rotate(-45deg);
+}
+
+.command-node__pin {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 26px;
+  opacity: 0.4;
+}
+
+.command-node__label {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 120px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.command-node__label-bg {
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  border: 1px solid;
+  z-index: -1;
+}
+
+.command-node__label-text {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.command-node__caption-text {
+  font-size: 10px;
+  color: rgba(222, 244, 252, 0.65);
+  line-height: 1.3;
+}
+
+/* 人员 Marker 样式 */
+.command-person {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(10, 15, 25, 0.85);
+  border: 1px solid rgba(0, 208, 233, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.command-person:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.command-person[data-status="executing"] {
+  border-color: rgba(46, 213, 115, 0.4);
+}
+
+.command-person[data-status="moving"] {
+  border-color: rgba(245, 166, 35, 0.4);
+}
+
+.command-person[data-status="calling"] {
+  border-color: rgba(255, 71, 87, 0.4);
+  animation: personCalling 1.5s ease-in-out infinite;
+}
+
+.command-person__core {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.command-person__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.command-person__name {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.command-person__task {
+  font-size: 10px;
+  color: rgba(222, 244, 252, 0.65);
+  white-space: nowrap;
+}
+
+@keyframes personCalling {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 71, 87, 0);
+  }
+}

@@ -9,7 +9,7 @@ import PortMode from './components/port/PortMode';
 import CommandMode from './components/command/CommandMode';
 import EmergencyMode from './components/emergency/EmergencyMode';
 import AnalysisMode from './components/analysis/AnalysisMode';
-import AIDecisionMode from './components/ai-decision/AIDecisionMode';
+import AIAnalysisMode from './components/ai-analysis/AIAnalysisMode';
 import CheckpointModal from './components/CheckpointModal';
 import CongestionPredictionModal from './components/CongestionPredictionModal';
 import PoiDetailModal from './components/PoiDetailModal';
@@ -229,7 +229,7 @@ function App() {
         {systemMode === 'command' && <CommandMode />}
         {systemMode === 'emergency' && <EmergencyMode />}
         {systemMode === 'analysis' && <AnalysisMode />}
-        {systemMode === 'ai-decision' && <AIDecisionMode />}
+        {systemMode === 'ai-analysis' && <AIAnalysisMode />}
 
         {/* Modals */}
         <CheckpointModal />

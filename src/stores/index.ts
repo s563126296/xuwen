@@ -97,15 +97,24 @@ export type {
   AnalysisState,
 } from './analysisStore';
 
-// AI Decision Store
-export { useAIDecisionStore } from './aiDecisionStore';
+// AI Analysis Store
+export { useAIAnalysisStore } from './aiAnalysisStore';
 export type {
-  TrendPrediction,
-  CausalNode,
-  AIRecommendation,
-  SafetyMetrics,
-  AIDecisionState,
-} from './aiDecisionStore';
+  HeatmapCell,
+  PredictionPoint,
+  CorrelationInsight,
+  ActiveAlert,
+  AlertHistoryItem,
+  PropagationNode,
+  AIRecommendation as AIAnalysisRecommendation,
+  Strategy,
+  RadarDimension,
+  PortCityPoint,
+  CurrentStateMetrics,
+  ReasoningStep,
+  DecisionRecommendation,
+  AIAnalysisState,
+} from './aiAnalysisStore';
 
 // Port Store
 export { usePortStore } from './portStore';

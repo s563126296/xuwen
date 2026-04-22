@@ -9,12 +9,40 @@ import VideoCallWindow from './VideoCallWindow';
 import CommandReportModal from './CommandReportModal';
 import EscalateConfirmModal from './EscalateConfirmModal';
 import CongestionDetailModal from './CongestionDetailModal';
+import IncomingCallModal from './IncomingCallModal';
 import { useCommandStore } from '../../stores/commandStore';
+import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
 
 export default function CommandMode() {
   const strategies = useCommandStore((s) => s.commandState.strategies);
+  const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
+  const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
+  const startCall = useCommandStore((s) => s.startCall);
+  const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
   const hasExecuting = strategies.some((s) => s.status === 'executing' || s.status === 'done');
-  const mainBottom = hasExecuting ? 310 : 240;
+  const mainBottom = hasExecuting ? 230 : 190;
+
+  const {
+    showIncomingCall,
+    incomingCallMessage,
+    incomingCallPerson,
+    setShowIncomingCall,
+  } = useIncomingCallHandler(commandFeed, fieldPersons);
+
+  const handleAcceptVideo = () => {
+    setShowIncomingCall(false);
+    if (incomingCallPerson) {
+      startCall(incomingCallPerson.id);
+      addCommandFeedItem(`已接通${incomingCallPerson.name}视频通话`);
+    }
+  };
+
+  const handleAcceptVoice = () => {
+    setShowIncomingCall(false);
+    if (incomingCallPerson) {
+      addCommandFeedItem(`已接通${incomingCallPerson.name}语音通话`);
+    }
+  };
 
   return (
     <>
@@ -63,6 +91,17 @@ export default function CommandMode() {
       <CommandReportModal />
       <EscalateConfirmModal />
       <CongestionDetailModal />
+
+      {/* Incoming call modal */}
+      {showIncomingCall && incomingCallPerson && (
+        <IncomingCallModal
+          person={incomingCallPerson}
+          message={incomingCallMessage}
+          onAcceptVideo={handleAcceptVideo}
+          onAcceptVoice={handleAcceptVoice}
+          onDecline={() => setShowIncomingCall(false)}
+        />
+      )}
     </>
   );
 }

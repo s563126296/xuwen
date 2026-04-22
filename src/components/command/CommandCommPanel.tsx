@@ -81,21 +81,22 @@ export default function CommandCommPanel() {
   }, [commandFeed.length]);
 
   const hasFlowBar = !!executingStrategy;
-  const panelHeight = hasFlowBar ? 280 : 210;
+  const panelHeight = hasFlowBar ? 200 : 160;
 
   return (
     <div className="cmd-comm-panel" style={{
       position: 'absolute', bottom: 12, left: 16, right: 16, height: panelHeight,
-      background: 'rgba(13,27,42,0.8)', borderRadius: 8,
-      border: '1px solid rgba(0,208,233,0.12)',
-      boxShadow: '0 -2px 16px rgba(0,208,233,0.06)',
-      backdropFilter: 'blur(10px)',
+      background: 'rgba(12, 25, 48, 0.82)',
+      borderRadius: 12,
+      border: '1px solid rgba(100, 180, 255, 0.08)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2), 0 0 20px rgba(77, 166, 255, 0.05)',
+      backdropFilter: 'blur(40px) saturate(150%)',
       display: 'flex', flexDirection: 'column',
       overflow: 'hidden',
     }}>
       {/* Header */}
       <div style={{
-        padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         borderBottom: '1px solid rgba(0,208,233,0.08)', flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -135,7 +136,7 @@ export default function CommandCommPanel() {
       <div ref={scrollRef} style={{
         flex: 1, overflowX: 'auto', overflowY: 'hidden',
         display: 'flex', alignItems: 'stretch', gap: 0,
-        padding: '8px 12px',
+        padding: '6px 12px',
         scrollBehavior: 'smooth',
       }}>
         {commandFeed.map((item, i) => {
@@ -152,7 +153,7 @@ export default function CommandCommPanel() {
                 id={`msg-${item.id}`}
                 className={isUrgent || isAlert ? 'cmd-urgent-card' : undefined}
                 style={{
-                  width: 220, padding: '8px 12px', borderRadius: 6,
+                  width: 200, padding: '6px 10px', borderRadius: 6,
                   background: isUrgent ? typeBg.alert : (typeBg[item.type] || typeBg.field),
                   border: isHighlighted
                     ? '1px solid #00D0E9'
@@ -234,20 +235,12 @@ export default function CommandCommPanel() {
       </div>
 
       <style>{`
-        /* Corner decorations */
+        /* Top light decoration */
         .cmd-comm-panel { position: relative; }
         .cmd-comm-panel::before {
-          content: ''; position: absolute; top: -1px; left: -1px;
-          width: 12px; height: 12px;
-          border-top: 2px solid rgba(0,208,233,0.5);
-          border-left: 2px solid rgba(0,208,233,0.5);
-          z-index: 1; pointer-events: none;
-        }
-        .cmd-comm-panel::after {
-          content: ''; position: absolute; bottom: -1px; right: -1px;
-          width: 12px; height: 12px;
-          border-bottom: 2px solid rgba(0,208,233,0.5);
-          border-right: 2px solid rgba(0,208,233,0.5);
+          content: ''; position: absolute; top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(77, 166, 255, 0.35), transparent);
           z-index: 1; pointer-events: none;
         }
         /* Live indicator pulse */

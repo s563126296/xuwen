@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Users } from 'lucide-react';
 import { useEmergencyStore } from '../../stores/emergencyStore';
-import { Users, Truck, Wrench } from 'lucide-react';
+import CollapsibleCard from '../common/CollapsibleCard';
 import ResourceDetailModal from './ResourceDetailModal';
 
 export default function ResourceDispatchPanel() {
@@ -29,15 +30,23 @@ export default function ResourceDispatchPanel() {
     total: equipment.length,
   };
 
+  const summary = (
+    <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      警力 <span style={{ color: '#00D0E9', fontWeight: 600 }}>{personnelByStatus.working}/{personnelByStatus.total}</span> · 车辆 <span style={{ color: '#F5A623', fontWeight: 600 }}>{vehiclesByStatus.working}/{vehiclesByStatus.total}</span> · 设备 <span style={{ color: '#2ED573', fontWeight: 600 }}>{equipmentByStatus.working}/{equipmentByStatus.total}</span>
+    </div>
+  );
+
   return (
     <>
-      <div className="card" style={{ padding: 14, flex: '25 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0', marginBottom: 12, flexShrink: 0 }}>资源调度状态</div>
-
-        {/* Summary cards - now clickable */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+      <CollapsibleCard
+        title="资源调度状态"
+        icon={<Users size={12} style={{ color: '#4da6ff' }} />}
+        summary={summary}
+        defaultExpanded={true}
+      >
+        <div style={{ display: 'flex', gap: 8 }}>
           <div
-            onClick={() => setDetailType('personnel')}
+            onClick={(e) => { e.stopPropagation(); setDetailType('personnel'); }}
             style={{
               flex: 1, padding: 10, borderRadius: 6, background: 'rgba(13,27,42,0.72)',
               border: '1px solid rgba(0,208,233,0.2)', cursor: 'pointer',
@@ -52,11 +61,8 @@ export default function ResourceDispatchPanel() {
               e.currentTarget.style.borderColor = 'rgba(0,208,233,0.2)';
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <Users size={14} color="#00D0E9" />
-              <span style={{ fontSize: 11, color: '#94A3B8' }}>人员</span>
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#00D0E9' }}>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6 }}>人员</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#00D0E9', fontFamily: 'DIN, sans-serif' }}>
               {personnelByStatus.working}/{personnelByStatus.total}
             </div>
             <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>
@@ -65,7 +71,7 @@ export default function ResourceDispatchPanel() {
           </div>
 
           <div
-            onClick={() => setDetailType('vehicle')}
+            onClick={(e) => { e.stopPropagation(); setDetailType('vehicle'); }}
             style={{
               flex: 1, padding: 10, borderRadius: 6, background: 'rgba(13,27,42,0.72)',
               border: '1px solid rgba(245,166,35,0.2)', cursor: 'pointer',
@@ -80,11 +86,8 @@ export default function ResourceDispatchPanel() {
               e.currentTarget.style.borderColor = 'rgba(245,166,35,0.2)';
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <Truck size={14} color="#F5A623" />
-              <span style={{ fontSize: 11, color: '#94A3B8' }}>车辆</span>
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#F5A623' }}>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6 }}>车辆</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#F5A623', fontFamily: 'DIN, sans-serif' }}>
               {vehiclesByStatus.working}/{vehiclesByStatus.total}
             </div>
             <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>
@@ -93,7 +96,7 @@ export default function ResourceDispatchPanel() {
           </div>
 
           <div
-            onClick={() => setDetailType('equipment')}
+            onClick={(e) => { e.stopPropagation(); setDetailType('equipment'); }}
             style={{
               flex: 1, padding: 10, borderRadius: 6, background: 'rgba(13,27,42,0.72)',
               border: '1px solid rgba(46,213,115,0.2)', cursor: 'pointer',
@@ -108,11 +111,8 @@ export default function ResourceDispatchPanel() {
               e.currentTarget.style.borderColor = 'rgba(46,213,115,0.2)';
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <Wrench size={14} color="#2ED573" />
-              <span style={{ fontSize: 11, color: '#94A3B8' }}>设备</span>
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#2ED573' }}>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6 }}>设备</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#2ED573', fontFamily: 'DIN, sans-serif' }}>
               {equipmentByStatus.working}/{equipmentByStatus.total}
             </div>
             <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>
@@ -124,7 +124,7 @@ export default function ResourceDispatchPanel() {
         <div style={{ marginTop: 10, fontSize: 10, color: '#64748B', textAlign: 'center' }}>
           点击卡片查看详细信息
         </div>
-      </div>
+      </CollapsibleCard>
 
       {detailType && (
         <ResourceDetailModal

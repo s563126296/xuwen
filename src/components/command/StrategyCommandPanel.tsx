@@ -49,7 +49,7 @@ export default function StrategyCommandPanel() {
 
       {/* A. Current Executing Strategy */}
       {activeStrategy && (
-        <div className="card cmd-panel-section" style={{ padding: 14 }}>
+        <div className="module-card cmd-panel-section" style={{ padding: 14 }}>
           <SectionHeader title="当前执行策略" />
           <ActiveStrategyCard
             strategy={activeStrategy}
@@ -69,7 +69,7 @@ export default function StrategyCommandPanel() {
 
       {/* B. Alternative Strategies */}
       {altStrategies.length > 0 && (
-        <div className="card cmd-panel-section" style={{ padding: 14 }}>
+        <div className="module-card cmd-panel-section" style={{ padding: 14 }}>
           <SectionHeader title="备选策略" />
           {altStrategies.map((s, idx) => (
             <AltStrategyCard
@@ -86,7 +86,7 @@ export default function StrategyCommandPanel() {
       <HistoryEffectsSection historyEffects={cmd.historyEffects} />
 
       {/* C. Custom Strategy Templates */}
-      <div className="card cmd-panel-section" style={{ padding: 14 }}>
+      <div className="module-card cmd-panel-section" style={{ padding: 14 }}>
         <SectionHeader title="自定义策略" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10 }}>
           <Plus size={12} color="#64748B" />

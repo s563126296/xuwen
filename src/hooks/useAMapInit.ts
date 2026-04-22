@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import AMapLoader from '@amap/amap-jsapi-loader';
+import { loadAMap } from '../utils/amapLoader';
 import { XUWEN_PORT, JINGANG_ROAD, SEGMENT_STYLES } from '../constants';
 
 export interface MapRefs {
@@ -32,11 +32,7 @@ export function useAMapInit(
   useEffect(() => {
     let destroyed = false;
 
-    AMapLoader.load({
-      key: 'd68ecc01797b67df1d265f2aa29ebc87',
-      version: '2.0',
-      plugins: ['AMap.Scale', 'AMap.Driving'],
-    }).then((AMap: any) => {
+    loadAMap(['AMap.Scale', 'AMap.Driving']).then((AMap: any) => {
       if (destroyed || !mapRef.current) return;
 
       const map = new AMap.Map(mapRef.current, {

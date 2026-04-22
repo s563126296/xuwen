@@ -2,20 +2,17 @@ import { useState, useRef, useEffect, ReactNode } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CollapsibleCardProps {
-  /** Card title */
   title: string;
-  /** Icon element */
   icon?: ReactNode;
-  /** Summary content shown when collapsed */
   summary: ReactNode;
-  /** Full content shown when expanded */
   children: ReactNode;
-  /** Animation delay */
   delay?: string;
-  /** Default expanded state */
   defaultExpanded?: boolean;
-  /** Accent color for glow */
   accent?: boolean;
+  /** 受控模式：外部控制展开状态 */
+  expanded?: boolean;
+  /** 受控模式：外部切换回调 */
+  onToggle?: () => void;
 }
 
 export default function CollapsibleCard({
@@ -26,8 +23,13 @@ export default function CollapsibleCard({
   delay = '0s',
   defaultExpanded = false,
   accent = false,
+  expanded: controlledExpanded,
+  onToggle,
 }: CollapsibleCardProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const isControlled = controlledExpanded !== undefined;
+  const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
+  const expanded = isControlled ? controlledExpanded : internalExpanded;
+
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState(0);
 
@@ -37,13 +39,20 @@ export default function CollapsibleCard({
     }
   }, [expanded]);
 
+  const handleClick = () => {
+    if (isControlled && onToggle) {
+      onToggle();
+    } else {
+      setInternalExpanded(!internalExpanded);
+    }
+  };
+
   return (
     <div
       className={`module-card animate-in ${accent ? 'glow-accent' : ''}`}
       style={{ animationDelay: delay, cursor: 'pointer', transition: 'border-color 0.2s ease' }}
-      onClick={() => setExpanded(!expanded)}
+      onClick={handleClick}
     >
-      {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           {icon}
@@ -52,12 +61,10 @@ export default function CollapsibleCard({
         {expanded ? <ChevronUp size={12} color="var(--text-tertiary, #A0A8B4)" /> : <ChevronDown size={12} color="var(--text-tertiary, #A0A8B4)" />}
       </div>
 
-      {/* Summary - always visible */}
       <div style={{ marginTop: 4 }}>
         {summary}
       </div>
 
-      {/* Expandable content */}
       <div
         ref={contentRef}
         style={{

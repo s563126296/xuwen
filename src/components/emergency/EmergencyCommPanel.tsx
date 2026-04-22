@@ -1,6 +1,8 @@
 import { useState, useMemo, useRef } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { useEmergencyStore } from '../../stores/emergencyStore';
 import { playMessageSound } from '../../utils/soundEffects';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 const DEPARTMENTS = ['公安交警', '民政局', '交通运输局', '港口管理方', '城管局', '应急管理局'] as const;
 
@@ -13,7 +15,6 @@ const QUICK_COMMANDS = [
   { label: '情况紧急', content: '现场情况紧急，请立即响应' },
 ];
 
-// Parse @mentions from content string
 function parseMentions(content: string): string[] {
   const matches = content.match(/@([^\s@]+)/g);
   if (!matches) return [];
@@ -22,7 +23,6 @@ function parseMentions(content: string): string[] {
     .filter((m) => (DEPARTMENTS as readonly string[]).includes(m));
 }
 
-// Highlight @mentions in content
 function renderContent(content: string) {
   const parts = content.split(/(@[^\s@]+)/g);
   return parts.map((part, i) => {
@@ -48,7 +48,6 @@ export default function EmergencyCommPanel() {
   const [showMentionPicker, setShowMentionPicker] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Filter messages by selected channel
   const filteredMessages = useMemo(() => {
     if (selectedChannel === '全部') return communications;
     return communications.filter(
@@ -59,7 +58,6 @@ export default function EmergencyCommPanel() {
     );
   }, [communications, selectedChannel]);
 
-  // Unread count per department (messages not from 指挥中心 targeting that dept)
   const unreadCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const dept of DEPARTMENTS) {
@@ -69,6 +67,9 @@ export default function EmergencyCommPanel() {
     }
     return counts;
   }, [communications]);
+
+  const onlineCount = DEPARTMENTS.length;
+  const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0);
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -108,7 +109,6 @@ export default function EmergencyCommPanel() {
     const newText = `${before}@${dept} ${after}`;
     setInputText(newText);
     setShowMentionPicker(false);
-    // Restore focus
     setTimeout(() => {
       input.focus();
       const pos = start + dept.length + 2;
@@ -116,23 +116,24 @@ export default function EmergencyCommPanel() {
     }, 0);
   };
 
+  const summary = (
+    <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      <span style={{ color: '#2ED573', fontWeight: 600 }}>{onlineCount}</span> 部门在线 · <span style={{ color: '#F5A623', fontWeight: 600 }}>{totalUnread}</span> 条未读
+    </div>
+  );
+
   return (
-    <div
-      className="card"
-      style={{
-        flex: '50 0 0',
-        minHeight: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        padding: 0,
-      }}
+    <CollapsibleCard
+      title="融合通信"
+      icon={<MessageSquare size={12} style={{ color: '#4da6ff' }} />}
+      summary={summary}
+      defaultExpanded={true}
     >
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px 8px', flexShrink: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>H. 融合通信</div>
+      {/* Conference button moved inside children */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             const allContactIds = contacts.map((c) => c.id).slice(0, 6);
             startVideoConference(allContactIds);
           }}
@@ -147,7 +148,7 @@ export default function EmergencyCommPanel() {
       </div>
 
       {/* Body: channel list + message area */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', minHeight: 0, overflow: 'hidden', height: 220 }}>
         {/* Channel list */}
         <div
           style={{
@@ -161,9 +162,8 @@ export default function EmergencyCommPanel() {
             borderRight: '1px solid rgba(148,163,184,0.1)',
           }}
         >
-          {/* All channel */}
           <button
-            onClick={() => setSelectedChannel('全部')}
+            onClick={(e) => { e.stopPropagation(); setSelectedChannel('全部'); }}
             style={{
               padding: '6px 4px',
               background: selectedChannel === '全部' ? 'rgba(0,208,233,0.12)' : 'transparent',
@@ -180,14 +180,13 @@ export default function EmergencyCommPanel() {
             全部
           </button>
 
-          {/* Department channels */}
           {DEPARTMENTS.map((dept) => {
             const isSelected = selectedChannel === dept;
             const unread = unreadCounts[dept] ?? 0;
             return (
               <button
                 key={dept}
-                onClick={() => setSelectedChannel(dept)}
+                onClick={(e) => { e.stopPropagation(); setSelectedChannel(dept); }}
                 style={{
                   position: 'relative',
                   padding: '6px 4px',
@@ -265,7 +264,6 @@ export default function EmergencyCommPanel() {
                     alignItems: isOwn ? 'flex-end' : 'flex-start',
                   }}
                 >
-                  {/* Source + time */}
                   <div
                     style={{
                       display: 'flex',
@@ -291,7 +289,6 @@ export default function EmergencyCommPanel() {
                     )}
                     <span style={{ fontSize: 9, color: '#475569' }}>{item.time}</span>
                   </div>
-                  {/* Bubble */}
                   <div
                     style={{
                       maxWidth: '85%',
@@ -314,12 +311,11 @@ export default function EmergencyCommPanel() {
 
           {/* Input area */}
           <div style={{ flexShrink: 0, padding: '6px 10px 8px', borderTop: '1px solid rgba(148,163,184,0.1)' }}>
-            {/* Quick commands */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
               {QUICK_COMMANDS.map((cmd) => (
                 <button
                   key={cmd.label}
-                  onClick={() => setInputText(cmd.content)}
+                  onClick={(e) => { e.stopPropagation(); setInputText(cmd.content); }}
                   style={{
                     padding: '2px 6px',
                     background: 'rgba(0,208,233,0.08)',
@@ -336,9 +332,7 @@ export default function EmergencyCommPanel() {
               ))}
             </div>
 
-            {/* Input row */}
             <div style={{ display: 'flex', gap: 4, position: 'relative' }}>
-              {/* @mention picker */}
               {showMentionPicker && (
                 <div
                   style={{
@@ -359,7 +353,7 @@ export default function EmergencyCommPanel() {
                   {DEPARTMENTS.map((dept) => (
                     <button
                       key={dept}
-                      onClick={() => insertMention(dept)}
+                      onClick={(e) => { e.stopPropagation(); insertMention(dept); }}
                       style={{
                         padding: '4px 8px',
                         background: 'transparent',
@@ -389,6 +383,7 @@ export default function EmergencyCommPanel() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
                 placeholder="输入消息..."
                 style={{
                   flex: 1,
@@ -403,7 +398,7 @@ export default function EmergencyCommPanel() {
                 }}
               />
               <button
-                onClick={() => setShowMentionPicker((v) => !v)}
+                onClick={(e) => { e.stopPropagation(); setShowMentionPicker((v) => !v); }}
                 style={{
                   padding: '5px 8px',
                   background: showMentionPicker ? 'rgba(245,166,35,0.2)' : 'rgba(13,27,42,0.8)',
@@ -419,7 +414,7 @@ export default function EmergencyCommPanel() {
                 @
               </button>
               <button
-                onClick={handleSend}
+                onClick={(e) => { e.stopPropagation(); handleSend(); }}
                 style={{
                   padding: '5px 10px',
                   background: inputText.trim() ? '#00D0E9' : 'rgba(0,208,233,0.2)',
@@ -438,6 +433,6 @@ export default function EmergencyCommPanel() {
           </div>
         </div>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

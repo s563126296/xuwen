@@ -3,16 +3,9 @@ import { Signal, Shield, Zap, Settings } from 'lucide-react';
 export const cornerStyles = `
 .cmd-panel-section { position: relative; }
 .cmd-panel-section::before {
-  content: ''; position: absolute; top: 0; left: 0;
-  width: 8px; height: 8px;
-  border-top: 2px solid rgba(0,208,233,0.4);
-  border-left: 2px solid rgba(0,208,233,0.4);
-}
-.cmd-panel-section::after {
-  content: ''; position: absolute; bottom: 0; right: 0;
-  width: 8px; height: 8px;
-  border-bottom: 2px solid rgba(0,208,233,0.4);
-  border-right: 2px solid rgba(0,208,233,0.4);
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,208,233,0.35), transparent);
 }
 .cmd-exec-btn-recommended:hover {
   box-shadow: 0 0 8px rgba(0,208,233,0.3) !important;

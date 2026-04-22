@@ -1,167 +1,187 @@
-import React from 'react';
-import { Video } from 'lucide-react';
-
-const panelStyle: React.CSSProperties = {
-  background: 'linear-gradient(135deg, rgba(0,20,40,0.95) 0%, rgba(10,30,50,0.9) 100%)',
-  border: '1px solid rgba(0,208,233,0.3)',
-  borderRadius: 8,
-  padding: '12px 14px',
-  backdropFilter: 'blur(12px)',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'relative',
-  overflow: 'hidden',
-  boxShadow: '0 0 20px rgba(0,208,233,0.15), inset 0 0 20px rgba(0,208,233,0.05)',
-};
-
-const titleStyle: React.CSSProperties = {
-  fontSize: 13,
-  fontWeight: 600,
-  color: '#00D0E9',
-  marginBottom: 10,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 6,
-  flexShrink: 0,
-};
-
-const cameraFeedStyle: React.CSSProperties = {
-  flex: 1,
-  position: 'relative',
-  borderRadius: 8,
-  overflow: 'hidden',
-  background: `
-    linear-gradient(135deg, rgba(8,16,32,0.95), rgba(12,32,56,0.85)),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 12px,
-      rgba(0,208,233,0.03) 12px,
-      rgba(0,208,233,0.03) 13px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 12px,
-      rgba(0,208,233,0.03) 12px,
-      rgba(0,208,233,0.03) 13px
-    )
-  `,
-  border: '1px solid rgba(0,208,233,0.15)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
+import { useState } from 'react';
+import { Video, X, Maximize2 } from 'lucide-react';
+import '../modals/detail-modal.css';
 
 const cameras = [
-  { name: '闸口监控', hint: 'Gate A-01' },
-  { name: '码头监控', hint: 'Dock B-03' },
+  {
+    name: '闸口监控',
+    location: '徐闻港闸口 A-01',
+    resolution: '1080P',
+    channel: 'CH-01',
+    ip: '10.68.1.101',
+    videoUrl: 'https://videos.pexels.com/video-files/8575970/8575970-uhd_2560_1440_30fps.mp4',
+  },
+  {
+    name: '码头监控',
+    location: '海安新港码头 B-03',
+    resolution: '1080P',
+    channel: 'CH-03',
+    ip: '10.68.2.203',
+    videoUrl: 'https://videos.pexels.com/video-files/30262131/12974415_3840_2160_60fps.mp4',
+  },
 ];
 
 export default function VideoMonitorPanel() {
-  return (
-    <div style={panelStyle}>
-      {/* 边框流光 */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        borderRadius: 8,
-        padding: '1px',
-        background: 'linear-gradient(90deg, transparent, #00D0E9, transparent)',
-        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-        WebkitMaskComposite: 'xor',
-        maskComposite: 'exclude',
-        animation: 'borderFlow 3s linear infinite',
-        pointerEvents: 'none',
-      }} />
+  const [expandedCamera, setExpandedCamera] = useState<string | null>(null);
+  const currentCamera = cameras.find((c) => c.name === expandedCamera);
 
-      <div style={titleStyle}>
-        <Video size={14} />
-        视频监控
+  return (
+    <div className="module-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '8px 10px' }}>
+      {/* 标题行 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexShrink: 0 }}>
+        <Video size={12} style={{ color: '#4da6ff' }} />
+        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>视频监控</span>
+        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginLeft: 'auto' }}>{cameras.length} 路在线</span>
       </div>
 
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, minHeight: 0 }}>
+      {/* 视频窗口 */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, minHeight: 0 }}>
         {cameras.map((camera) => (
-          <div key={camera.name} style={cameraFeedStyle}>
-            {/* 左上角：摄像头名称 */}
-            <div style={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              padding: '3px 6px',
-              background: 'rgba(0,0,0,0.45)',
-              border: '1px solid rgba(0,208,233,0.2)',
-              borderRadius: 4,
-              fontSize: 10,
-              color: '#fff',
-              backdropFilter: 'blur(4px)',
-            }}>
+          <div
+            key={camera.name}
+            onClick={() => setExpandedCamera(camera.name)}
+            style={{
+              position: 'relative', borderRadius: 6, overflow: 'hidden', cursor: 'pointer',
+              background: '#060e1a',
+              border: '1px solid rgba(0,208,233,0.12)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'border-color 0.2s',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,208,233,0.35)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,208,233,0.12)'; }}
+          >
+            {/* 缩略视频（静音自动播放） */}
+            <video
+              src={camera.videoUrl}
+              muted
+              autoPlay
+              loop
+              playsInline
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
+            />
+            <div style={{ position: 'absolute', top: 4, left: 4, padding: '2px 5px', background: 'rgba(0,0,0,0.6)', borderRadius: 3, fontSize: 9, color: '#fff', zIndex: 1 }}>
               {camera.name}
             </div>
-
-            {/* 右上角：REC 指示 */}
-            <div style={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '3px 6px',
-              background: 'rgba(0,0,0,0.45)',
-              borderRadius: 4,
-              fontSize: 10,
-              color: '#fff',
-              backdropFilter: 'blur(4px)',
-            }}>
-              <div style={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: '#FF4757',
-                boxShadow: '0 0 8px rgba(255,71,87,0.8)',
-              }} />
+            <div style={{ position: 'absolute', top: 4, right: 4, display: 'flex', alignItems: 'center', gap: 3, padding: '2px 5px', background: 'rgba(0,0,0,0.6)', borderRadius: 3, fontSize: 9, color: '#fff', zIndex: 1 }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#FF4757', boxShadow: '0 0 6px rgba(255,71,87,0.8)', animation: 'blink 1.5s infinite' }} />
               REC
             </div>
-
-            {/* 中央：视频图标 */}
-            <Video size={36} color="rgba(255,255,255,0.18)" strokeWidth={1.5} />
-
-            {/* 底部辅助信息 */}
-            <div style={{
-              position: 'absolute',
-              bottom: 8,
-              left: 8,
-              right: 8,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: 9,
-              color: 'rgba(255,255,255,0.45)',
-            }}>
-              <span>{camera.hint}</span>
-              <span>1080P</span>
+            <Maximize2 size={16} color="rgba(255,255,255,0.4)" style={{ zIndex: 1 }} />
+            <div style={{ position: 'absolute', bottom: 4, left: 4, right: 4, display: 'flex', justifyContent: 'space-between', fontSize: 8, color: 'rgba(255,255,255,0.4)', zIndex: 1 }}>
+              <span>{camera.channel}</span>
+              <span>{camera.resolution}</span>
             </div>
-
-            {/* 扫描线效果 */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '30%',
-              background: 'linear-gradient(180deg, rgba(0,208,233,0.08), transparent)',
-              pointerEvents: 'none',
-            }} />
           </div>
         ))}
       </div>
 
+      {/* 视频卡片弹窗 */}
+      {expandedCamera && currentCamera && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            animation: 'fadeIn 0.2s ease',
+          }}
+          onClick={() => setExpandedCamera(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 800, maxWidth: '90vw',
+              background: 'linear-gradient(145deg, rgba(6,16,31,0.98), rgba(8,31,49,0.95))',
+              border: '1px solid rgba(0,208,233,0.25)',
+              borderRadius: 12,
+              overflow: 'hidden',
+              boxShadow: '0 32px 64px rgba(0,0,0,0.6), 0 0 40px rgba(0,208,233,0.1)',
+              animation: 'slideUp 0.25s ease',
+            }}
+          >
+            {/* 视频区域 */}
+            <div style={{ position: 'relative', background: '#000' }}>
+              <video
+                src={currentCamera.videoUrl}
+                autoPlay
+                loop
+                controls
+                playsInline
+                style={{ width: '100%', height: 420, objectFit: 'cover', display: 'block' }}
+              />
+              {/* 顶部信息栏 */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0,
+                padding: '10px 14px',
+                background: 'linear-gradient(180deg, rgba(0,0,0,0.7), transparent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF4757', boxShadow: '0 0 8px rgba(255,71,87,0.8)', animation: 'blink 1.5s infinite' }} />
+                    <span style={{ fontSize: 11, color: '#FF4757', fontWeight: 600 }}>REC</span>
+                  </div>
+                  <span style={{ fontSize: 13, color: '#fff', fontWeight: 600 }}>{currentCamera.name}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{currentCamera.channel}</span>
+                </div>
+                <button
+                  onClick={() => setExpandedCamera(null)}
+                  style={{
+                    background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 6,
+                    width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', transition: 'background 0.2s',
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.2)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; }}
+                >
+                  <X size={16} color="#fff" />
+                </button>
+              </div>
+              {/* 底部时间戳 */}
+              <div style={{
+                position: 'absolute', bottom: 40, left: 14,
+                padding: '4px 8px', background: 'rgba(0,0,0,0.6)', borderRadius: 4,
+                fontSize: 12, color: 'rgba(255,255,255,0.7)',
+                fontFamily: "'DIN Alternate', 'Roboto Mono', monospace",
+              }}>
+                {new Date().toLocaleString('zh-CN')} · LIVE
+              </div>
+            </div>
+
+            {/* 底部信息栏 */}
+            <div style={{
+              padding: '10px 14px',
+              display: 'flex', alignItems: 'center', gap: 20,
+              borderTop: '1px solid rgba(0,208,233,0.15)',
+            }}>
+              {[
+                { label: '位置', value: currentCamera.location },
+                { label: 'IP', value: currentCamera.ip },
+                { label: '分辨率', value: `${currentCamera.resolution} / 30fps` },
+                { label: '状态', value: '在线', color: '#2ED573' },
+              ].map((item) => (
+                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{item.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'color' in item && item.color ? item.color : '#fff' }}>{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
-        @keyframes borderFlow {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px) scale(0.97); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
     </div>

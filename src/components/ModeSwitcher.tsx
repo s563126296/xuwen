@@ -11,7 +11,7 @@ export default function ModeSwitcher() {
     { id: 'command', label: '指挥' },
     { id: 'emergency', label: '应急' },
     { id: 'analysis', label: '统计分析' },
-    { id: 'ai-decision', label: 'AI决策' },
+    { id: 'ai-analysis', label: 'AI分析' },
   ];
 
   return (

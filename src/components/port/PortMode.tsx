@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { Activity, Anchor, Gauge, ParkingCircle, Ship, Wind } from 'lucide-react';
-import StraitSchematicMap from './schematic/StraitSchematicMap';
+import PortRealMap from './PortRealMap';
 import StraitIndexPanel from './panels/StraitIndexPanel';
 import WeatherImpactPanel from './panels/WeatherImpactPanel';
 import PortCapacityPanel from './panels/PortCapacityPanel';
@@ -27,7 +27,7 @@ function PortMetric({ icon: Icon, label, value, unit, tone = 'cyan', caption }: 
   return (
     <div className={`port-metric port-metric--${tone}`}>
       <div className="port-metric__icon">
-        <Icon size={17} strokeWidth={2} />
+        <Icon size={15} strokeWidth={2} />
       </div>
       <div className="port-metric__body">
         <div className="port-metric__label">{label}</div>
@@ -63,9 +63,8 @@ export default function PortMode() {
 
         <div className="port-mode__status-strip">
           <div className="port-mode__title-block">
-            <div className="port-mode__eyebrow">PORT MODE · QIONGZHOU STRAIT OPERATIONS</div>
             <div className="port-mode__title-row">
-              <Anchor size={22} />
+              <Anchor size={19} />
               <span>琼州海峡港航运行态势</span>
               <b className={`port-mode__status-dot port-mode__status-dot--${statusTone}`}>{statusText}</b>
             </div>
@@ -128,7 +127,7 @@ export default function PortMode() {
           </aside>
 
           <main className="port-mode__map-stage">
-            <StraitSchematicMap />
+            <PortRealMap />
           </main>
 
           <aside className="port-mode__rail port-mode__rail--right">

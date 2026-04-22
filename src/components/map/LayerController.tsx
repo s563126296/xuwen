@@ -45,7 +45,7 @@ const LAYER_VISIBILITY: Record<SystemMode, string[]> = {
   ],
   emergency: ['roadCongestion', 'roadInfo', 'electronicPolice', 'securityCamera', 'checkpointGate', 'trafficLight', 'drone'],
   analysis: ['roadCongestion', 'roadInfo', 'electronicPolice', 'speedCamera', 'securityCamera', 'checkpointGate'],
-  'ai-decision': ['roadCongestion', 'roadInfo', 'electronicPolice', 'securityCamera', 'checkpointGate', 'trafficLight', 'drone'],
+  'ai-analysis': ['roadCongestion', 'roadInfo', 'electronicPolice', 'securityCamera', 'checkpointGate', 'trafficLight'],
 };
 
 export default function LayerController() {

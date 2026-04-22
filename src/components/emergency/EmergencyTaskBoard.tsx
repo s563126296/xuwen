@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { CheckSquare } from 'lucide-react';
 import { useEmergencyStore } from '../../stores/emergencyStore';
 import { playClickSound, playMessageSound } from '../../utils/soundEffects';
+import CollapsibleCard from '../common/CollapsibleCard';
 import AddTaskModal from './AddTaskModal';
 
 const priorityColor = {
@@ -29,6 +31,10 @@ export default function EmergencyTaskBoard() {
   const tasks = useEmergencyStore((s) => s.emergencyState.tasks);
   const setEmergencyState = useEmergencyStore((s) => s.setEmergencyState);
   const [showModal, setShowModal] = useState(false);
+
+  const executingCount = tasks.filter((t) => t.status === 'executing' || t.status === 'arrived').length;
+  const pendingCount = tasks.filter((t) => t.status === 'pending').length;
+  const completedCount = tasks.filter((t) => t.status === 'done').length;
 
   const handleStatusChange = (taskId: string, newStatus: 'received' | 'executing' | 'arrived' | 'done') => {
     if (newStatus === 'done') {
@@ -66,13 +72,23 @@ export default function EmergencyTaskBoard() {
     setShowModal(false);
   };
 
+  const summary = (
+    <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      执行中 <span style={{ color: '#F5A623', fontWeight: 600 }}>{executingCount}</span> · 待接收 <span style={{ color: '#00D0E9', fontWeight: 600 }}>{pendingCount}</span> · 已完成 <span style={{ color: '#2ED573', fontWeight: 600 }}>{completedCount}</span>
+    </div>
+  );
+
   return (
     <>
-      <div className="card" style={{ padding: 14, flex: '45 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>F. 跨部门任务板</div>
+      <CollapsibleCard
+        title="跨部门任务板"
+        icon={<CheckSquare size={12} style={{ color: '#4da6ff' }} />}
+        summary={summary}
+        defaultExpanded={true}
+      >
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
           <button
-            onClick={() => { playClickSound(); setShowModal(true); }}
+            onClick={(e) => { e.stopPropagation(); playClickSound(); setShowModal(true); }}
             style={{
               fontSize: 11,
               padding: '4px 10px',
@@ -87,7 +103,7 @@ export default function EmergencyTaskBoard() {
             + 新增任务
           </button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', paddingRight: 8, flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {tasks.map((task) => {
             const btnConfig = nextStatusConfig[task.status];
             return (
@@ -99,10 +115,10 @@ export default function EmergencyTaskBoard() {
                 <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: 11, color: '#94A3B8' }}>
                   <span>{task.department} · {task.owner}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>{task.updatedAt}</span>
+                    <span style={{ fontFamily: 'DIN, sans-serif' }}>{task.updatedAt}</span>
                     {btnConfig && (
                       <button
-                        onClick={() => handleStatusChange(task.id, btnConfig.next)}
+                        onClick={(e) => { e.stopPropagation(); handleStatusChange(task.id, btnConfig.next); }}
                         style={{
                           fontSize: 10,
                           padding: '4px 8px',
@@ -123,7 +139,7 @@ export default function EmergencyTaskBoard() {
             );
           })}
         </div>
-      </div>
+      </CollapsibleCard>
       {showModal && (
         <AddTaskModal onClose={() => setShowModal(false)} onConfirm={handleAddTask} />
       )}

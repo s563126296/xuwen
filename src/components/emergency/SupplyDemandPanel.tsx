@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Package } from 'lucide-react';
 import { useEmergencyStore } from '../../stores/emergencyStore';
 import { playClickSound } from '../../utils/soundEffects';
+import CollapsibleCard from '../common/CollapsibleCard';
 
 // 物资库存（mock，待民政局确认后替换真实数据）
 const supplyInventory = [
@@ -27,7 +29,6 @@ export default function SupplyDemandPanel() {
   const strandedPeople = Math.round(forecast.currentStrandedVehicles * 2);
   const shutdownDays = Math.max(1, Math.ceil(forecast.estimatedShutdownHours / 24));
 
-  // Track dispatched amounts per item key
   const [dispatched, setDispatched] = useState<Record<string, number>>({});
 
   const items = supplyInventory.map((item) => {
@@ -44,10 +45,11 @@ export default function SupplyDemandPanel() {
     ? items.reduce((sum, i) => sum + i.ratio, 0) / items.length
     : 1;
 
+  const mealsItem = items.find((i) => i.key === 'meals');
+
   const handleDispatch = (item: typeof items[0]) => {
     playClickSound();
     setDispatched((prev) => ({ ...prev, [item.key]: (prev[item.key] ?? 0) + item.dispatchAmount }));
-    // Add comm record
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const newComm = {
@@ -60,22 +62,27 @@ export default function SupplyDemandPanel() {
     setEmergencyState({ communications: [...communications, newComm] });
   };
 
+  const summary = (
+    <div style={{ fontSize: 10, color: '#C9CDD4', fontFamily: 'var(--font-data, JetBrains Mono)' }}>
+      充足率 <span style={{ color: getBarColor(overallRatio), fontWeight: 600 }}>{Math.round(overallRatio * 100)}%</span> · 盒饭 <span style={{ color: '#4da6ff', fontWeight: 600 }}>{mealsItem?.available.toLocaleString()}/{mealsItem?.demand.toLocaleString()}</span>
+    </div>
+  );
+
   return (
-    <div className="card" style={{ padding: 14, flex: '35 0 0', minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexShrink: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#E2E8F0' }}>C. 物资需求估算</div>
-        <div style={{
-          fontSize: 10, padding: '2px 8px', borderRadius: 3,
+    <CollapsibleCard
+      title="物资需求估算"
+      icon={<Package size={12} style={{ color: '#4da6ff' }} />}
+      summary={summary}
+      defaultExpanded={true}
+    >
+      <div style={{ fontSize: 11, color: '#64748B', marginBottom: 10 }}>
+        滞留 {strandedPeople} 人 · 预计 {shutdownDays} 天 · <span style={{
+          fontSize: 10, padding: '1px 6px', borderRadius: 3,
           background: `${getBarColor(overallRatio)}22`,
           color: getBarColor(overallRatio), fontWeight: 600,
-        }}>
-          综合充足率 {Math.round(overallRatio * 100)}%
-        </div>
+        }}>综合充足率 {Math.round(overallRatio * 100)}%</span>
       </div>
-      <div style={{ fontSize: 11, color: '#64748B', marginBottom: 10, flexShrink: 0 }}>
-        滞留 {strandedPeople} 人 · 预计 {shutdownDays} 天
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', paddingRight: 8, flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {items.map((item) => {
           const pct = Math.round(item.ratio * 100);
           const color = getBarColor(item.ratio);
@@ -85,11 +92,11 @@ export default function SupplyDemandPanel() {
                 <span style={{ color: '#94A3B8' }}>{item.label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ color: '#E2E8F0' }}>
-                    <span style={{ color }}>{item.available.toLocaleString()}</span>
+                    <span style={{ color, fontFamily: 'DIN, sans-serif' }}>{item.available.toLocaleString()}</span>
                     <span style={{ color: '#64748B' }}> / {item.demand.toLocaleString()}{item.unit} ({pct}%)</span>
                   </span>
                   <button
-                    onClick={() => handleDispatch(item)}
+                    onClick={(e) => { e.stopPropagation(); handleDispatch(item); }}
                     style={{
                       fontSize: 10, padding: '1px 5px', borderRadius: 3,
                       background: 'transparent', border: '1px solid #2ED573',
@@ -98,13 +105,13 @@ export default function SupplyDemandPanel() {
                   >调拨</button>
                 </div>
               </div>
-              <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.08)' }}>
-                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2, background: color, transition: 'width 0.3s' }} />
+              <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.08)' }}>
+                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 3, background: color, transition: 'width 0.3s' }} />
               </div>
             </div>
           );
         })}
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

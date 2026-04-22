@@ -32,6 +32,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.5.0",
     "less": "^4.6.4",
+    "playwright": "^1.59.1",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.2.3",
     "typescript": "^5.4.5",
