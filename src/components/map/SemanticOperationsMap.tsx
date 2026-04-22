@@ -1,5 +1,5 @@
-import { useState, type CSSProperties } from 'react';
-import { ZoomIn, ZoomOut } from 'lucide-react';
+import { useState, useCallback, type CSSProperties } from 'react';
+import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import './semantic-operations-map.css';
 
 export type SemanticTone = 'cyan' | 'green' | 'amber' | 'red' | 'blue' | 'muted';
@@ -67,8 +67,9 @@ export interface SemanticOperationsMapProps {
   legend: Array<{ label: string; tone: SemanticTone; type?: 'dot' | 'line' | 'dash' }>;
 }
 
-const VIEWBOX_WIDTH = 1200;
-const VIEWBOX_HEIGHT = 720;
+// viewBox 基准尺寸，所有坐标基于此坐标系
+const BASE_W = 1600;
+const BASE_H = 720;
 
 const TONE_COLORS: Record<SemanticTone, string> = {
   cyan: '#00D0E9',
@@ -84,12 +85,10 @@ function toneStyle(tone: SemanticTone = 'cyan'): CSSProperties {
 }
 
 function BaseMapLandmarks({
-  title,
   subtitle,
   statusLabel,
   statusTone,
 }: {
-  title: string;
   subtitle: string;
   statusLabel: string;
   statusTone: SemanticTone;
@@ -125,64 +124,67 @@ function BaseMapLandmarks({
         </filter>
       </defs>
 
-      <rect width={VIEWBOX_WIDTH} height={VIEWBOX_HEIGHT} fill="#07111F" />
-      <rect width={VIEWBOX_WIDTH} height={VIEWBOX_HEIGHT} fill="url(#semanticGrid)" opacity="0.46" />
+      {/* 背景铺满 */}
+      <rect width={BASE_W} height={BASE_H} fill="#07111F" />
+      <rect width={BASE_W} height={BASE_H} fill="url(#semanticGrid)" opacity="0.46" />
 
+      {/* 陆地 */}
       <path
-        d="M0,0 H1200 V410 C1050,395 900,405 700,400 C500,395 300,410 100,405 L0,410 Z"
+        d={`M0,0 H${BASE_W} V410 C1400,395 1200,405 900,400 C600,395 350,415 100,408 L0,412 Z`}
         fill="url(#semanticLandGrad)"
       />
+      {/* 海域 */}
       <path
-        d="M0,410 C150,415 300,405 500,410 C700,415 900,400 1100,390 L1200,385 V720 H0 Z"
+        d={`M0,412 C150,418 350,405 600,412 C900,420 1200,395 1500,388 L${BASE_W},385 V${BASE_H} H0 Z`}
         fill="url(#semanticSeaGrad)"
       />
+      {/* 海岸线 */}
       <path
-        d="M100,410 C300,405 500,415 700,400 C850,390 950,395 1100,390"
+        d="M0,412 C200,408 400,418 700,405 C1000,392 1300,398 1600,388"
         fill="none"
         stroke="url(#semanticCoastGrad)"
         strokeWidth="3"
         filter="url(#semanticGlow)"
       />
 
+      {/* 海口岸线标识 */}
       <path
-        d="M100,660 C300,650 500,665 700,655 C900,645 1000,658 1100,650"
+        d="M100,660 C400,650 700,665 1000,655 C1300,645 1450,658 1550,650"
         fill="none"
         stroke="rgba(245,166,35,0.28)"
         strokeWidth="2"
         strokeDasharray="10 12"
       />
-      <text x="42" y="38" className="semantic-map__map-title">
-        {title}
-      </text>
-      <text x="42" y="58" className="semantic-map__map-subtitle">
+
+      {/* 左上角业务数据 */}
+      <text x="24" y="30" className="semantic-map__map-subtitle">
         {subtitle}
       </text>
-      <g transform="translate(42 68)" style={toneStyle(statusTone)}>
-        <rect className="semantic-map__map-status-bg" width="92" height="24" rx="5" />
-        <text x="46" y="16" textAnchor="middle" className="semantic-map__map-status">
+      <g transform="translate(24 40)" style={toneStyle(statusTone)}>
+        <rect className="semantic-map__map-status-bg" width="92" height="22" rx="5" />
+        <text x="46" y="15" textAnchor="middle" className="semantic-map__map-status">
           {statusLabel}
         </text>
       </g>
 
-      <text x="42" y="120" className="semantic-map__area-title">
-        徐闻县域交通走廊
+      {/* 地理标注 */}
+      <text x="120" y="430" className="semantic-map__area-label">
+        徐闻港
       </text>
-      <text x="120" y="425" className="semantic-map__area-label">
-        徐闻港岸线
+      <text x="800" y="540" textAnchor="middle" className="semantic-map__sea-label">
+        琼州海峡
       </text>
-      <text x="600" y="540" textAnchor="middle" className="semantic-map__sea-label">
-        琼州海峡通行窗口
-      </text>
-      <text x="1100" y="650" textAnchor="end" className="semantic-map__area-label semantic-map__area-label--south">
-        海口承接岸线
+      <text x="1500" y="660" textAnchor="end" className="semantic-map__area-label semantic-map__area-label--south">
+        海口
       </text>
 
+      {/* 传感器 */}
       <g className="semantic-map__sensor-grid" opacity="0.72">
         {[
-          { x: 850, y: 160, label: '城区卡口' },
-          { x: 650, y: 240, label: '雷达覆盖' },
-          { x: 420, y: 320, label: '视频AI' },
-          { x: 900, y: 480, label: '海况站' },
+          { x: 1100, y: 160, label: '城区卡口' },
+          { x: 850, y: 240, label: '雷达覆盖' },
+          { x: 550, y: 320, label: '视频AI' },
+          { x: 1200, y: 480, label: '海况站' },
         ].map((sensor) => (
           <g key={sensor.label} transform={`translate(${sensor.x} ${sensor.y})`}>
             <circle r="24" fill="none" stroke="rgba(143,244,255,0.16)" strokeDasharray="4 8">
@@ -201,13 +203,14 @@ function BaseMapLandmarks({
         ))}
       </g>
 
+      {/* 海峡流线 */}
       <g opacity="0.5">
         {[0, 1, 2, 3].map((index) => {
           const y = 480 + index * 55;
           return (
             <path
               key={y}
-              d={`M100,${y} C300,${y - 15} 500,${y + 20} 700,${y - 5} C900,${y - 25} 1000,${y + 15} 1100,${y - 10}`}
+              d={`M50,${y} C400,${y - 15} 700,${y + 20} 1000,${y - 5} C1250,${y - 25} 1400,${y + 15} 1550,${y - 10}`}
               fill="none"
               stroke="rgba(143,244,255,0.13)"
               strokeWidth="1.2"
@@ -308,9 +311,13 @@ function SemanticHazardMarker({ hazard }: { hazard: SemanticHazard }) {
   );
 }
 
+// 缩放步长：每次缩放改变 viewBox 可视区域
+const ZOOM_STEP = 160;
+const MIN_ZOOM = 0; // 0 = 全局视图
+const MAX_ZOOM = 4; // 最多放大 4 级
+
 export default function SemanticOperationsMap({
   mode,
-  title,
   subtitle,
   statusLabel,
   statusTone,
@@ -320,21 +327,72 @@ export default function SemanticOperationsMap({
   hazards = [],
   legend,
 }: SemanticOperationsMapProps) {
-  const [zoom, setZoom] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(0);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
 
-  const zoomIn = () => setZoom((value) => Math.min(1.45, Number((value + 0.1).toFixed(2))));
-  const zoomOut = () => setZoom((value) => Math.max(0.85, Number((value - 0.1).toFixed(2))));
+  // viewBox 缩放：放大 = 缩小 viewBox 可视区域
+  const vbW = BASE_W - zoomLevel * ZOOM_STEP;
+  const vbH = BASE_H - zoomLevel * (ZOOM_STEP * BASE_H / BASE_W);
+  // 居中偏移
+  const vbX = (BASE_W - vbW) / 2 + panOffset.x;
+  const vbY = (BASE_H - vbH) / 2 + panOffset.y;
+
+  const zoomIn = useCallback(() => {
+    setZoomLevel((v) => Math.min(MAX_ZOOM, v + 1));
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setZoomLevel((v) => {
+      const next = Math.max(MIN_ZOOM, v - 1);
+      if (next === 0) setPanOffset({ x: 0, y: 0 });
+      return next;
+    });
+  }, []);
+
+  const resetZoom = useCallback(() => {
+    setZoomLevel(0);
+    setPanOffset({ x: 0, y: 0 });
+  }, []);
+
+  // 拖拽平移（仅在放大时生效）
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (zoomLevel === 0) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startPan = { ...panOffset };
+    const scale = vbW / (e.currentTarget.clientWidth || 1);
+
+    const handleMove = (ev: MouseEvent) => {
+      const dx = (ev.clientX - startX) * scale;
+      const dy = (ev.clientY - startY) * scale;
+      setPanOffset({ x: startPan.x - dx, y: startPan.y - dy });
+    };
+
+    const handleUp = () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+  }, [zoomLevel, panOffset, vbW]);
+
+  const zoomPercent = Math.round((BASE_W / vbW) * 100);
 
   return (
     <div className={`semantic-map semantic-map--${mode}`}>
-      <div className="semantic-map__viewport" style={{ '--semantic-zoom': zoom } as CSSProperties}>
+      <div
+        className={`semantic-map__viewport ${zoomLevel > 0 ? 'is-pannable' : ''}`}
+        onMouseDown={handleMouseDown}
+      >
         <svg
-          viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+          viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
           className="semantic-map__svg"
+          preserveAspectRatio="xMidYMid slice"
           role="img"
-          aria-label={`${title}语义化态势图`}
+          aria-label="应急态势图"
         >
-          <BaseMapLandmarks title={title} subtitle={subtitle} statusLabel={statusLabel} statusTone={statusTone} />
+          <BaseMapLandmarks subtitle={subtitle} statusLabel={statusLabel} statusTone={statusTone} />
 
           <g className="semantic-map__flow-layer">
             {flows.map((flow) => (
@@ -403,7 +461,7 @@ export default function SemanticOperationsMap({
 
           <g className="semantic-map__inline-legend">
             {legend.map((item, index) => (
-              <g key={item.label} transform={`translate(${42 + index * 128} 700)`} style={toneStyle(item.tone)}>
+              <g key={item.label} transform={`translate(${24 + index * 150} 700)`} style={toneStyle(item.tone)}>
                 {item.type === 'line' || item.type === 'dash' ? (
                   <line x1="0" y1="0" x2="30" y2="0" className={`semantic-map__legend-line ${item.type === 'dash' ? 'is-dashed' : ''}`} />
                 ) : (
@@ -419,13 +477,18 @@ export default function SemanticOperationsMap({
       </div>
 
       <div className="semantic-map__zoom-controls">
-        <button type="button" onClick={zoomOut} aria-label="缩小语义地图">
+        <button type="button" onClick={zoomOut} aria-label="缩小" disabled={zoomLevel <= MIN_ZOOM}>
           <ZoomOut size={16} />
         </button>
-        <span>{Math.round(zoom * 100)}%</span>
-        <button type="button" onClick={zoomIn} aria-label="放大语义地图">
+        <span>{zoomPercent}%</span>
+        <button type="button" onClick={zoomIn} aria-label="放大" disabled={zoomLevel >= MAX_ZOOM}>
           <ZoomIn size={16} />
         </button>
+        {zoomLevel > 0 && (
+          <button type="button" onClick={resetZoom} aria-label="重置视图">
+            <Maximize2 size={14} />
+          </button>
+        )}
       </div>
     </div>
   );

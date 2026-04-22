@@ -12,21 +12,22 @@ type SelectedEmergencyEntity =
   | { kind: 'resource'; id: string }
   | { kind: 'vehicle'; id: string };
 
+// 坐标基于 1600x720 viewBox
 const RESOURCE_POSITIONS: Record<string, { x: number; y: number; marker: string }> = {
-  p1: { x: 350, y: 340, marker: 'P1' },
-  p2: { x: 450, y: 310, marker: 'P2' },
-  s1: { x: 500, y: 350, marker: '物' },
-  g1: { x: 400, y: 370, marker: '警' },
-  d1: { x: 550, y: 280, marker: 'U' },
+  p1: { x: 450, y: 340, marker: 'P1' },
+  p2: { x: 580, y: 310, marker: 'P2' },
+  s1: { x: 650, y: 350, marker: '物' },
+  g1: { x: 520, y: 370, marker: '警' },
+  d1: { x: 720, y: 280, marker: 'U' },
 };
 
 const VEHICLE_POSITIONS: Record<string, { x: number; y: number }> = {
-  'sv-1': { x: 320, y: 390 },
-  'sv-2': { x: 380, y: 370 },
-  'sv-3': { x: 440, y: 340 },
-  'sv-4': { x: 500, y: 310 },
-  'sv-5': { x: 560, y: 270 },
-  'sv-6': { x: 610, y: 230 },
+  'sv-1': { x: 420, y: 390 },
+  'sv-2': { x: 500, y: 370 },
+  'sv-3': { x: 580, y: 340 },
+  'sv-4': { x: 660, y: 310 },
+  'sv-5': { x: 740, y: 270 },
+  'sv-6': { x: 810, y: 230 },
 };
 
 const typeLabel: Record<SpecialVehicleDetail['type'], string> = {
@@ -84,7 +85,7 @@ export default function EmergencyMap() {
 
   const emergencyTone = getEmergencyTone(emergencyLevel);
   const typhoonProgress = Math.max(0, Math.min(1, 1 - typhoon.distance / 85));
-  const typhoonX = 1000 - typhoonProgress * 450;
+  const typhoonX = 1350 - typhoonProgress * 600;
   const typhoonY = 500 + typhoonProgress * 50;
 
   const p1Usage = Math.min(100, Math.round((forecast.currentStrandedVehicles / 3200) * 82));
@@ -94,46 +95,46 @@ export default function EmergencyMap() {
   const corridors: SemanticCorridor[] = [
     {
       id: 'stranded-main',
-      label: '进港大道滞留链',
-      path: 'M650,200 C580,260 480,310 400,360 C360,380 330,395 300,410',
+      label: 'S548 进港大道',
+      path: 'M860,200 C780,260 660,310 540,360 C480,385 430,400 380,412',
       tone: emergencyTone,
       width: 16,
       status: `${forecast.currentStrandedVehicles.toLocaleString()}辆滞留 · 峰值${forecast.peakStrandedVehicles.toLocaleString()}辆`,
-      labelX: 540,
+      labelX: 720,
       labelY: 260,
       pulse: true,
     },
     {
       id: 'parking-transfer',
-      label: '停车区分拨线',
-      path: 'M400,360 C380,350 360,345 350,340 M480,310 C470,310 460,310 450,310',
+      label: '停车分拨',
+      path: 'M540,360 C510,350 480,345 450,340 M660,310 C640,310 610,310 580,310',
       tone: 'amber',
       width: 9,
       dashed: true,
       status: `P-1 ${p1Usage}% · P-2 ${p2Usage}%`,
-      labelX: 340,
+      labelX: 430,
       labelY: 290,
     },
     {
       id: 'supply-line',
-      label: '民生物资配送线',
-      path: 'M500,350 C460,350 420,355 380,360 M500,350 C480,340 460,330 450,310',
+      label: '物资配送',
+      path: 'M650,350 C600,355 550,360 510,370 M650,350 C630,340 610,325 580,310',
       tone: 'green',
       width: 7,
       dashed: true,
       status: '盒饭·饮水·燃油',
-      labelX: 580,
+      labelX: 760,
       labelY: 370,
     },
     {
       id: 'drone-loop',
-      label: '无人机巡查闭环',
-      path: 'M550,280 C620,260 680,300 660,360 C640,390 560,380 480,350 C440,330 480,280 550,280',
+      label: '无人机巡查',
+      path: 'M720,280 C800,260 880,300 860,360 C840,390 740,380 630,350 C580,330 620,280 720,280',
       tone: isDroneDeployed ? 'cyan' : 'muted',
       width: 4,
       dashed: true,
       status: isDroneDeployed ? 'UAV-01巡查中' : '待派出',
-      labelX: 700,
+      labelX: 900,
       labelY: 300,
     },
   ];
@@ -141,20 +142,20 @@ export default function EmergencyMap() {
   const flows: SemanticFlow[] = [
     {
       id: 'typhoon-forecast',
-      path: `M1000,500 C${900 - typhoonProgress * 200},${520 - typhoonProgress * 20} ${700 - typhoonProgress * 100},${540 - typhoonProgress * 40} ${typhoonX},${typhoonY}`,
+      path: `M1350,500 C${1200 - typhoonProgress * 300},${520 - typhoonProgress * 20} ${1000 - typhoonProgress * 200},${540 - typhoonProgress * 40} ${typhoonX},${typhoonY}`,
       tone: 'red',
       label: '台风预测路径',
-      labelX: 800,
+      labelX: 1100,
       labelY: 520,
       dashed: true,
       width: 3,
     },
     {
       id: 'recovery-output',
-      path: 'M300,410 C450,480 650,520 900,560',
+      path: 'M380,412 C550,480 850,530 1200,570',
       tone: 'cyan',
       label: '复航疏散方向',
-      labelX: 650,
+      labelX: 850,
       labelY: 540,
       dashed: true,
       width: 3,
@@ -174,8 +175,8 @@ export default function EmergencyMap() {
     },
     {
       id: 'shutdown-impact',
-      x: 300,
-      y: 410,
+      x: 380,
+      y: 412,
       radius: 58,
       label: '停航影响圈',
       caption: `预计停航 ${forecast.estimatedShutdownHours}h`,
@@ -224,8 +225,8 @@ export default function EmergencyMap() {
   const fixedNodes: SemanticNode[] = [
     {
       id: 'xuwen-port-closed',
-      x: 300,
-      y: 410,
+      x: 380,
+      y: 412,
       label: '徐闻港',
       caption: portShutdown ? '已停航' : '可通行',
       marker: '港',
@@ -235,7 +236,7 @@ export default function EmergencyMap() {
     },
     {
       id: 'command-base',
-      x: 850,
+      x: 1100,
       y: 120,
       label: '县应急指挥点',
       caption: `${executingTaskCount}项执行中`,
@@ -258,7 +259,7 @@ export default function EmergencyMap() {
     <div className="card" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
       <SemanticOperationsMap
         mode="emergency"
-        title="停航应急资源部署语义图"
+        title=""
         subtitle={`${phaseLabel} · 滞留${forecast.currentStrandedVehicles.toLocaleString()}辆 · 冷链${forecast.coldChainVehicles}辆 · 危化${forecast.hazardousVehicles}辆 · 台风${typhoon.distance}km · ${typhoon.warningLevel}预警`}
         statusLabel={`${emergencyLevel}级响应`}
         statusTone={emergencyTone}

@@ -56,9 +56,15 @@
 .semantic-map__viewport {
   width: 100%;
   height: 100%;
-  transform: scale(var(--semantic-zoom, 1));
-  transform-origin: 50% 45%;
-  transition: transform 180ms ease-out;
+  transition: none;
+}
+
+.semantic-map__viewport.is-pannable {
+  cursor: grab;
+}
+
+.semantic-map__viewport.is-pannable:active {
+  cursor: grabbing;
 }
 
 .semantic-map__map-title {
@@ -318,7 +324,12 @@
   cursor: pointer;
 }
 
-.semantic-map__zoom-controls button:hover {
+.semantic-map__zoom-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.semantic-map__zoom-controls button:not(:disabled):hover {
   border-color: rgba(0, 208, 233, 0.44);
   background: rgba(0, 208, 233, 0.14);
 }
