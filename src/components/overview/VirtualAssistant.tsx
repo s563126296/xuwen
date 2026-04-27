@@ -79,12 +79,12 @@ export default function VirtualAssistant() {
 
 function SpeechBubble({ text }: { text: string }) {
   return (
-    <div style={{ position: 'absolute', top: -50, left: '50%',
+    <div style={{ position: 'absolute', top: -80, left: '50%',
       transform: 'translateX(-50%)', maxWidth: 200, padding: '8px 12px',
       background: '#FFFFFF', border: '1px solid rgba(0, 208, 233, 0.3)',
       borderRadius: 8, fontSize: 11, color: '#0A0F19',
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-      animation: 'assistantFadeIn 0.3s ease-out',
+      animation: 'assistantFadeIn 0.3s ease-out', zIndex: 300,
     }}>
       {text}
       <div style={{ position: 'absolute', bottom: -6, left: '50%',
