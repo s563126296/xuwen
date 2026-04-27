@@ -68,6 +68,35 @@ export interface AiSummary {
   compares: AiSummaryCompare[];
   compareConclusion: string;
   expanded: boolean;
+
+  // v2.0 new fields
+  riskForecast?: {
+    next30min: 'low' | 'medium' | 'high';
+    next1hour: 'low' | 'medium' | 'high';
+  };
+
+  predictionConfidence?: number; // 0-100
+
+  // Phase 2 fields (add but don't use yet)
+  influenceFactors?: {
+    port: number;      // 0-100
+    traffic: number;   // 0-100
+    weather: number;   // 0-100
+    event: number;     // 0-100
+  };
+
+  similarCases?: Array<{
+    date: string;
+    similarity: number;
+    strategy: string;
+    effectTime: number;
+  }>;
+
+  learningStats?: {
+    casesLearned: number;
+    weeklyAdoptionRate: number;
+    predictionAccuracy: number;
+  };
 }
 
 export type NavigationStatus = 'normal' | 'caution' | 'restricted' | 'closed';
@@ -473,6 +502,9 @@ const defaultAiSummary: AiSummary = {
   ],
   compareConclusion: '\u6574\u4F53\u4F18\u4E8E\u53BB\u5E74',
   expanded: false,
+  // v2.0 new fields
+  riskForecast: { next30min: 'medium', next1hour: 'medium' },
+  predictionConfidence: 82,
 };
 
 // === Store Interface ===

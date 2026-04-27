@@ -9,7 +9,8 @@ export default function ModeSwitcher() {
     { id: 'overview', label: '总览' },
     { id: 'port', label: '港口' },
     { id: 'command', label: '指挥' },
-    { id: 'emergency', label: '应急' },
+    // v2.0: 应急模式已合并到指挥模式，从导航栏隐藏
+    // { id: 'emergency', label: '应急' },
     { id: 'analysis', label: '统计分析' },
     { id: 'ai-analysis', label: 'AI分析' },
   ];

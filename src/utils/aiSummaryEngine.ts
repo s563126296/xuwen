@@ -59,6 +59,15 @@ export function computeAiSummary(indicators: OverviewIndicators): AiSummary {
   const compares = generateCompares(indicators, specialEvents);
   const compareConclusion = generateCompareConclusion(specialEvents);
 
+  // v2.0: Generate risk forecast
+  const riskForecast = {
+    next30min: level === 'red' ? 'high' : level === 'orange' ? 'medium' : 'low',
+    next1hour: level === 'red' || level === 'orange' ? 'medium' : 'low',
+  } as const;
+
+  // v2.0: Generate prediction confidence (mock: 75-95%)
+  const predictionConfidence = Math.floor(75 + Math.random() * 20);
+
   return {
     level,
     conclusion,
@@ -71,6 +80,13 @@ export function computeAiSummary(indicators: OverviewIndicators): AiSummary {
     compares,
     compareConclusion,
     expanded: false,
+    // v2.0 new fields
+    riskForecast,
+    predictionConfidence,
+    // Phase 2 fields (empty for now)
+    influenceFactors: undefined,
+    similarCases: undefined,
+    learningStats: undefined,
   };
 }
 

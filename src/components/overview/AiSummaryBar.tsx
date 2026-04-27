@@ -1,4 +1,4 @@
-import { CheckCircle, AlertTriangle, AlertOctagon, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle, AlertTriangle, AlertOctagon, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useCommandStore } from '../../stores/commandStore';
@@ -111,6 +111,29 @@ export default function AiSummaryBar() {
         </span>
         <span style={{ color: `${config.color}40`, margin: '0 12px', fontSize: 11 }}>·</span>
 
+        {/* v2.0: 30min Risk badge */}
+        {aiSummary.riskForecast && (
+          <>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              height: 24,
+              padding: '0 8px',
+              borderRadius: 4,
+              fontSize: 11,
+              fontWeight: 600,
+              background: aiSummary.riskForecast.next30min === 'high' ? 'rgba(255,71,87,0.1)' : aiSummary.riskForecast.next30min === 'medium' ? 'rgba(245,166,35,0.1)' : 'rgba(46,213,115,0.1)',
+              border: `1px solid ${aiSummary.riskForecast.next30min === 'high' ? 'rgba(255,71,87,0.2)' : aiSummary.riskForecast.next30min === 'medium' ? 'rgba(245,166,35,0.2)' : 'rgba(46,213,115,0.2)'}`,
+              color: aiSummary.riskForecast.next30min === 'high' ? '#FF4757' : aiSummary.riskForecast.next30min === 'medium' ? '#F5A623' : '#2ED573',
+            }}>
+              <AlertCircle size={12} />
+              30min风险:{aiSummary.riskForecast.next30min === 'high' ? '高' : aiSummary.riskForecast.next30min === 'medium' ? '中' : '低'}
+            </span>
+            <span style={{ color: `${config.color}40`, margin: '0 12px', fontSize: 11 }}>·</span>
+          </>
+        )}
+
         {/* Suggestion hint */}
         <span style={{ fontSize: 12, color: '#00D0E9' }}>
           {aiSummary.suggestionHint}
@@ -148,6 +171,27 @@ export default function AiSummaryBar() {
               </span>
             );
           })}
+
+          {/* v2.0: Confidence badge */}
+          {aiSummary.predictionConfidence !== undefined && (
+            <span
+              style={{
+                height: 24,
+                padding: '0 8px',
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                fontFamily: 'DIN, monospace',
+                background: 'rgba(168,85,247,0.1)',
+                border: '1px solid rgba(168,85,247,0.2)',
+                color: '#A855F7',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              可信度 {aiSummary.predictionConfidence}%
+            </span>
+          )}
         </div>
 
         {/* Expand icon */}
