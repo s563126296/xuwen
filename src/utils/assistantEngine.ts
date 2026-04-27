@@ -101,7 +101,7 @@ export const BroadcastScenarios = {
     const { aiSummary } = useOverviewStore.getState();
     if (!aiSummary) return;
 
-    const message = `系统已启动。当前态势${aiSummary.conclusion}。${aiSummary.suggestionHint}`;
+    const message = `系统已启动，当前${aiSummary.conclusion}`;
     speak(message);
   },
 
