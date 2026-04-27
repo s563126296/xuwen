@@ -1,5 +1,6 @@
 import { Volume2, VolumeX, MessageCircle } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
+import { stopSpeaking } from '../../utils/assistantEngine';
 
 // Button style helper
 const btnBase: React.CSSProperties = {
@@ -33,9 +34,19 @@ export default function VirtualAssistant() {
       {isSpeaking && currentMessage && <SpeechBubble text={currentMessage} />}
 
       {/* Character container with float animation */}
-      <div style={{ position: 'relative', width: '100%', height: '100%',
-        animation: 'assistantFloat 2s ease-in-out infinite' }}>
-
+      <div
+        style={{ position: 'relative', width: '100%', height: '100%',
+          animation: 'assistantFloat 2s ease-in-out infinite',
+          cursor: isSpeaking ? 'pointer' : 'default' }}
+        onClick={() => {
+          if (isSpeaking) {
+            stopSpeaking();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={isSpeaking ? '停止播报' : '虚拟助手'}
+      >
         <CharacterSVG isSpeaking={isSpeaking} />
 
         {/* Name tag */}

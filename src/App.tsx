@@ -23,6 +23,7 @@ import StraitTransitIndex from './components/overview/StraitTransitIndex';
 import BottomChartsBar from './components/overview/BottomChartsBar';
 import { useUIStore, useOverviewStore } from './stores';
 import { computeAiSummary } from './utils/aiSummaryEngine';
+import { initTTS, BroadcastScenarios } from './utils/assistantEngine';
 import './App.css';
 
 interface DeviceData {
@@ -107,6 +108,54 @@ function App() {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Initialize TTS and system startup broadcast
+  useEffect(() => {
+    const ttsSupported = initTTS();
+    if (!ttsSupported) {
+      console.warn('[App] TTS not supported in this browser');
+    }
+
+    // System startup broadcast (after 2 seconds)
+    const startupTimer = setTimeout(() => {
+      if (systemMode === 'overview') {
+        BroadcastScenarios.systemStartup();
+      }
+    }, 2000);
+
+    return () => clearTimeout(startupTimer);
+  }, []); // Run once on mount
+
+  // Hourly report broadcast
+  useEffect(() => {
+    if (systemMode !== 'overview') return;
+
+    const now = new Date();
+    const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
+
+    const hourlyTimer = setTimeout(() => {
+      BroadcastScenarios.hourlyReport();
+
+      // Set up recurring hourly broadcast
+      const recurringTimer = setInterval(() => {
+        if (useUIStore.getState().systemMode === 'overview') {
+          BroadcastScenarios.hourlyReport();
+        }
+      }, 60 * 60 * 1000); // Every hour
+
+      return () => clearInterval(recurringTimer);
+    }, msUntilNextHour);
+
+    return () => clearTimeout(hourlyTimer);
+  }, [systemMode]);
+
+  // Alert broadcast (when activeAlert changes)
+  const activeAlert = useOverviewStore((s) => s.activeAlert);
+  useEffect(() => {
+    if (activeAlert && systemMode === 'overview') {
+      BroadcastScenarios.alertTriggered(activeAlert.content);
+    }
+  }, [activeAlert, systemMode]);
 
   // 感知设备数据
   const deviceData: DeviceData[] = [
@@ -230,6 +279,28 @@ function App() {
             }}>
               <StraitTransitIndex />
             </div>
+
+            {/* Development TTS test button */}
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => BroadcastScenarios.systemStartup()}
+                style={{
+                  position: 'absolute',
+                  bottom: 250,
+                  right: 20,
+                  padding: '8px 12px',
+                  background: '#A855F7',
+                  border: 'none',
+                  borderRadius: 6,
+                  color: '#FFFFFF',
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  zIndex: 200,
+                }}
+              >
+                测试播报
+              </button>
+            )}
           </>
         )}
 
