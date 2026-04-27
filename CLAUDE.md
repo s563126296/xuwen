@@ -52,6 +52,44 @@ React 18 + TypeScript + Vite + Zustand + Recharts + 高德地图 JS API，1920x1
 
 **总工作量：26-36 天（约 5-7 周）**
 
+## v2.0 最新进展（2026-04-25）
+
+### 已完成：需求分析文档
+
+**总览模式 v2.0 详细需求分析（7 个文档）：**
+- ✅ `doc/v2.0/01-overview/0_index.md` - 索引与导航
+- ✅ `doc/v2.0/01-overview/1_common.md` - 公共上下文（v1.0 现状 + v2.0 目标）
+- ✅ `doc/v2.0/01-overview/2_pc_ai_panel.md` - AI 态势研判面板增强
+- ✅ `doc/v2.0/01-overview/2_pc_active_alert.md` - AI 主动告警机制
+- ✅ `doc/v2.0/01-overview/2_pc_assistant.md` - 虚拟人主动播报
+- ✅ `doc/v2.0/01-overview/2_pc_qa_dialog.md` - 虚拟人问答交互
+- ✅ `doc/v2.0/01-overview/9_data_dict.md` - 数据字典
+- ✅ `doc/v2.0/01-overview/草图-总览模式v2.0.md` - ASCII 草图对比
+
+**指挥模式 v2.0 详细需求分析（6 个文档）：**
+- ✅ `doc/v2.0/03-command/0_index.md` - 索引与导航
+- ✅ `doc/v2.0/03-command/1_common.md` - 公共上下文（合并方案）
+- ✅ `doc/v2.0/03-command/2_merge_analysis.md` - 应急指挥合并详细分析
+- ✅ `doc/v2.0/03-command/3_component_migration.md` - 组件迁移清单（14 保留 + 6 迁入 + 14 移除）
+- ✅ `doc/v2.0/03-command/4_scene_switch.md` - 场景切换机制（congestion/emergency）
+- ✅ `doc/v2.0/03-command/9_data_dict.md` - 数据字典
+
+**高保真设计稿：**
+- ✅ 总览模式 v2.0 高保真设计（Pencil 工具）
+- ✅ 设计文件：`/Users/zhangmingchen/projects/pencil-new.pen`（节点 ID: `6TOOB`）
+- ✅ 虚拟人助手"小徐"采用悬浮卡通人物设计
+
+### 核心成果
+
+1. **总览模式从"被动展示"升级为"AI 驱动的态势总入口"**
+   - 4 层增强：AI 更主动、更可信、会说话、能回答
+   - 不改变主体布局，新增能力叠加在 AI 面板和辅助区域
+
+2. **指挥模式从"拥堵处置"升级为"统一指挥中枢"**
+   - 吸收应急核心功能（特殊车辆、物资需求、任务板、预案快捷入口）
+   - 场景感知（日常拥堵 / 应急场景）
+   - 模式数量：5 个 → 4 个
+
 ## v2.0 下一步动作
 
 ### Phase 1：应急指挥模式合并（优先级最高）
@@ -59,7 +97,7 @@ React 18 + TypeScript + Vite + Zustand + Recharts + 高德地图 JS API，1920x1
 **待决策：**
 - [ ] 与项目经理确认功能保留清单
 - [ ] 确认 UI 布局方案
-- [ ] 评审迭代规划文档
+- [x] 评审迭代规划文档（已完成详细需求分析）
 
 **待实施：**
 - [ ] 重写指挥模式 PRD（整合应急功能）
