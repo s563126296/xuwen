@@ -577,6 +577,19 @@ interface OverviewState {
   } | null;
   setActiveAlert: (alert: OverviewState['activeAlert']) => void;
   clearActiveAlert: () => void;
+
+  // v2.0 Phase 3: Virtual Assistant
+  assistantState: {
+    status: 'idle' | 'speaking' | 'listening';
+    currentMessage: string;
+    muted: boolean;
+    chatOpen: boolean;
+  };
+  setAssistantStatus: (status: OverviewState['assistantState']['status']) => void;
+  setAssistantMessage: (message: string) => void;
+  toggleAssistantMute: () => void;
+  openAssistantChat: () => void;
+  closeAssistantChat: () => void;
 }
 
 // === Store Implementation ===
@@ -648,4 +661,27 @@ export const useOverviewStore = create<OverviewState>((set) => ({
   activeAlert: null,
   setActiveAlert: (alert) => set({ activeAlert: alert }),
   clearActiveAlert: () => set({ activeAlert: null }),
+
+  // v2.0 Phase 3: Virtual Assistant
+  assistantState: {
+    status: 'idle',
+    currentMessage: '',
+    muted: false,
+    chatOpen: false,
+  },
+  setAssistantStatus: (status) => set((state) => ({
+    assistantState: { ...state.assistantState, status },
+  })),
+  setAssistantMessage: (message) => set((state) => ({
+    assistantState: { ...state.assistantState, currentMessage: message },
+  })),
+  toggleAssistantMute: () => set((state) => ({
+    assistantState: { ...state.assistantState, muted: !state.assistantState.muted },
+  })),
+  openAssistantChat: () => set((state) => ({
+    assistantState: { ...state.assistantState, chatOpen: true },
+  })),
+  closeAssistantChat: () => set((state) => ({
+    assistantState: { ...state.assistantState, chatOpen: false },
+  })),
 }));
