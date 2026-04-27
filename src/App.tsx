@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import BigScreen from './pages/BigScreen';
 import Header from './components/Header';
 import AiSummaryBar from './components/overview/AiSummaryBar';
+import AiAlertPopup from './components/overview/AiAlertPopup';
 import LeftPanel from './components/LeftPanel';
 import RightPanel from './components/RightPanel';
 import ModeSwitcher from './components/ModeSwitcher';
@@ -158,6 +159,9 @@ function App() {
 
             {/* AI Summary Bar */}
             <AiSummaryBar />
+
+            {/* v2.0 Phase 2: AI Alert Popup */}
+            <AiAlertPopup />
 
             {/* Left Panel — 延伸到底部 */}
             <div style={{

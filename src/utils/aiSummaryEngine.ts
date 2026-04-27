@@ -68,6 +68,29 @@ export function computeAiSummary(indicators: OverviewIndicators): AiSummary {
   // v2.0: Generate prediction confidence (mock: 75-95%)
   const predictionConfidence = Math.floor(75 + Math.random() * 20);
 
+  // v2.0 Phase 2: Generate influence factors (mock: weighted by alert level)
+  const influenceFactors = {
+    port: level === 'red' || level === 'orange' ? 40 : 25,
+    traffic: level === 'red' ? 35 : level === 'orange' ? 30 : 20,
+    weather: level === 'red' ? 15 : 20,
+    event: level === 'orange' || level === 'yellow' ? 10 : 5,
+  };
+
+  // v2.0 Phase 2: Generate similar cases (mock: 1 case)
+  const similarCases = [{
+    date: '2025-12-23',
+    similarity: 78,
+    strategy: 'S-02 分流',
+    effectTime: 32,
+  }];
+
+  // v2.0 Phase 2: Generate learning stats (mock: fixed values)
+  const learningStats = {
+    casesLearned: 126,
+    weeklyAdoptionRate: 68,
+    predictionAccuracy: 84,
+  };
+
   return {
     level,
     conclusion,
@@ -83,10 +106,9 @@ export function computeAiSummary(indicators: OverviewIndicators): AiSummary {
     // v2.0 new fields
     riskForecast,
     predictionConfidence,
-    // Phase 2 fields (empty for now)
-    influenceFactors: undefined,
-    similarCases: undefined,
-    learningStats: undefined,
+    influenceFactors,
+    similarCases,
+    learningStats,
   };
 }
 

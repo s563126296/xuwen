@@ -202,7 +202,7 @@ export default function AiSummaryBar() {
 
       {/* Expanded panel */}
       <div style={{
-        maxHeight: expanded ? 320 : 0,
+        maxHeight: expanded ? 480 : 0,
         overflow: 'hidden',
         transition: 'max-height 0.3s ease',
         background: '#0D1220',
@@ -334,6 +334,94 @@ export default function AiSummaryBar() {
             </div>
           </div>
         </div>
+
+        {/* v2.0 Phase 2: Influence Factors Section */}
+        {aiSummary.influenceFactors && (
+          <div style={{
+            padding: '12px 32px',
+            borderTop: '1px solid rgba(255,255,255,0.04)',
+          }}>
+            <div style={{ fontSize: 11, color: '#A0A8B4', marginBottom: 8 }}>
+              影响因子
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
+              {[
+                { label: '港口积压', value: aiSummary.influenceFactors.port },
+                { label: '流量高峰', value: aiSummary.influenceFactors.traffic },
+                { label: '天气影响', value: aiSummary.influenceFactors.weather },
+                { label: '节假日', value: aiSummary.influenceFactors.event },
+              ].map((factor, i) => (
+                <div key={i}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, color: '#C9CDD4' }}>{factor.label}</span>
+                    <span style={{ fontSize: 11, color: '#00D0E9', fontFamily: 'DIN, monospace', fontWeight: 600 }}>
+                      {factor.value}%
+                    </span>
+                  </div>
+                  <div style={{
+                    height: 6,
+                    background: 'rgba(255,255,255,0.08)',
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      width: `${factor.value}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #00D0E9, #00A8C5)',
+                      transition: 'width 0.3s ease',
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* v2.0 Phase 2: Similar Cases Section */}
+        {aiSummary.similarCases && aiSummary.similarCases.length > 0 && (
+          <div style={{
+            padding: '10px 32px',
+            background: 'rgba(26,37,64,0.4)',
+            borderTop: '1px solid rgba(255,255,255,0.04)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}>
+            <span style={{ fontSize: 18 }}>📊</span>
+            <span style={{ fontSize: 11, color: '#94A3B8' }}>
+              相似案例：{aiSummary.similarCases[0].date} 周一晚高峰（相似度 {aiSummary.similarCases[0].similarity}%）
+              <span style={{ color: '#00D0E9', marginLeft: 8 }}>
+                → {aiSummary.similarCases[0].strategy} 缓解 {aiSummary.similarCases[0].effectTime} 分钟
+              </span>
+            </span>
+          </div>
+        )}
+
+        {/* v2.0 Phase 2: AI Learning Stats Section */}
+        {aiSummary.learningStats && (
+          <div style={{
+            padding: '10px 32px',
+            background: 'rgba(168,85,247,0.06)',
+            borderTop: '1px solid rgba(168,85,247,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 24,
+          }}>
+            <span style={{ fontSize: 18 }}>🤖</span>
+            <span style={{ fontSize: 11, color: '#A855F7', fontWeight: 500 }}>AI 学习成果：</span>
+            <span style={{ fontSize: 11, color: '#C9CDD4' }}>
+              已学习 <span style={{ color: '#A855F7', fontWeight: 600 }}>{aiSummary.learningStats.casesLearned}</span> 个场景
+            </span>
+            <span style={{ color: '#94A3B8', fontSize: 11 }}>|</span>
+            <span style={{ fontSize: 11, color: '#C9CDD4' }}>
+              本周采纳率 <span style={{ color: '#A855F7', fontWeight: 600 }}>{aiSummary.learningStats.weeklyAdoptionRate}%</span>
+            </span>
+            <span style={{ color: '#94A3B8', fontSize: 11 }}>|</span>
+            <span style={{ fontSize: 11, color: '#C9CDD4' }}>
+              预测准确率 <span style={{ color: '#A855F7', fontWeight: 600 }}>{aiSummary.learningStats.predictionAccuracy}%</span>
+            </span>
+          </div>
+        )}
 
         {/* Compare bar */}
         <div style={{

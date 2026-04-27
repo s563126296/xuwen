@@ -564,6 +564,19 @@ interface OverviewState {
 
   currentWeather: CurrentWeather;
   setCurrentWeather: (data: CurrentWeather) => void;
+
+  // v2.0 Phase 2: Active alert popup
+  activeAlert: {
+    id: string;
+    type: string;
+    title: string;
+    content: string;
+    factors: { name: string; weight: number }[];
+    suggestion: string;
+    timestamp: number;
+  } | null;
+  setActiveAlert: (alert: OverviewState['activeAlert']) => void;
+  clearActiveAlert: () => void;
 }
 
 // === Store Implementation ===
@@ -630,4 +643,9 @@ export const useOverviewStore = create<OverviewState>((set) => ({
 
   currentWeather: defaultCurrentWeather,
   setCurrentWeather: (data) => set({ currentWeather: data }),
+
+  // v2.0 Phase 2: Active alert popup
+  activeAlert: null,
+  setActiveAlert: (alert) => set({ activeAlert: alert }),
+  clearActiveAlert: () => set({ activeAlert: null }),
 }));

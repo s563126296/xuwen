@@ -647,6 +647,18 @@ body {
   max-height: calc(80vh - 80px);
 }
 
+/* v2.0 Phase 2: AI Alert Popup slide-in animation */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 @keyframes modalFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
