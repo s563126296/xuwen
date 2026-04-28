@@ -174,6 +174,20 @@ export interface CommandState {
     planName: string;
     progress: number;
   } | null;
+
+  // v2.0: Strategy expected effect timeline (P0-4)
+  strategyTimeline: {
+    strategyName: string;
+    startTime: string;
+    checkpoints: Array<{
+      time: string;
+      minutesAfter: number;
+      expected: number;
+      actual: number | null;
+      status: 'pending' | 'on-track' | 'off-track';
+    }>;
+    overallStatus: 'executing' | 'on-track' | 'off-track' | 'completed';
+  } | null;
 }
 
 // === Default Command State ===
@@ -350,6 +364,17 @@ const defaultCommandState: CommandState = {
     { id: 'et-3', department: '交通运输局', title: '更新诱导屏提示', status: 'completed', owner: '张科' },
   ],
   activePlan: null,
+  strategyTimeline: {
+    strategyName: 'S-02 S376省道分流',
+    startTime: '17:15',
+    checkpoints: [
+      { time: '17:45', minutesAfter: 30, expected: 5.8, actual: 5.9, status: 'on-track' },
+      { time: '18:15', minutesAfter: 60, expected: 5.2, actual: null, status: 'pending' },
+      { time: '18:45', minutesAfter: 90, expected: 4.5, actual: null, status: 'pending' },
+      { time: '19:15', minutesAfter: 120, expected: 4.0, actual: null, status: 'pending' },
+    ],
+    overallStatus: 'executing',
+  },
 };
 
 // === Command Store Interface ===

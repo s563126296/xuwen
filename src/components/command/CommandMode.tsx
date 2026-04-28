@@ -11,6 +11,7 @@ import EscalateConfirmModal from './EscalateConfirmModal';
 import CongestionDetailModal from './CongestionDetailModal';
 import IncomingCallModal from './IncomingCallModal';
 import EmergencyPanels from './EmergencyPanels';
+import StrategyTimelinePanel from './StrategyTimelinePanel';
 import { useCommandStore } from '../../stores/commandStore';
 import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
 
@@ -19,11 +20,14 @@ export default function CommandMode() {
   const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
   const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
   const commandScene = useCommandStore((s) => s.commandState.commandScene);
+  const strategyTimeline = useCommandStore((s) => s.commandState.strategyTimeline);
   const setCommandScene = useCommandStore((s) => s.setCommandScene);
   const startCall = useCommandStore((s) => s.startCall);
   const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
   const hasExecuting = strategies.some((s) => s.status === 'executing' || s.status === 'done');
-  const mainBottom = hasExecuting ? 230 : 190;
+  const timelineHeight = strategyTimeline ? 140 : 0;
+  const timelineGap = strategyTimeline ? 12 : 0;
+  const mainBottom = hasExecuting ? 230 + timelineHeight + timelineGap : 190 + timelineHeight + timelineGap;
 
   const {
     showIncomingCall,
@@ -76,6 +80,20 @@ export default function CommandMode() {
           {commandScene === 'emergency' && <EmergencyPanels />}
         </div>
       </div>
+
+      {/* Strategy timeline: below map, above comm panel */}
+      {strategyTimeline && (
+        <div style={{
+          position: 'absolute',
+          left: 16,
+          right: 328,
+          bottom: hasExecuting ? 242 : 202,
+          height: 140,
+          zIndex: 100,
+        }}>
+          <StrategyTimelinePanel />
+        </div>
+      )}
 
       {/* v2.0: Scene toggle (dev mode) */}
       <div style={{
