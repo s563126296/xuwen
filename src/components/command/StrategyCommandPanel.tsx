@@ -1,16 +1,11 @@
-import { Plus, Play, ListChecks } from 'lucide-react';
+import { Play, ListChecks } from 'lucide-react';
 import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
 import CollapsibleCard from '../common/CollapsibleCard';
 import ExecutionResourcePanel from './ExecutionResourcePanel';
-import HistoryStatsPanel from './HistoryStatsPanel';
 import { cornerStyles, getLinkedCamera, getLatestFieldFeedback } from './strategy/strategyConstants';
-import SectionHeader from './strategy/SectionHeader';
 import ActiveStrategyCard from './strategy/ActiveStrategyCard';
 import AltStrategyCard from './strategy/AltStrategyCard';
-import CustomStrategyGrid from './strategy/CustomStrategyGrid';
-import HistoryEffectsSection from './strategy/HistoryEffectsSection';
-import DeviationMonitorPanel from './DeviationMonitorPanel';
 
 export default function StrategyCommandPanel() {
   const cmd = useCommandStore((s) => s.commandState);
@@ -87,7 +82,7 @@ export default function StrategyCommandPanel() {
               {altStrategies.length} 个备选方案
             </div>
           }
-          defaultExpanded={true}
+          defaultExpanded={false}
         >
           {altStrategies.map((s, idx) => (
             <AltStrategyCard
@@ -100,27 +95,8 @@ export default function StrategyCommandPanel() {
         </CollapsibleCard>
       )}
 
-      {/* History Effects */}
-      <HistoryEffectsSection historyEffects={cmd.historyEffects} />
-
-      {/* C. Custom Strategy Templates */}
-      <div className="module-card cmd-panel-section" style={{ padding: 14 }}>
-        <SectionHeader title="自定义策略" />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10 }}>
-          <Plus size={12} color="#64748B" />
-          <span style={{ fontSize: 11, color: '#64748B' }}>选择模板快速创建</span>
-        </div>
-        <CustomStrategyGrid />
-      </div>
-
-      {/* P1-1: Deviation Monitor */}
-      <DeviationMonitorPanel />
-
-      {/* E4. Execution Resources */}
+      {/* Execution Resources */}
       <ExecutionResourcePanel />
-
-      {/* I. History Stats */}
-      <HistoryStatsPanel />
     </div>
   );
 }

@@ -1,7 +1,6 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { useCommandStore } from '../../stores/commandStore';
 import { Info, Bot, UserCheck, Camera, Phone, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
-import StrategyFlowBar from './StrategyFlowBar';
 
 const iconMap = {
   info: { Icon: Info, color: '#00D0E9' },
@@ -51,27 +50,8 @@ const typeLabel: Record<string, { text: string; color: string }> = {
 };
 
 export default function CommandCommPanel() {
-  const { commandFeed, currentStep, strategies } = useCommandStore((s) => s.commandState);
-  const [selectedStep, setSelectedStep] = useState<number | null>(null);
+  const { commandFeed } = useCommandStore((s) => s.commandState);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const executingStrategy = strategies.find((s) => s.status === 'executing' || s.status === 'done') ?? null;
-
-  const handleStepClick = (stepId: number) => {
-    setSelectedStep(stepId);
-    const targetMessage = commandFeed.find((f) => f.step === stepId);
-    if (targetMessage && scrollRef.current) {
-      const targetElement = document.getElementById(`msg-${targetMessage.id}`);
-      if (targetElement) {
-        // 只滚动消息列表容器，不触发页面滚动
-        const container = scrollRef.current;
-        const targetLeft = targetElement.offsetLeft - container.offsetWidth / 2 + targetElement.offsetWidth / 2;
-        container.scrollTo({
-          left: targetLeft,
-          behavior: 'smooth',
-        });
-      }
-    }
-  };
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -80,8 +60,7 @@ export default function CommandCommPanel() {
     }
   }, [commandFeed.length]);
 
-  const hasFlowBar = !!executingStrategy;
-  const panelHeight = hasFlowBar ? 200 : 160;
+  const panelHeight = 180;
 
   return (
     <div className="cmd-comm-panel" style={{
@@ -124,14 +103,6 @@ export default function CommandCommPanel() {
         <span style={{ fontSize: 11, color: '#475569' }}>← 滑动查看历史</span>
       </div>
 
-      {/* Strategy execution flow */}
-      {executingStrategy && (
-        <StrategyFlowBar
-          currentStep={currentStep}
-          onStepClick={handleStepClick}
-        />
-      )}
-
       {/* Timeline scroll area */}
       <div ref={scrollRef} style={{
         flex: 1, overflowX: 'auto', overflowY: 'hidden',
@@ -145,7 +116,7 @@ export default function CommandCommPanel() {
           const isUrgent = !!item.urgent;
           const isAlert = item.type === 'alert';
           const isApproval = item.type === 'approval';
-          const isHighlighted = selectedStep !== null && item.step === selectedStep;
+          const isHighlighted = false;
           return (
             <div key={item.id} style={{ display: 'flex', alignItems: 'stretch', flexShrink: 0 }}>
               {/* Event card */}

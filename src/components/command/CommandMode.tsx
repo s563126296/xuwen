@@ -11,25 +11,22 @@ import EscalateConfirmModal from './EscalateConfirmModal';
 import CongestionDetailModal from './CongestionDetailModal';
 import IncomingCallModal from './IncomingCallModal';
 import EmergencyPanels from './EmergencyPanels';
-import StrategyTimelinePanel from './StrategyTimelinePanel';
+import DeviationMonitorPanel from './DeviationMonitorPanel';
 import InquiryModal from './InquiryModal';
 import StrategyFeedbackPanel from './StrategyFeedbackPanel';
 import { useCommandStore } from '../../stores/commandStore';
 import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
 
 export default function CommandMode() {
-  const strategies = useCommandStore((s) => s.commandState.strategies);
   const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
   const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
   const commandScene = useCommandStore((s) => s.commandState.commandScene);
-  const strategyTimeline = useCommandStore((s) => s.commandState.strategyTimeline);
   const setCommandScene = useCommandStore((s) => s.setCommandScene);
   const startCall = useCommandStore((s) => s.startCall);
   const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
-  const hasExecuting = strategies.some((s) => s.status === 'executing' || s.status === 'done');
-  const timelineHeight = strategyTimeline ? 140 : 0;
-  const timelineGap = strategyTimeline ? 12 : 0;
-  const mainBottom = hasExecuting ? 230 + timelineHeight + timelineGap : 190 + timelineHeight + timelineGap;
+  const isMonitoring = useCommandStore((s) => s.commandState.monitorState.isMonitoring);
+  const hasCurveData = useCommandStore((s) => s.commandState.monitorState.curveData.length > 0);
+  const mainBottom = 192;
 
   const {
     showIncomingCall,
@@ -83,17 +80,17 @@ export default function CommandMode() {
         </div>
       </div>
 
-      {/* Strategy timeline: below map, above comm panel */}
-      {strategyTimeline && (
+      {/* Deviation monitor floating panel (replaces StrategyTimelinePanel) */}
+      {(isMonitoring || hasCurveData) && (
         <div style={{
           position: 'absolute',
           left: 16,
-          right: 328,
-          bottom: hasExecuting ? 242 : 202,
-          height: 140,
+          bottom: 204,
+          width: 550,
           zIndex: 100,
+          pointerEvents: 'auto',
         }}>
-          <StrategyTimelinePanel />
+          <DeviationMonitorPanel />
         </div>
       )}
 
