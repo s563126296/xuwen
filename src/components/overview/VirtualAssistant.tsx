@@ -113,7 +113,7 @@ export default function VirtualAssistant() {
 function SpeechBubble({ text }: { text: string }) {
   return (
     <div style={{
-      position: 'absolute', top: -50, left: -300,
+      position: 'absolute', top: 20, right: 155,
       width: 288, height: 162,
       background: 'rgba(13, 17, 55, 0.95)',
       border: '1px solid rgba(0, 208, 233, 0.3)',
@@ -129,7 +129,7 @@ function SpeechBubble({ text }: { text: string }) {
       {text}
       {/* Tail pointing right to character head */}
       <div style={{
-        position: 'absolute', top: 60, right: -6,
+        position: 'absolute', top: 30, right: -6,
         width: 0, height: 0,
         borderTop: '6px solid transparent',
         borderBottom: '6px solid transparent',
