@@ -26,7 +26,7 @@ export default function CommandMode() {
   const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
   const isMonitoring = useCommandStore((s) => s.commandState.monitorState.isMonitoring);
   const hasCurveData = useCommandStore((s) => s.commandState.monitorState.curveData.length > 0);
-  const mainBottom = 16;
+  const mainBottom = 192;
 
   const {
     showIncomingCall,
@@ -85,7 +85,7 @@ export default function CommandMode() {
         <div style={{
           position: 'absolute',
           left: 16,
-          bottom: 200,
+          bottom: 204,
           width: 550,
           zIndex: 100,
           pointerEvents: 'auto',

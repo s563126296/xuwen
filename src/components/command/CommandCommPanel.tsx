@@ -1,6 +1,6 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { useCommandStore } from '../../stores/commandStore';
-import { Info, Bot, UserCheck, Camera, Phone, CheckCircle, AlertTriangle, FileText, MessageSquare, Minimize2 } from 'lucide-react';
+import { Info, Bot, UserCheck, Camera, Phone, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
 
 const iconMap = {
   info: { Icon: Info, color: '#00D0E9' },
@@ -52,81 +52,22 @@ const typeLabel: Record<string, { text: string; color: string }> = {
 export default function CommandCommPanel() {
   const { commandFeed } = useCommandStore((s) => s.commandState);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isExpanded, setIsExpanded] = useState(true);
 
   // Auto-scroll to latest message
   useEffect(() => {
-    if (scrollRef.current && isExpanded) {
+    if (scrollRef.current) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
     }
-  }, [commandFeed.length, isExpanded]);
+  }, [commandFeed.length]);
 
-
-  // Collapsed state - floating button in map area bottom-right
-  if (!isExpanded) {
-    return (
-      <button
-        onClick={() => setIsExpanded(true)}
-        style={{
-          position: 'absolute',
-          right: 328,
-          bottom: 16,
-          width: 48,
-          height: 48,
-          borderRadius: 10,
-          background: 'rgba(12, 25, 48, 0.9)',
-          border: '1px solid rgba(0, 208, 233, 0.3)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          zIndex: 100,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = '#00D0E9';
-          e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 208, 233, 0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'rgba(0, 208, 233, 0.3)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-        }}
-      >
-        <MessageSquare size={20} color="#00D0E9" />
-        {commandFeed.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: -4,
-            right: -4,
-            minWidth: 18,
-            height: 18,
-            borderRadius: 9,
-            background: '#FF4757',
-            border: '2px solid #0A0F19',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 10,
-            fontWeight: 700,
-            color: '#fff',
-            padding: '0 4px',
-          }}>
-            {commandFeed.length}
-          </div>
-        )}
-      </button>
-    );
-  }
-
-  // Expanded state - full panel in map area bottom-right
+  // Always expanded - bottom spanning panel
   return (
     <div className="cmd-comm-panel" style={{
       position: 'absolute',
-      right: 340,
-      bottom: 16,
-      width: 420,
-      height: 200,
+      bottom: 12,
+      left: 16,
+      right: 16,
+      height: 180,
       background: 'rgba(12, 25, 48, 0.92)',
       borderRadius: 12,
       border: '1px solid rgba(100, 180, 255, 0.12)',
@@ -177,28 +118,6 @@ export default function CommandCommPanel() {
             }}>实时</span>
           </div>
         </div>
-        <button
-          onClick={() => setIsExpanded(false)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 4,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 4,
-            transition: 'background 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(148,163,184,0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'none';
-          }}
-        >
-          <Minimize2 size={14} color="#94A3B8" />
-        </button>
       </div>
 
       {/* Timeline scroll area */}

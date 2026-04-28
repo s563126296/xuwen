@@ -40,8 +40,8 @@ export default function ChatWindow() {
     <div
       style={{
         position: 'absolute',
-        left: 16,
-        bottom: 250,
+        right: 328,
+        bottom: 16,
         width: 320,
         height: 400,
         zIndex: 102,

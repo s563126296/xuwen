@@ -12,8 +12,8 @@ export default function ChatMinimizedButton({ unreadCount, onClick, variant }: C
       onClick={onClick}
       style={{
         position: 'absolute',
-        left: 16,
-        bottom: 250,
+        right: 328,
+        bottom: 16,
         width: 48,
         height: 48,
         borderRadius: '50%',
