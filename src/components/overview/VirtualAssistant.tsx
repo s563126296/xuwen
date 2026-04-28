@@ -56,9 +56,9 @@ export default function VirtualAssistant() {
 
   return (
     <div style={{ position: 'absolute', bottom: 20, right: 20,
-      width: 150, height: 220, zIndex: 200, pointerEvents: 'auto' }}>
+      width: 300, height: 440, zIndex: 200, pointerEvents: 'auto' }}>
 
-      {/* Speech bubble - 16:9 横向框，左上角位置 */}
+      {/* Speech bubble - 16:9 横向框，左上角位置，调整位置适配放大后的虚拟人 */}
       {isSpeaking && currentMessage && <SpeechBubble text={currentMessage} />}
 
       {/* Collapse button */}
@@ -80,7 +80,6 @@ export default function VirtualAssistant() {
       {/* Character container */}
       <div
         style={{ position: 'relative', width: '100%', height: '100%',
-          animation: 'assistantFloat 2s ease-in-out infinite',
           cursor: isSpeaking ? 'pointer' : 'default' }}
         onClick={() => { if (isSpeaking) stopSpeaking(); }}
         role="button"
@@ -120,7 +119,7 @@ export default function VirtualAssistant() {
 function SpeechBubble({ text }: { text: string }) {
   return (
     <div style={{
-      position: 'absolute', top: 20, right: 155,
+      position: 'absolute', top: 15, right: 260,
       width: 288, height: 162,
       background: 'rgba(13, 17, 55, 0.95)',
       border: '1px solid rgba(0, 208, 233, 0.3)',
