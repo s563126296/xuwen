@@ -1,8 +1,8 @@
-import { Volume2, VolumeX, MessageCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Volume2, VolumeX, MessageCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import { stopSpeaking } from '../../utils/assistantEngine';
 
-// Button style helper
 const btnBase: React.CSSProperties = {
   width: 24, height: 24, borderRadius: '50%',
   border: '1px solid rgba(0, 208, 233, 0.3)',
@@ -25,27 +25,60 @@ export default function VirtualAssistant() {
   const toggleMute = useOverviewStore((s) => s.toggleAssistantMute);
   const openChat = useOverviewStore((s) => s.openAssistantChat);
   const isSpeaking = status === 'speaking';
+  const [collapsed, setCollapsed] = useState(false);
+
+  if (collapsed) {
+    return (
+      <button
+        onClick={() => setCollapsed(false)}
+        style={{
+          position: 'absolute', bottom: 20, right: 20, zIndex: 200,
+          width: 40, height: 40, borderRadius: '50%',
+          background: 'rgba(13, 17, 55, 0.95)',
+          border: '1px solid rgba(0, 208, 233, 0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', pointerEvents: 'auto',
+          boxShadow: '0 2px 8px rgba(0, 208, 233, 0.2)',
+        }}
+        aria-label="展开小闻"
+      >
+        <ChevronLeft size={16} color="#00D0E9" />
+      </button>
+    );
+  }
 
   return (
     <div style={{ position: 'absolute', bottom: 20, right: 20,
       width: 150, height: 220, zIndex: 200, pointerEvents: 'auto' }}>
 
-      {/* Speech bubble */}
+      {/* Speech bubble - 16:9 横向框，左上角位置 */}
       {isSpeaking && currentMessage && <SpeechBubble text={currentMessage} />}
 
-      {/* Character container with float animation */}
+      {/* Collapse button */}
+      <button
+        onClick={() => setCollapsed(true)}
+        style={{
+          position: 'absolute', top: -5, right: -5, zIndex: 310,
+          width: 20, height: 20, borderRadius: '50%',
+          background: 'rgba(13, 17, 55, 0.95)',
+          border: '1px solid rgba(0, 208, 233, 0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer',
+        }}
+        aria-label="隐藏小闻"
+      >
+        <ChevronRight size={10} color="#94A3B8" />
+      </button>
+
+      {/* Character container */}
       <div
         style={{ position: 'relative', width: '100%', height: '100%',
           animation: 'assistantFloat 2s ease-in-out infinite',
           cursor: isSpeaking ? 'pointer' : 'default' }}
-        onClick={() => {
-          if (isSpeaking) {
-            stopSpeaking();
-          }
-        }}
+        onClick={() => { if (isSpeaking) stopSpeaking(); }}
         role="button"
         tabIndex={0}
-        aria-label={isSpeaking ? '停止播报' : '虚拟助手'}
+        aria-label={isSpeaking ? '停止播报' : '虚拟助手小闻'}
       >
         <CharacterSVG isSpeaking={isSpeaking} />
 
@@ -54,7 +87,7 @@ export default function VirtualAssistant() {
           transform: 'translateX(-50%)', padding: '4px 12px',
           background: '#0D1137', border: '1px solid rgba(0, 208, 233, 0.3)',
           borderRadius: 12, fontSize: 12, fontWeight: 600, color: '#00D0E9',
-        }}>&#x963F;&#x743C;</div>
+        }}>小闻</div>
 
         {/* Controls */}
         <div style={{ position: 'absolute', bottom: -5, left: '50%',
@@ -79,18 +112,29 @@ export default function VirtualAssistant() {
 
 function SpeechBubble({ text }: { text: string }) {
   return (
-    <div style={{ position: 'absolute', top: -100, left: '50%',
-      transform: 'translateX(-50%)', maxWidth: 240, padding: '10px 14px',
-      background: '#FFFFFF', border: '1px solid rgba(0, 208, 233, 0.3)',
-      borderRadius: 8, fontSize: 12, color: '#0A0F19', lineHeight: 1.5,
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+    <div style={{
+      position: 'absolute', top: 10, right: 160,
+      width: 288, height: 162,
+      background: 'rgba(13, 17, 55, 0.95)',
+      border: '1px solid rgba(0, 208, 233, 0.3)',
+      borderRadius: 8, padding: '12px 14px',
+      fontSize: 12, color: '#E0E8FF', lineHeight: 1.6,
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
       animation: 'assistantFadeIn 0.3s ease-out', zIndex: 300,
+      overflowY: 'auto',
     }}>
+      <div style={{ fontSize: 10, color: '#00D0E9', fontWeight: 600, marginBottom: 6 }}>
+        小闻播报
+      </div>
       {text}
-      <div style={{ position: 'absolute', bottom: -6, left: '50%',
-        transform: 'translateX(-50%)', width: 0, height: 0,
-        borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
-        borderTop: '6px solid #FFFFFF' }} />
+      {/* Tail pointing right to character */}
+      <div style={{
+        position: 'absolute', top: 30, right: -6,
+        width: 0, height: 0,
+        borderTop: '6px solid transparent',
+        borderBottom: '6px solid transparent',
+        borderLeft: '6px solid rgba(13, 17, 55, 0.95)',
+      }} />
     </div>
   );
 }

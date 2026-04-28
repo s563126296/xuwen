@@ -65,18 +65,19 @@ export function stopSpeaking(): void {
 
 export const BroadcastScenarios = {
   dailyStartup: () => {
-    const key = 'aqiong_last_daily';
+    const key = 'xiaowen_last_daily';
     const today = new Date().toDateString();
     if (localStorage.getItem(key) === today) return;
-    localStorage.setItem(key, today);
 
     const { aiSummary, portDigestion, systemResilience } = useOverviewStore.getState();
     if (!aiSummary) return;
 
+    localStorage.setItem(key, today);
+
     const hour = new Date().getHours();
     const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
 
-    const message = `${greeting}，我是阿琼。昨日进港车辆约1万2千辆，港口平均等待35分钟，处理拥堵事件3次。今日预计进港1万5千辆，当前${aiSummary.conclusion}，港口待渡${portDigestion.xuwen.waitingVehicles}辆，系统韧性${systemResilience.score}分。建议重点关注进港大道晚高峰时段。`;
+    const message = `${greeting}，我是小闻。昨日进港车辆约1万2千辆，港口平均等待35分钟，处理拥堵事件3次。今日预计进港1万5千辆，当前${aiSummary.conclusion}，港口待渡${portDigestion.xuwen.waitingVehicles}辆，系统韧性${systemResilience.score}分。建议重点关注进港大道晚高峰时段。`;
     speak(message);
   },
 
@@ -84,12 +85,12 @@ export const BroadcastScenarios = {
     const dayOfWeek = new Date().getDay();
     if (dayOfWeek !== 1) return;
 
-    const key = 'aqiong_last_weekly';
+    const key = 'xiaowen_last_weekly';
     const thisWeek = `${new Date().getFullYear()}-W${Math.ceil(new Date().getDate() / 7)}`;
     if (localStorage.getItem(key) === thisWeek) return;
     localStorage.setItem(key, thisWeek);
 
-    const message = `周一好，我是阿琼。上周整体情况：共处理车辆约8万5千辆，同比增长12%。发生拥堵事件15次，平均缓解时间28分钟。策略执行24次，采纳率68%，AI预测准确率84%。本周预计车流量与上周持平，周五晚高峰需重点关注。`;
+    const message = `周一好，我是小闻。上周整体情况：共处理车辆约8万5千辆，同比增长12%。发生拥堵事件15次，平均缓解时间28分钟。策略执行24次，采纳率68%，AI预测准确率84%。本周预计车流量与上周持平，周五晚高峰需重点关注。`;
     speak(message);
   },
 
@@ -105,13 +106,6 @@ export const BroadcastScenarios = {
     if (now - lastAlertTime < ALERT_COOLDOWN) return;
     lastAlertTime = now;
     speak(`注意，${alertContent}`);
-  },
-
-  hourlyReport: () => {
-    const { portDigestion, systemResilience, aiSummary } = useOverviewStore.getState();
-    if (!aiSummary) return;
-    const message = `整点播报：当前${aiSummary.conclusion}，港口待渡${portDigestion.xuwen.waitingVehicles}辆，系统韧性${systemResilience.score}分。`;
-    speak(message);
   },
 
   modeSwitchSuggestion: (targetMode: string, reason: string) => {

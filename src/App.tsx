@@ -114,38 +114,17 @@ function App() {
   useEffect(() => {
     initTTS();
 
+    // Daily/weekly broadcast after AI summary is computed (3s delay)
     const startupTimer = setTimeout(() => {
       if (systemMode === 'overview') {
         BroadcastScenarios.weeklyStartup();
-        BroadcastScenarios.dailyStartup();
+        // dailyStartup checks localStorage internally, safe to always call
+        setTimeout(() => BroadcastScenarios.dailyStartup(), 500);
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(startupTimer);
   }, []);
-
-  // Hourly report broadcast
-  useEffect(() => {
-    if (systemMode !== 'overview') return;
-
-    const now = new Date();
-    const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
-
-    const hourlyTimer = setTimeout(() => {
-      BroadcastScenarios.hourlyReport();
-
-      // Set up recurring hourly broadcast
-      const recurringTimer = setInterval(() => {
-        if (useUIStore.getState().systemMode === 'overview') {
-          BroadcastScenarios.hourlyReport();
-        }
-      }, 60 * 60 * 1000); // Every hour
-
-      return () => clearInterval(recurringTimer);
-    }, msUntilNextHour);
-
-    return () => clearTimeout(hourlyTimer);
-  }, [systemMode]);
 
   // Alert broadcast (when activeAlert changes)
   const activeAlert = useOverviewStore((s) => s.activeAlert);
