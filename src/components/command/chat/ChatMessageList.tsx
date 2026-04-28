@@ -1,6 +1,7 @@
 import { RefObject } from 'react';
 import { Users } from 'lucide-react';
 import { ChatType, Person, STATUS_CONFIG } from './ChatTypes';
+import type { AIConfirmation } from '../../../utils/feedbackAIEngine';
 import type { CommandFeedItem } from '../../../stores/commandStore';
 
 interface ChatMessageListProps {
@@ -10,6 +11,9 @@ interface ChatMessageListProps {
   messagesContainerRef: RefObject<HTMLDivElement>;
   messagesEndRef: RefObject<HTMLDivElement>;
   getSourceDotColor: (source: string) => string;
+  pendingAIConfirmation: AIConfirmation | null;
+  onAIAction: (action: string) => void;
+  onDismissAI: () => void;
 }
 
 export default function ChatMessageList({
@@ -19,6 +23,9 @@ export default function ChatMessageList({
   messagesContainerRef,
   messagesEndRef,
   getSourceDotColor,
+  pendingAIConfirmation,
+  onAIAction,
+  onDismissAI,
 }: ChatMessageListProps) {
   return (
     <>
@@ -83,8 +90,13 @@ export default function ChatMessageList({
           </div>
         )}
 
-        {selectedMessages.map((message) => {
+        {selectedMessages.map((message, index) => {
           const isOwn = message.type === 'command';
+          const isAI = message.type === 'ai';
+          // Show action buttons only on the latest AI message when there's a pending confirmation
+          const isLatestAI = isAI && pendingAIConfirmation &&
+            index === selectedMessages.findIndex((m) => m.type === 'ai' && m.id.startsWith('ai-feedback-'));
+
           return (
             <div
               key={message.id}
@@ -96,13 +108,19 @@ export default function ChatMessageList({
             >
               <div
                 style={{
-                  maxWidth: '80%',
+                  maxWidth: '85%',
                   padding: '6px 9px',
                   borderRadius: 6,
-                  background: isOwn ? 'rgba(0,208,233,0.15)' : 'rgba(13,27,42,0.8)',
-                  border: isOwn
-                    ? '1px solid rgba(0,208,233,0.2)'
-                    : '1px solid rgba(255,255,255,0.05)',
+                  background: isAI
+                    ? 'rgba(139,92,246,0.12)'
+                    : isOwn
+                      ? 'rgba(0,208,233,0.15)'
+                      : 'rgba(13,27,42,0.8)',
+                  border: isAI
+                    ? '1px solid rgba(139,92,246,0.3)'
+                    : isOwn
+                      ? '1px solid rgba(0,208,233,0.2)'
+                      : '1px solid rgba(255,255,255,0.05)',
                 }}
               >
                 <div
@@ -112,10 +130,25 @@ export default function ChatMessageList({
                     gap: 4,
                     marginBottom: 2,
                     fontSize: 10,
-                    color: '#94A3B8',
+                    color: isAI ? 'rgba(139,92,246,0.8)' : '#94A3B8',
                   }}
                 >
-                  {chatType === 'group' && (
+                  {isAI && (
+                    <>
+                      <div
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          background: '#8B5CF6',
+                        }}
+                      />
+                      <span style={{ color: '#A78BFA' }}>{message.source}</span>
+                      <span>·</span>
+                    </>
+                  )}
+
+                  {!isAI && chatType === 'group' && (
                     <>
                       <div
                         style={{
@@ -130,7 +163,7 @@ export default function ChatMessageList({
                     </>
                   )}
 
-                  {chatType === 'private' && (
+                  {!isAI && chatType === 'private' && (
                     <>
                       <span style={{ color: '#E2E8F0' }}>{message.source}</span>
                       <span>·</span>
@@ -140,7 +173,63 @@ export default function ChatMessageList({
                   <span>{message.time}</span>
                 </div>
 
-                <div style={{ fontSize: 12, color: '#E2E8F0', lineHeight: 1.5 }}>{message.content}</div>
+                {isAI ? (
+                  <div style={{ fontSize: 12, color: '#E2E8F0', lineHeight: 1.6 }}>
+                    {message.content.split('\n').map((line, i) => (
+                      <div key={i} style={{ marginBottom: i < message.content.split('\n').length - 1 ? 3 : 0 }}>
+                        {line}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 12, color: '#E2E8F0', lineHeight: 1.5 }}>{message.content}</div>
+                )}
+
+                {isLatestAI && pendingAIConfirmation && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 4,
+                      marginTop: 6,
+                      paddingTop: 6,
+                      borderTop: '1px solid rgba(139,92,246,0.15)',
+                    }}
+                  >
+                    {pendingAIConfirmation.options.map((opt) => (
+                      <button
+                        key={opt.action}
+                        onClick={() => {
+                          if (opt.action === 'dismiss') {
+                            onDismissAI();
+                          } else {
+                            onAIAction(opt.action);
+                          }
+                        }}
+                        style={{
+                          padding: '3px 8px',
+                          fontSize: 11,
+                          borderRadius: 4,
+                          border: '1px solid rgba(139,92,246,0.4)',
+                          background: 'rgba(139,92,246,0.1)',
+                          color: '#C4B5FD',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(139,92,246,0.25)';
+                          e.currentTarget.style.borderColor = 'rgba(139,92,246,0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(139,92,246,0.1)';
+                          e.currentTarget.style.borderColor = 'rgba(139,92,246,0.4)';
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );

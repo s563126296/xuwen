@@ -535,6 +535,7 @@ interface CommandStoreState {
   setActiveVideoChannel: (channel: number) => void;
   setCurrentStep: (step: 1 | 2 | 3 | 4 | 5 | 6) => void;
   addCommandFeedItem: (content: string) => void;
+  addAIFeedItem: (content: string) => void;
   startCall: (personId: string) => void;
   endCall: () => void;
   openChatWith: (personId: string) => void;
@@ -890,6 +891,27 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
         time: timeStr,
         content,
         icon: 'check',
+      };
+      return {
+        commandState: {
+          ...state.commandState,
+          commandFeed: [newItem, ...state.commandState.commandFeed],
+        },
+      };
+    });
+  },
+
+  addAIFeedItem: (content) => {
+    set((state) => {
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const newItem: CommandFeedItem = {
+        id: `ai-feedback-${Date.now()}`,
+        type: 'ai',
+        source: 'AI分析',
+        time: timeStr,
+        content,
+        icon: 'ai',
       };
       return {
         commandState: {

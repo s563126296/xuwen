@@ -21,10 +21,13 @@ export default function ChatWindow() {
     selectedPersonRecord,
     selectedMessages,
     commandFeed,
+    pendingAIConfirmation,
     handleSelectGroup,
     handleSelectPerson,
     handleQuickReply,
     handleStartCall,
+    handleAIAction,
+    dismissAIConfirmation,
     getSourceDotColor,
   } = useChatWindow();
 
@@ -77,6 +80,9 @@ export default function ChatWindow() {
             messagesContainerRef={messagesContainerRef}
             messagesEndRef={messagesEndRef}
             getSourceDotColor={getSourceDotColor}
+            pendingAIConfirmation={pendingAIConfirmation}
+            onAIAction={handleAIAction}
+            onDismissAI={dismissAIConfirmation}
           />
 
           <ChatInputArea

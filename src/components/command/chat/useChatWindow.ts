@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCommandStore } from '../../../stores/commandStore';
 import { playMessageSound, playClickSound } from '../../../utils/soundEffects';
+import { extractKeyInfo, generateAIConfirmation } from '../../../utils/feedbackAIEngine';
+import type { AIConfirmation } from '../../../utils/feedbackAIEngine';
 import { ChatType, PERSONS, STATUS_CONFIG } from './ChatTypes';
 
 export function useChatWindow() {
@@ -9,12 +11,15 @@ export function useChatWindow() {
   const [chatType, setChatType] = useState<ChatType>('group');
   const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
   const [animationState, setAnimationState] = useState<'entering' | 'entered'>('entering');
+  const [pendingAIConfirmation, setPendingAIConfirmation] = useState<AIConfirmation | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef(0);
+  const processedFieldMsgIds = useRef<Set<string>>(new Set());
 
   const commandState = useCommandStore((s) => s.commandState);
   const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
+  const addAIFeedItem = useCommandStore((s) => s.addAIFeedItem);
   const startCall = useCommandStore((s) => s.startCall);
   const { commandFeed } = commandState;
   const activeChatPersonId = useCommandStore((s) => s.commandState.activeChatPersonId);
@@ -42,7 +47,7 @@ export function useChatWindow() {
     }
 
     return sortedByTimeline.filter(
-      (item) => item.source === selectedPersonRecord.name || item.type === 'command'
+      (item) => item.source === selectedPersonRecord.name || item.type === 'command' || item.type === 'ai'
     );
   }, [chatType, commandFeed, selectedPersonRecord]);
 
@@ -78,6 +83,39 @@ export function useChatWindow() {
       setSelectedPerson(activeChatPersonId);
     }
   }, [activeChatPersonId]);
+
+  // AI extraction: watch for new field messages and generate AI confirmations
+  useEffect(() => {
+    // commandFeed is newest-first; check the first item
+    const newest = commandFeed[0];
+    if (!newest || newest.type !== 'field') return;
+    if (processedFieldMsgIds.current.has(newest.id)) return;
+
+    processedFieldMsgIds.current.add(newest.id);
+
+    const info = extractKeyInfo(newest.content);
+    if (!info.hasKeyInfo) return;
+
+    const confirmation = generateAIConfirmation(info, newest.content);
+    const aiContent = `${confirmation.confirmation}\n${confirmation.impactAssessment}\n${confirmation.question}`;
+
+    // Insert AI response after a brief delay to feel natural
+    const timer = setTimeout(() => {
+      addAIFeedItem(aiContent);
+      setPendingAIConfirmation(confirmation);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [commandFeed, addAIFeedItem]);
+
+  const handleAIAction = (action: string) => {
+    setPendingAIConfirmation(null);
+    addCommandFeedItem(`[操作] ${action}`);
+  };
+
+  const dismissAIConfirmation = () => {
+    setPendingAIConfirmation(null);
+  };
 
   const handleSelectGroup = () => {
     setChatType('group');
@@ -137,10 +175,13 @@ export function useChatWindow() {
     selectedPersonRecord,
     selectedMessages,
     commandFeed,
+    pendingAIConfirmation,
     handleSelectGroup,
     handleSelectPerson,
     handleQuickReply,
     handleStartCall,
+    handleAIAction,
+    dismissAIConfirmation,
     getSourceDotColor,
   };
 }
