@@ -109,22 +109,19 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Initialize TTS and system startup broadcast
+  // Initialize TTS and startup broadcasts
   useEffect(() => {
-    const ttsSupported = initTTS();
-    if (!ttsSupported) {
-      console.warn('[App] TTS not supported in this browser');
-    }
+    initTTS();
 
-    // System startup broadcast (after 2 seconds)
     const startupTimer = setTimeout(() => {
       if (systemMode === 'overview') {
-        BroadcastScenarios.systemStartup();
+        BroadcastScenarios.weeklyStartup();
+        BroadcastScenarios.dailyStartup();
       }
     }, 2000);
 
     return () => clearTimeout(startupTimer);
-  }, []); // Run once on mount
+  }, []);
 
   // Hourly report broadcast
   useEffect(() => {
