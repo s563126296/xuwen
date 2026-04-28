@@ -18,23 +18,28 @@ export default function Header({ time, children }: Props) {
 
   return (
     <header className="header">
-      <div className="header-left">
-        <div className="logo">
+      <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, whiteSpace: 'nowrap' }}>
           <div className="logo-icon">
             <Navigation size={22} color="#fff" strokeWidth={2.5} />
           </div>
-          <div className="logo-text-group">
-            <span className="logo-text">徐闻智慧交通</span>
-          </div>
+          <span style={{
+            fontFamily: "'Noto Sans SC', sans-serif",
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'rgba(255,255,255,0.95)',
+            letterSpacing: 4,
+            textShadow: '0 0 20px rgba(0, 208, 233, 0.4)',
+          }}>徐闻智慧交通</span>
         </div>
       </div>
 
-      <div className="header-center">
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {children}
       </div>
 
-      <div className="header-right">
-        <div className="header-time">
+      <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
+        <div style={{ textAlign: 'right' }}>
           <span className="time-value">{hours}:{minutes}:{seconds}</span>
           <span className="time-label">{year}.{month}.{day} 星期{weekday}</span>
         </div>
