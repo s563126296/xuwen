@@ -159,7 +159,7 @@ export default function CommandCommPanel() {
                     ? '1px solid #00D0E9'
                     : `1px solid ${isUrgent ? typeBorder.alert : (typeBorder[item.type] || typeBorder.field)}`,
                   borderLeft: isUrgent
-                    ? typeBorderLeft.alert
+                    ? '3px solid #FF4757'
                     : (typeBorderLeft[item.type] || typeBorderLeft.field),
                   boxShadow: isHighlighted ? '0 0 10px rgba(0,208,233,0.3)' : 'none',
                   display: 'flex', flexDirection: 'column', gap: 4,
@@ -256,8 +256,8 @@ export default function CommandCommPanel() {
           animation: urgentPulse 2s infinite;
         }
         @keyframes urgentPulse {
-          0%, 100% { border-color: rgba(255,71,87,0.4); }
-          50% { border-color: rgba(255,71,87,0.8); box-shadow: 0 0 8px rgba(255,71,87,0.3); }
+          0%, 100% { opacity: 1; border-color: rgba(255,71,87,0.4); }
+          50% { opacity: 0.7; border-color: rgba(255,71,87,0.8); box-shadow: 0 0 8px rgba(255,71,87,0.3); }
         }
       `}</style>
     </div>

@@ -10,6 +10,7 @@ import ActiveStrategyCard from './strategy/ActiveStrategyCard';
 import AltStrategyCard from './strategy/AltStrategyCard';
 import CustomStrategyGrid from './strategy/CustomStrategyGrid';
 import HistoryEffectsSection from './strategy/HistoryEffectsSection';
+import DeviationMonitorPanel from './DeviationMonitorPanel';
 
 export default function StrategyCommandPanel() {
   const cmd = useCommandStore((s) => s.commandState);
@@ -111,6 +112,9 @@ export default function StrategyCommandPanel() {
         </div>
         <CustomStrategyGrid />
       </div>
+
+      {/* P1-1: Deviation Monitor */}
+      <DeviationMonitorPanel />
 
       {/* E4. Execution Resources */}
       <ExecutionResourcePanel />

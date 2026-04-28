@@ -12,6 +12,8 @@ import CongestionDetailModal from './CongestionDetailModal';
 import IncomingCallModal from './IncomingCallModal';
 import EmergencyPanels from './EmergencyPanels';
 import StrategyTimelinePanel from './StrategyTimelinePanel';
+import InquiryModal from './InquiryModal';
+import StrategyFeedbackPanel from './StrategyFeedbackPanel';
 import { useCommandStore } from '../../stores/commandStore';
 import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
 
@@ -151,6 +153,9 @@ export default function CommandMode() {
           onDecline={() => setShowIncomingCall(false)}
         />
       )}
+
+      <InquiryModal />
+      <StrategyFeedbackPanel />
     </>
   );
 }

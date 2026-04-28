@@ -646,6 +646,13 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
       };
     });
 
+    // Start closed-loop monitoring
+    setTimeout(() => {
+      import('../utils/strategyMonitorEngine').then(({ startMonitoring }) => {
+        startMonitoring(strategyId);
+      });
+    }, 1000);
+
     // Phase 1 (2s): congestion starts dropping + field exec message
     setTimeout(() => {
       set((state) => {
