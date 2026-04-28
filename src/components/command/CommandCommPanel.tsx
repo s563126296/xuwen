@@ -61,9 +61,8 @@ export default function CommandCommPanel() {
     }
   }, [commandFeed.length, isExpanded]);
 
-  const unreadCount = commandFeed.filter(f => f.urgent).length;
 
-  // Collapsed state - floating button
+  // Collapsed state - floating button in map area bottom-right
   if (!isExpanded) {
     return (
       <button
@@ -71,69 +70,63 @@ export default function CommandCommPanel() {
         style={{
           position: 'absolute',
           right: 328,
-          bottom: 12,
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00D0E9 0%, #0066FF 100%)',
-          border: '2px solid rgba(0, 208, 233, 0.4)',
-          boxShadow: '0 4px 16px rgba(0, 208, 233, 0.3), 0 0 24px rgba(0, 208, 233, 0.2)',
+          bottom: 16,
+          width: 48,
+          height: 48,
+          borderRadius: 10,
+          background: 'rgba(12, 25, 48, 0.9)',
+          border: '1px solid rgba(0, 208, 233, 0.3)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
           transition: 'all 0.3s ease',
-          animation: unreadCount > 0 ? 'commPulse 2s infinite' : 'none',
+          zIndex: 100,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 208, 233, 0.4), 0 0 32px rgba(0, 208, 233, 0.3)';
+          e.currentTarget.style.borderColor = '#00D0E9';
+          e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 208, 233, 0.3)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 208, 233, 0.3), 0 0 24px rgba(0, 208, 233, 0.2)';
+          e.currentTarget.style.borderColor = 'rgba(0, 208, 233, 0.3)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
         }}
       >
-        <MessageSquare size={24} color="#fff" strokeWidth={2.5} />
-        {unreadCount > 0 && (
+        <MessageSquare size={20} color="#00D0E9" />
+        {commandFeed.length > 0 && (
           <div style={{
             position: 'absolute',
             top: -4,
             right: -4,
-            minWidth: 20,
-            height: 20,
-            borderRadius: 10,
+            minWidth: 18,
+            height: 18,
+            borderRadius: 9,
             background: '#FF4757',
             border: '2px solid #0A0F19',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 700,
             color: '#fff',
-            padding: '0 6px',
+            padding: '0 4px',
           }}>
-            {unreadCount}
+            {commandFeed.length}
           </div>
         )}
-        <style>{`
-          @keyframes commPulse {
-            0%, 100% { box-shadow: 0 4px 16px rgba(0, 208, 233, 0.3), 0 0 24px rgba(0, 208, 233, 0.2); }
-            50% { box-shadow: 0 6px 24px rgba(255, 71, 87, 0.4), 0 0 32px rgba(255, 71, 87, 0.3); }
-          }
-        `}</style>
       </button>
     );
   }
 
-  // Expanded state - full panel
+  // Expanded state - full panel in map area bottom-right
   return (
     <div className="cmd-comm-panel" style={{
       position: 'absolute',
-      right: 328,
-      bottom: 12,
-      width: 480,
-      height: 240,
+      right: 340,
+      bottom: 16,
+      width: 420,
+      height: 200,
       background: 'rgba(12, 25, 48, 0.92)',
       borderRadius: 12,
       border: '1px solid rgba(100, 180, 255, 0.12)',
@@ -143,6 +136,7 @@ export default function CommandCommPanel() {
       flexDirection: 'column',
       overflow: 'hidden',
       animation: 'slideInFromRight 0.3s ease-out',
+      zIndex: 100,
     }}>
       {/* Header */}
       <div style={{
