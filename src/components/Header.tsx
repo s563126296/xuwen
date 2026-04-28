@@ -24,7 +24,7 @@ export default function Header({ time, children }: Props) {
             <Navigation size={22} color="#fff" strokeWidth={2.5} />
           </div>
           <div className="logo-text-group">
-            <span className="logo-text">徐闻智慧交通</span>
+            <span className="logo-text">徐闻智慧交通大屏</span>
             <span className="logo-badge">SMART TRAFFIC</span>
           </div>
         </div>

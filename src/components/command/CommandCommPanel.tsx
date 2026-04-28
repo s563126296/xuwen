@@ -1,6 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useCommandStore } from '../../stores/commandStore';
-import { Info, Bot, UserCheck, Camera, Phone, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
+import { Info, Bot, UserCheck, Camera, Phone, CheckCircle, AlertTriangle, FileText, MessageSquare, Minimize2 } from 'lucide-react';
 
 const iconMap = {
   info: { Icon: Info, color: '#00D0E9' },
@@ -52,62 +52,170 @@ const typeLabel: Record<string, { text: string; color: string }> = {
 export default function CommandCommPanel() {
   const { commandFeed } = useCommandStore((s) => s.commandState);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Auto-scroll to latest message
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && isExpanded) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
     }
-  }, [commandFeed.length]);
+  }, [commandFeed.length, isExpanded]);
 
-  const panelHeight = 180;
+  const unreadCount = commandFeed.filter(f => f.urgent).length;
 
+  // Collapsed state - floating button
+  if (!isExpanded) {
+    return (
+      <button
+        onClick={() => setIsExpanded(true)}
+        style={{
+          position: 'absolute',
+          right: 328,
+          bottom: 12,
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #00D0E9 0%, #0066FF 100%)',
+          border: '2px solid rgba(0, 208, 233, 0.4)',
+          boxShadow: '0 4px 16px rgba(0, 208, 233, 0.3), 0 0 24px rgba(0, 208, 233, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          animation: unreadCount > 0 ? 'commPulse 2s infinite' : 'none',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 208, 233, 0.4), 0 0 32px rgba(0, 208, 233, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 208, 233, 0.3), 0 0 24px rgba(0, 208, 233, 0.2)';
+        }}
+      >
+        <MessageSquare size={24} color="#fff" strokeWidth={2.5} />
+        {unreadCount > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: -4,
+            right: -4,
+            minWidth: 20,
+            height: 20,
+            borderRadius: 10,
+            background: '#FF4757',
+            border: '2px solid #0A0F19',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#fff',
+            padding: '0 6px',
+          }}>
+            {unreadCount}
+          </div>
+        )}
+        <style>{`
+          @keyframes commPulse {
+            0%, 100% { box-shadow: 0 4px 16px rgba(0, 208, 233, 0.3), 0 0 24px rgba(0, 208, 233, 0.2); }
+            50% { box-shadow: 0 6px 24px rgba(255, 71, 87, 0.4), 0 0 32px rgba(255, 71, 87, 0.3); }
+          }
+        `}</style>
+      </button>
+    );
+  }
+
+  // Expanded state - full panel
   return (
     <div className="cmd-comm-panel" style={{
-      position: 'absolute', bottom: 12, left: 16, right: 16, height: panelHeight,
-      background: 'rgba(12, 25, 48, 0.82)',
+      position: 'absolute',
+      right: 328,
+      bottom: 12,
+      width: 480,
+      height: 240,
+      background: 'rgba(12, 25, 48, 0.92)',
       borderRadius: 12,
-      border: '1px solid rgba(100, 180, 255, 0.08)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2), 0 0 20px rgba(77, 166, 255, 0.05)',
+      border: '1px solid rgba(100, 180, 255, 0.12)',
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), 0 0 24px rgba(77, 166, 255, 0.08)',
       backdropFilter: 'blur(40px) saturate(150%)',
-      display: 'flex', flexDirection: 'column',
+      display: 'flex',
+      flexDirection: 'column',
       overflow: 'hidden',
+      animation: 'slideInFromRight 0.3s ease-out',
     }}>
       {/* Header */}
       <div style={{
-        padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(0,208,233,0.08)', flexShrink: 0,
+        padding: '8px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderBottom: '1px solid rgba(0,208,233,0.1)',
+        flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* Left cyan bar decoration */}
           <div style={{
-            width: 3, height: 14, borderRadius: 1,
+            width: 3,
+            height: 14,
+            borderRadius: 1,
             background: 'linear-gradient(180deg, #00D0E9, rgba(0,208,233,0.3))',
           }} />
           <span style={{
-            fontSize: 12, fontWeight: 600, color: '#E2E8F0',
+            fontSize: 13,
+            fontWeight: 600,
+            color: '#E2E8F0',
             letterSpacing: '0.5px',
-          }}>执行动态</span>
-          <span style={{ fontSize: 11, color: '#64748B' }}>{commandFeed.length} 条记录</span>
-          {/* Live indicator */}
+          }}>指挥通信</span>
+          <span style={{ fontSize: 11, color: '#64748B' }}>{commandFeed.length} 条</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
             <div className="cmd-live-dot" style={{
-              width: 6, height: 6, borderRadius: '50%', background: '#2ED573',
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: '#2ED573',
             }} />
             <span style={{
-              fontSize: 10, color: '#2ED573', fontWeight: 600,
-              letterSpacing: '1px', textTransform: 'uppercase',
+              fontSize: 10,
+              color: '#2ED573',
+              fontWeight: 600,
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
             }}>实时</span>
           </div>
         </div>
-        <span style={{ fontSize: 11, color: '#475569' }}>← 滑动查看历史</span>
+        <button
+          onClick={() => setIsExpanded(false)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 4,
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(148,163,184,0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'none';
+          }}
+        >
+          <Minimize2 size={14} color="#94A3B8" />
+        </button>
       </div>
 
       {/* Timeline scroll area */}
       <div ref={scrollRef} style={{
-        flex: 1, overflowX: 'auto', overflowY: 'hidden',
-        display: 'flex', alignItems: 'stretch', gap: 0,
-        padding: '6px 12px',
+        flex: 1,
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        display: 'flex',
+        alignItems: 'stretch',
+        gap: 0,
+        padding: '8px 12px',
         scrollBehavior: 'smooth',
       }}>
         {commandFeed.map((item, i) => {
@@ -116,7 +224,6 @@ export default function CommandCommPanel() {
           const isUrgent = !!item.urgent;
           const isAlert = item.type === 'alert';
           const isApproval = item.type === 'approval';
-          const isHighlighted = false;
           return (
             <div key={item.id} style={{ display: 'flex', alignItems: 'stretch', flexShrink: 0 }}>
               {/* Event card */}
@@ -124,37 +231,36 @@ export default function CommandCommPanel() {
                 id={`msg-${item.id}`}
                 className={isUrgent || isAlert ? 'cmd-urgent-card' : undefined}
                 style={{
-                  width: 200, padding: '6px 10px', borderRadius: 6,
+                  width: 200,
+                  padding: '6px 10px',
+                  borderRadius: 6,
                   background: isUrgent ? typeBg.alert : (typeBg[item.type] || typeBg.field),
-                  border: isHighlighted
-                    ? '1px solid #00D0E9'
-                    : `1px solid ${isUrgent ? typeBorder.alert : (typeBorder[item.type] || typeBorder.field)}`,
+                  border: `1px solid ${isUrgent ? typeBorder.alert : (typeBorder[item.type] || typeBorder.field)}`,
                   borderLeft: isUrgent
                     ? '3px solid #FF4757'
                     : (typeBorderLeft[item.type] || typeBorderLeft.field),
-                  boxShadow: isHighlighted ? '0 0 10px rgba(0,208,233,0.3)' : 'none',
-                  display: 'flex', flexDirection: 'column', gap: 4,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
                   cursor: 'default',
                   transition: 'border-color 0.2s, box-shadow 0.2s',
                 }}
                 onMouseEnter={(e) => {
-                  if (!isHighlighted) {
-                    e.currentTarget.style.borderColor = iconInfo.color;
-                    e.currentTarget.style.boxShadow = `0 0 12px ${iconInfo.color}22`;
-                  }
+                  e.currentTarget.style.borderColor = iconInfo.color;
+                  e.currentTarget.style.boxShadow = `0 0 12px ${iconInfo.color}22`;
                 }}
                 onMouseLeave={(e) => {
-                  if (!isHighlighted) {
-                    e.currentTarget.style.borderColor = isUrgent ? typeBorder.alert : (typeBorder[item.type] || typeBorder.field);
-                    e.currentTarget.style.boxShadow = 'none';
-                  }
+                  e.currentTarget.style.borderColor = isUrgent ? typeBorder.alert : (typeBorder[item.type] || typeBorder.field);
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 {/* Time + source */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <ItemIcon size={12} color={iconInfo.color} />
                   <span style={{
-                    fontSize: 9, padding: '0 4px', borderRadius: 3,
+                    fontSize: 9,
+                    padding: '0 4px',
+                    borderRadius: 3,
                     background: `${(typeLabel[item.type] || typeLabel.field).color}15`,
                     color: (typeLabel[item.type] || typeLabel.field).color,
                     fontWeight: 600,
@@ -162,7 +268,8 @@ export default function CommandCommPanel() {
                     {(typeLabel[item.type] || typeLabel.field).text}
                   </span>
                   <span style={{
-                    fontSize: 11, color: 'rgba(0,208,233,0.8)',
+                    fontSize: 11,
+                    color: 'rgba(0,208,233,0.8)',
                     fontFamily: '"DIN Alternate", "DIN", "Consolas", "Monaco", monospace',
                     fontWeight: 600,
                     textShadow: '0 0 6px rgba(0,208,233,0.3)',
@@ -177,12 +284,18 @@ export default function CommandCommPanel() {
                   fontSize: 11,
                   color: isUrgent || isAlert ? '#FCA5A5' : '#C9CDD4',
                   fontWeight: isUrgent || isAlert ? 600 : 400,
-                  lineHeight: 1.5, flex: 1,
+                  lineHeight: 1.5,
+                  flex: 1,
                 }}>
                   {isUrgent && (
                     <span style={{
-                      fontSize: 9, padding: '0 4px', borderRadius: 3, marginRight: 4,
-                      background: 'rgba(255,71,87,0.2)', color: '#FF4757', fontWeight: 700,
+                      fontSize: 9,
+                      padding: '0 4px',
+                      borderRadius: 3,
+                      marginRight: 4,
+                      background: 'rgba(255,71,87,0.2)',
+                      color: '#FF4757',
+                      fontWeight: 700,
                     }}>紧急</span>
                   )}
                   {item.content}
@@ -192,10 +305,15 @@ export default function CommandCommPanel() {
               {/* Connector line */}
               {i < commandFeed.length - 1 && (
                 <div style={{
-                  width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  width: 24,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
                 }}>
                   <div style={{
-                    width: 16, height: 1,
+                    width: 16,
+                    height: 1,
                     background: 'linear-gradient(90deg, rgba(0,240,255,0.1), rgba(0,208,233,0.3), rgba(0,240,255,0.1))',
                   }} />
                 </div>
@@ -206,15 +324,18 @@ export default function CommandCommPanel() {
       </div>
 
       <style>{`
-        /* Top light decoration */
         .cmd-comm-panel { position: relative; }
         .cmd-comm-panel::before {
-          content: ''; position: absolute; top: 0; left: 0; right: 0;
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
           height: 1px;
           background: linear-gradient(90deg, transparent, rgba(77, 166, 255, 0.35), transparent);
-          z-index: 1; pointer-events: none;
+          z-index: 1;
+          pointer-events: none;
         }
-        /* Live indicator pulse */
         .cmd-live-dot {
           animation: cmdLivePulse 2s infinite;
         }
@@ -222,13 +343,22 @@ export default function CommandCommPanel() {
           0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46,213,115,0.5); }
           50% { opacity: 0.7; box-shadow: 0 0 6px 3px rgba(46,213,115,0.3); }
         }
-        /* Urgent card pulse */
         .cmd-urgent-card {
           animation: urgentPulse 2s infinite;
         }
         @keyframes urgentPulse {
           0%, 100% { opacity: 1; border-color: rgba(255,71,87,0.4); }
           50% { opacity: 0.7; border-color: rgba(255,71,87,0.8); box-shadow: 0 0 8px rgba(255,71,87,0.3); }
+        }
+        @keyframes slideInFromRight {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
       `}</style>
     </div>

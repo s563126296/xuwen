@@ -26,7 +26,7 @@ export default function CommandMode() {
   const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
   const isMonitoring = useCommandStore((s) => s.commandState.monitorState.isMonitoring);
   const hasCurveData = useCommandStore((s) => s.commandState.monitorState.curveData.length > 0);
-  const mainBottom = 192;
+  const mainBottom = 16;
 
   const {
     showIncomingCall,
