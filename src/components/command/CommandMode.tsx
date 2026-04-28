@@ -85,7 +85,7 @@ export default function CommandMode() {
         <div style={{
           position: 'absolute',
           left: 16,
-          bottom: 204,
+          bottom: 200,
           width: 550,
           zIndex: 100,
           pointerEvents: 'auto',

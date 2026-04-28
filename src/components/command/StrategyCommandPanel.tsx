@@ -3,6 +3,7 @@ import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
 import CollapsibleCard from '../common/CollapsibleCard';
 import ExecutionResourcePanel from './ExecutionResourcePanel';
+import HistoryEffectsSection from './strategy/HistoryEffectsSection';
 import { cornerStyles, getLinkedCamera, getLatestFieldFeedback } from './strategy/strategyConstants';
 import ActiveStrategyCard from './strategy/ActiveStrategyCard';
 import AltStrategyCard from './strategy/AltStrategyCard';
@@ -94,6 +95,9 @@ export default function StrategyCommandPanel() {
           ))}
         </CollapsibleCard>
       )}
+
+      {/* History Effects */}
+      <HistoryEffectsSection historyEffects={cmd.historyEffects} />
 
       {/* Execution Resources */}
       <ExecutionResourcePanel />

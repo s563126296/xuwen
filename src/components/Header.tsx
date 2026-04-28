@@ -1,4 +1,4 @@
-import { Activity } from 'lucide-react';
+import { Navigation } from 'lucide-react';
 import HeaderWeather from './overview/HeaderWeather';
 
 interface Props {
@@ -21,11 +21,11 @@ export default function Header({ time, children }: Props) {
       <div className="header-left">
         <div className="logo">
           <div className="logo-icon">
-            <Activity size={20} color="#060d1a" />
+            <Navigation size={22} color="#fff" strokeWidth={2.5} />
           </div>
-          <div>
-            <div className="logo-text">徐闻智慧交通大屏</div>
-            <div className="header-subtitle">徐闻智慧交通</div>
+          <div className="logo-text-group">
+            <span className="logo-text">徐闻智慧交通</span>
+            <span className="logo-badge">SMART TRAFFIC</span>
           </div>
         </div>
       </div>
@@ -46,26 +46,42 @@ export default function Header({ time, children }: Props) {
         .header-left { flex: 1; }
         .header-center { flex: 1; display: flex; justify-content: center; align-items: center; }
         .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
-        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo { display: flex; align-items: center; gap: 14px; }
         .logo-icon {
-          width: 36px; height: 36px;
-          background: linear-gradient(135deg, var(--color-primary, #4da6ff) 0%, #2563EB 100%);
-          border-radius: var(--radius-md, 12px);
+          width: 40px; height: 40px;
+          background: linear-gradient(135deg, #00D0E9 0%, #0066FF 100%);
+          border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
-          box-shadow: var(--glow-primary, 0 0 12px rgba(77,166,255,0.35));
+          box-shadow: 0 0 16px rgba(0, 208, 233, 0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+          position: relative;
+        }
+        .logo-icon::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 12px;
+          border: 1px solid rgba(0, 208, 233, 0.3);
+        }
+        .logo-text-group {
+          display: flex;
+          align-items: baseline;
+          gap: 10px;
         }
         .logo-text {
-          font-family: var(--font-label, 'Rajdhani'), sans-serif;
-          font-size: 20px; font-weight: 600;
-          color: var(--text-highlight, rgba(255,255,255,0.98));
-          letter-spacing: 2px;
-          text-shadow: 0 0 15px var(--color-primary-glow, rgba(77,166,255,0.5));
-        }
-        .header-subtitle {
           font-family: 'Noto Sans SC', sans-serif;
-          font-size: 13px;
-          color: var(--text-secondary, rgba(180,200,220,0.6));
-          letter-spacing: 2px; margin-top: 2px;
+          font-size: 24px; font-weight: 700;
+          color: rgba(255,255,255,0.95);
+          letter-spacing: 4px;
+          text-shadow: 0 0 20px rgba(0, 208, 233, 0.4);
+        }
+        .logo-badge {
+          font-family: var(--font-data, 'JetBrains Mono'), monospace;
+          font-size: 10px; font-weight: 500;
+          color: rgba(0, 208, 233, 0.6);
+          letter-spacing: 2px;
+          border: 1px solid rgba(0, 208, 233, 0.2);
+          padding: 2px 6px;
+          border-radius: 3px;
         }
         .header-time { text-align: right; }
         .time-value {
