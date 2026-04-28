@@ -106,6 +106,50 @@ export interface CommandFocusRoad {
   futureInflow: number;
 }
 
+export interface ExpectationVersion {
+  version: number;
+  checkpoints: { minutesAfter: number; expected: number }[];
+  reason: string;
+  timestamp: number;
+}
+
+export interface CurveDataPoint {
+  timestamp: number;
+  minutesAfter: number;
+  expected: number;
+  actual: number;
+}
+
+export interface ActiveInquiry {
+  id: string;
+  target: 'commander' | 'field';
+  question: string;
+  options: string[];
+  status: 'pending' | 'answered' | 'timeout';
+  answer?: string;
+  createdAt: number;
+}
+
+export interface StrategyFeedback {
+  rating: 'effective' | 'ineffective' | null;
+  comment: string;
+  timestamp: number;
+}
+
+export type DeviationLevel = 'none' | 'yellow' | 'orange' | 'red';
+
+export interface MonitorState {
+  isMonitoring: boolean;
+  monitorStartTime: number;
+  monitorStrategyId: string | null;
+  curveData: CurveDataPoint[];
+  deviationLevel: DeviationLevel;
+  deviationPercent: number;
+  expectationVersions: ExpectationVersion[];
+  activeInquiry: ActiveInquiry | null;
+  feedback: StrategyFeedback | null;
+}
+
 export interface CommandState {
   context: CommandContext;
   congestionIndex: number;
@@ -188,6 +232,9 @@ export interface CommandState {
     }>;
     overallStatus: 'executing' | 'on-track' | 'off-track' | 'completed';
   } | null;
+
+  // v2.0 P1-1: Strategy execution closed-loop monitoring
+  monitorState: MonitorState;
 }
 
 // === Default Command State ===
@@ -375,6 +422,17 @@ const defaultCommandState: CommandState = {
     ],
     overallStatus: 'executing',
   },
+  monitorState: {
+    isMonitoring: false,
+    monitorStartTime: 0,
+    monitorStrategyId: null,
+    curveData: [],
+    deviationLevel: 'none',
+    deviationPercent: 0,
+    expectationVersions: [],
+    activeInquiry: null,
+    feedback: null,
+  },
 };
 
 // === Command Store Interface ===
@@ -394,6 +452,11 @@ interface CommandStoreState {
   startCall: (personId: string) => void;
   endCall: () => void;
   openChatWith: (personId: string) => void;
+  setMonitorState: (data: Partial<MonitorState>) => void;
+  addCurveDataPoint: (point: CurveDataPoint) => void;
+  addExpectationVersion: (version: ExpectationVersion) => void;
+  setActiveInquiry: (inquiry: ActiveInquiry | null) => void;
+  setStrategyFeedback: (feedback: StrategyFeedback | null) => void;
 }
 
 // === Command Store Implementation ===
@@ -407,6 +470,47 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
 
   setCommandScene: (scene) => set((state) => ({
     commandState: { ...state.commandState, commandScene: scene },
+  })),
+
+  setMonitorState: (data) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      monitorState: { ...state.commandState.monitorState, ...data },
+    },
+  })),
+
+  addCurveDataPoint: (point) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      monitorState: {
+        ...state.commandState.monitorState,
+        curveData: [...state.commandState.monitorState.curveData, point],
+      },
+    },
+  })),
+
+  addExpectationVersion: (version) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      monitorState: {
+        ...state.commandState.monitorState,
+        expectationVersions: [...state.commandState.monitorState.expectationVersions, version],
+      },
+    },
+  })),
+
+  setActiveInquiry: (inquiry) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      monitorState: { ...state.commandState.monitorState, activeInquiry: inquiry },
+    },
+  })),
+
+  setStrategyFeedback: (feedback) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      monitorState: { ...state.commandState.monitorState, feedback },
+    },
   })),
 
   enterCommandMode: (action) => set((state) => {
