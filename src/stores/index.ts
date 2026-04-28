@@ -135,5 +135,13 @@ export type {
   PortState,
 } from './portStore';
 
+// Simulator Store
+export { useSimulatorStore } from './simulatorStore';
+export type {
+  SimulatorParams,
+  SimulationResult,
+  AIRecommendation,
+} from './simulatorStore';
+
 // Shared Types
 export type { PortType, DirectionType, ViewMode, SystemMode, BaselineMode } from './types';

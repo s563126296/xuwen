@@ -51,7 +51,7 @@ export interface AnalysisState {
   events: HistoryEvent[];
   strategyRecords: StrategyRecord[];
   selectedEventId: string | null;
-  activeView: 'trend' | 'compare' | 'strategy' | 'event' | 'heatmap';
+  activeView: 'simulator' | 'trend' | 'compare' | 'strategy' | 'event' | 'heatmap';
   activeQuickFilter: string | null;
 }
 
@@ -78,7 +78,7 @@ export const useAnalysisStore = create<AnalysisStore>((set) => ({
     events: generateHistoryEvents() as HistoryEvent[],
     strategyRecords: generateStrategyRecords() as StrategyRecord[],
     selectedEventId: null,
-    activeView: 'trend',
+    activeView: 'simulator',
     activeQuickFilter: null,
   },
   setAnalysisFilters: (filters) => set((state) => ({
