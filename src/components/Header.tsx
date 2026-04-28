@@ -25,7 +25,6 @@ export default function Header({ time, children }: Props) {
           </div>
           <div className="logo-text-group">
             <span className="logo-text">徐闻智慧交通大屏</span>
-            <span className="logo-badge">SMART TRAFFIC</span>
           </div>
         </div>
       </div>

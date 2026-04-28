@@ -41,7 +41,7 @@ export default function ChatWindow() {
       style={{
         position: 'absolute',
         right: 328,
-        bottom: 16,
+        bottom: 204,
         width: 320,
         height: 400,
         zIndex: 102,
