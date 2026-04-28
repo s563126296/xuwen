@@ -260,7 +260,7 @@ function App() {
             {/* Development TTS test button */}
             {import.meta.env.DEV && (
               <button
-                onClick={() => BroadcastScenarios.systemStartup()}
+                onClick={() => BroadcastScenarios.forceDailyStartup()}
                 style={{
                   position: 'absolute',
                   bottom: 250,

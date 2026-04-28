@@ -81,6 +81,18 @@ export const BroadcastScenarios = {
     speak(message);
   },
 
+  // Force daily broadcast (for testing, ignores localStorage)
+  forceDailyStartup: () => {
+    const { aiSummary, portDigestion, systemResilience } = useOverviewStore.getState();
+    const conclusion = aiSummary?.conclusion || '正常';
+
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
+
+    const message = `${greeting}，我是小闻。昨日进港车辆约1万2千辆，港口平均等待35分钟，处理拥堵事件3次。今日预计进港1万5千辆，当前${conclusion}，港口待渡${portDigestion.xuwen.waitingVehicles}辆，系统韧性${systemResilience.score}分。建议重点关注进港大道晚高峰时段。`;
+    speak(message);
+  },
+
   weeklyStartup: () => {
     const dayOfWeek = new Date().getDay();
     if (dayOfWeek !== 1) return;
