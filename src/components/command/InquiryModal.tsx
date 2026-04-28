@@ -1,7 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AlertTriangle, Clock, MessageSquare } from 'lucide-react';
 import { useCommandStore } from '../../stores/commandStore';
-import { handleInquiryResponse } from '../../utils/strategyMonitorEngine';
+import { handleInquiryResponse, analyzeDeviation } from '../../utils/strategyMonitorEngine';
+import type { DeviationType } from '../../stores/commandStore';
+
+const typeLabels: Record<DeviationType, string> = {
+  strategy: '策略偏差',
+  execution: '执行偏差',
+  environment: '环境偏差',
+};
+
+const typeColors: Record<DeviationType, string> = {
+  strategy: '#F59E0B',
+  execution: '#3B82F6',
+  environment: '#10B981',
+};
 
 export default function InquiryModal() {
   const inquiry = useCommandStore((s) => s.commandState.monitorState.activeInquiry);
@@ -9,6 +22,11 @@ export default function InquiryModal() {
   const congestionIndex = useCommandStore((s) => s.commandState.congestionIndex);
   const [customInput, setCustomInput] = useState('');
   const [countdown, setCountdown] = useState(60);
+
+  const analysis = useMemo(() => {
+    if (!inquiry || inquiry.status !== 'pending') return null;
+    return analyzeDeviation();
+  }, [inquiry?.id]);
 
   useEffect(() => {
     if (!inquiry || inquiry.status !== 'pending' || inquiry.target !== 'commander') return;
@@ -38,9 +56,33 @@ export default function InquiryModal() {
         </div>
 
         <div style={{ background: 'rgba(255, 71, 87, 0.1)', border: '1px solid rgba(255, 71, 87, 0.2)', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 12, color: '#E0E8FF', lineHeight: 1.8 }}>
-          当前拥堵指数 <span style={{ color: '#FF4757', fontWeight: 600 }}>{congestionIndex.toFixed(1)}</span>
-          ，偏差 <span style={{ color: '#FF4757', fontWeight: 600 }}>{deviationPercent}%</span>
-          <br />{inquiry.question}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            当前拥堵指数 <span style={{ color: '#FF4757', fontWeight: 600 }}>{congestionIndex.toFixed(1)}</span>
+            ，偏差 <span style={{ color: '#FF4757', fontWeight: 600 }}>{deviationPercent}%</span>
+            {analysis && (
+              <span style={{ marginLeft: 'auto', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: `${typeColors[analysis.primaryType]}22`, color: typeColors[analysis.primaryType], border: `1px solid ${typeColors[analysis.primaryType]}44` }}>
+                {typeLabels[analysis.primaryType]}
+              </span>
+            )}
+          </div>
+          {inquiry.question}
+          {analysis && (
+            <>
+              <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6 }}>Top 影响因素</div>
+                {analysis.factors.slice(0, 3).map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: typeColors[f.category], flexShrink: 0 }} />
+                    <span style={{ flex: 1 }}>{f.factor}</span>
+                    <span style={{ color: typeColors[f.category], fontWeight: 600, fontSize: 11 }}>{f.weight}%</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 8, padding: '6px 8px', background: 'rgba(0, 208, 233, 0.06)', borderRadius: 4, fontSize: 11, color: '#00D0E9' }}>
+                {analysis.recommendation}
+              </div>
+            </>
+          )}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>

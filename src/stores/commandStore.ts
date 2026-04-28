@@ -165,6 +165,23 @@ export interface StrategyFeedback {
 
 export type DeviationLevel = 'none' | 'yellow' | 'orange' | 'red';
 
+export type DeviationType = 'strategy' | 'execution' | 'environment';
+
+export interface DeviationFactor {
+  factor: string;
+  weight: number; // 0-100
+  category: DeviationType;
+  description: string;
+}
+
+export interface DeviationAnalysis {
+  timestamp: number;
+  deviationPercent: number;
+  primaryType: DeviationType;
+  factors: DeviationFactor[];
+  recommendation: string;
+}
+
 export interface ExecutionVersion {
   version: string;
   content: string;

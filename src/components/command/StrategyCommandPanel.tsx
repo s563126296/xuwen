@@ -3,6 +3,7 @@ import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
 import CollapsibleCard from '../common/CollapsibleCard';
 import ExecutionResourcePanel from './ExecutionResourcePanel';
+import ResourceDecisionPanel from './ResourceDecisionPanel';
 import HistoryEffectsSection from './strategy/HistoryEffectsSection';
 import { cornerStyles, getLinkedCamera, getLatestFieldFeedback } from './strategy/strategyConstants';
 import ActiveStrategyCard from './strategy/ActiveStrategyCard';
@@ -12,6 +13,8 @@ export default function StrategyCommandPanel() {
   const cmd = useCommandStore((s) => s.commandState);
   const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
   const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
+  const resources = useCommandStore((s) => s.commandState.resources);
+  const executionResources = useCommandStore((s) => s.commandState.executionResources);
   const startCall = useCommandStore((s) => s.startCall);
   const setActiveModal = useUIStore((s) => s.setActiveModal);
 
@@ -71,6 +74,15 @@ export default function StrategyCommandPanel() {
             onViewPhoto={handleViewPhoto}
           />
         </CollapsibleCard>
+      )}
+
+      {/* Resource Decision Panel */}
+      {activeStrategy && activeStrategy.requiredResources && activeStrategy.requiredResources.length > 0 && (
+        <ResourceDecisionPanel
+          strategy={activeStrategy}
+          resources={resources}
+          executionResources={executionResources}
+        />
       )}
 
       {/* B. Alternative Strategies */}
