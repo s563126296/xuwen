@@ -119,7 +119,7 @@ export default function VirtualAssistant() {
 function SpeechBubble({ text }: { text: string }) {
   return (
     <div style={{
-      position: 'absolute', top: 5, right: 240,
+      position: 'absolute', top: -10, right: 220,
       width: 288, height: 162,
       background: 'rgba(13, 17, 55, 0.95)',
       border: '1px solid rgba(0, 208, 233, 0.3)',
