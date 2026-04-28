@@ -19,8 +19,10 @@ const subLabels: { key: 'corridorRedundancy' | 'alternateRoutes' | 'controlCapac
 
 export default function SystemResilienceCard({ delay = '0s' }: { delay?: string }) {
   const systemResilience = useOverviewStore((s) => s.systemResilience);
+  const aiSummary = useOverviewStore((s) => s.aiSummary);
   const setActiveModal = useUIStore((s) => s.setActiveModal);
   const { score, subScores, weakestDimension } = systemResilience;
+  const accuracy = aiSummary.learningStats?.predictionAccuracy ?? 84;
   const arcColor = getArcColor(score);
   const weakestKey = subLabels.reduce((min, cur) => subScores[cur.key] < subScores[min.key] ? cur : min, subLabels[0]);
   const r = 38;
@@ -97,6 +99,22 @@ export default function SystemResilienceCard({ delay = '0s' }: { delay?: string 
       </div>
       <div style={{ marginTop: 6, fontSize: 10, color: '#F5A623', textAlign: 'center' }}>
         薄弱环节：{weakestDimension}
+      </div>
+      {/* v2.0: AI prediction badge */}
+      <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          padding: '2px 8px', borderRadius: 4,
+          background: 'rgba(168, 85, 247, 0.1)',
+          border: '1px solid rgba(168, 85, 247, 0.2)',
+          fontSize: 10, color: '#A855F7', fontWeight: 600,
+        }}>
+          <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#A855F7', animation: 'aiPulse 2s infinite' }} />
+          AI 预测
+        </div>
+        <div style={{ fontSize: 10, color: '#94A3B8' }}>
+          AI 预测准确率 {accuracy}%
+        </div>
       </div>
     </CollapsibleCard>
   );

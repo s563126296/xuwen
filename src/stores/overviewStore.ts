@@ -77,6 +77,12 @@ export interface AiSummary {
 
   predictionConfidence?: number; // 0-100
 
+  // v2.0: "No intervention" forecast for comparison
+  noInterventionForecast?: {
+    congestionIndex1h: number;  // predicted congestion index in 1h without intervention
+    congestionIndex2h: number;  // predicted congestion index in 2h without intervention
+  };
+
   // Phase 2 fields (add but don't use yet)
   influenceFactors?: {
     port: number;      // 0-100
@@ -505,6 +511,10 @@ const defaultAiSummary: AiSummary = {
   // v2.0 new fields
   riskForecast: { next30min: 'medium', next1hour: 'medium' },
   predictionConfidence: 82,
+  noInterventionForecast: {
+    congestionIndex1h: 7.2,
+    congestionIndex2h: 7.8,
+  },
 };
 
 // === Store Interface ===

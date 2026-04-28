@@ -9,7 +9,8 @@ import RightPanel from './components/RightPanel';
 import ModeSwitcher from './components/ModeSwitcher';
 import PortMode from './components/port/PortMode';
 import CommandMode from './components/command/CommandMode';
-import EmergencyMode from './components/emergency/EmergencyMode';
+// v2.0: Emergency mode merged into Command mode
+// import EmergencyMode from './components/emergency/EmergencyMode';
 import AnalysisMode from './components/analysis/AnalysisMode';
 import AIAnalysisMode from './components/ai-analysis/AIAnalysisMode';
 import CheckpointModal from './components/CheckpointModal';
@@ -303,7 +304,8 @@ function App() {
 
         {systemMode === 'port' && <PortMode />}
         {systemMode === 'command' && <CommandMode />}
-        {systemMode === 'emergency' && <EmergencyMode />}
+        {/* v2.0: Emergency mode merged into Command mode */}
+        {/* {systemMode === 'emergency' && <EmergencyMode />} */}
         {systemMode === 'analysis' && <AnalysisMode />}
         {systemMode === 'ai-analysis' && <AIAnalysisMode />}
 

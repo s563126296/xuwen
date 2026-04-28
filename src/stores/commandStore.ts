@@ -140,6 +140,40 @@ export interface CommandState {
     materials: Array<{ name: string; total: number; ready: number; unit: string }>;
   };
   historyStats: { totalExecuted: number; adoptionRate: number; avgReliefMinutes: number; top3: Array<{ name: string; avgMinutes: number }> };
+
+  // v2.0: Scene awareness (congestion vs emergency)
+  commandScene: 'congestion' | 'emergency';
+
+  // v2.0: Emergency features (migrated from emergencyStore)
+  specialVehicles: Array<{
+    id: string;
+    plate: string;
+    type: 'cold_chain' | 'hazmat';
+    waitTime: number;
+    status: 'normal' | 'warning' | 'critical';
+    cargo: string;
+  }>;
+
+  supplyDemand: Array<{
+    name: string;
+    required: number;
+    allocated: number;
+    unit: string;
+  }>;
+
+  emergencyTasks: Array<{
+    id: string;
+    department: string;
+    title: string;
+    status: 'pending' | 'received' | 'executing' | 'completed';
+    owner: string;
+  }>;
+
+  activePlan: {
+    planId: string;
+    planName: string;
+    progress: number;
+  } | null;
 }
 
 // === Default Command State ===
@@ -295,6 +329,27 @@ const defaultCommandState: CommandState = {
       { name: 'S-14 交警部署', avgMinutes: 35 },
     ],
   },
+
+  // v2.0: Scene awareness
+  commandScene: 'congestion',
+
+  // v2.0: Emergency features mock data
+  specialVehicles: [
+    { id: 'sv-1', plate: '粤G·K7823', type: 'cold_chain', waitTime: 135, status: 'warning', cargo: '冷冻海鲜' },
+    { id: 'sv-2', plate: '琼A·D3156', type: 'cold_chain', waitTime: 130, status: 'warning', cargo: '冷冻水产' },
+    { id: 'sv-3', plate: '粤G·M5521', type: 'hazmat', waitTime: 110, status: 'normal', cargo: '液化石油气' },
+  ],
+  supplyDemand: [
+    { name: '盒饭', required: 38800, allocated: 15000, unit: '份' },
+    { name: '饮用水', required: 23000, allocated: 10000, unit: '升' },
+    { name: '应急电源', required: 180, allocated: 50, unit: '台' },
+  ],
+  emergencyTasks: [
+    { id: 'et-1', department: '公安交警', title: '部署停车区引导标识', status: 'executing', owner: '李科' },
+    { id: 'et-2', department: '民政局', title: '准备3天物资', status: 'received', owner: '王主任' },
+    { id: 'et-3', department: '交通运输局', title: '更新诱导屏提示', status: 'completed', owner: '张科' },
+  ],
+  activePlan: null,
 };
 
 // === Command Store Interface ===
@@ -302,6 +357,7 @@ const defaultCommandState: CommandState = {
 interface CommandStoreState {
   commandState: CommandState;
   setCommandState: (data: Partial<CommandState>) => void;
+  setCommandScene: (scene: 'congestion' | 'emergency') => void;
   enterCommandMode: (action: AiSummaryAction | null) => void;
   exitCommandMode: () => void;
   executeStrategy: (strategyId: string) => void;
@@ -322,6 +378,10 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
 
   setCommandState: (data) => set((state) => ({
     commandState: { ...state.commandState, ...data },
+  })),
+
+  setCommandScene: (scene) => set((state) => ({
+    commandState: { ...state.commandState, commandScene: scene },
   })),
 
   enterCommandMode: (action) => set((state) => {

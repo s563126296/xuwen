@@ -10,6 +10,7 @@ import CommandReportModal from './CommandReportModal';
 import EscalateConfirmModal from './EscalateConfirmModal';
 import CongestionDetailModal from './CongestionDetailModal';
 import IncomingCallModal from './IncomingCallModal';
+import EmergencyPanels from './EmergencyPanels';
 import { useCommandStore } from '../../stores/commandStore';
 import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
 
@@ -17,6 +18,8 @@ export default function CommandMode() {
   const strategies = useCommandStore((s) => s.commandState.strategies);
   const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
   const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
+  const commandScene = useCommandStore((s) => s.commandState.commandScene);
+  const setCommandScene = useCommandStore((s) => s.setCommandScene);
   const startCall = useCommandStore((s) => s.startCall);
   const addCommandFeedItem = useCommandStore((s) => s.addCommandFeedItem);
   const hasExecuting = strategies.some((s) => s.status === 'executing' || s.status === 'done');
@@ -69,7 +72,39 @@ export default function CommandMode() {
           padding: '0 2px',
         }}>
           <StrategyCommandPanel />
+          {/* v2.0: Emergency panels (visible in emergency scene) */}
+          {commandScene === 'emergency' && <EmergencyPanels />}
         </div>
+      </div>
+
+      {/* v2.0: Scene toggle (dev mode) */}
+      <div style={{
+        position: 'absolute', top: 92, right: 40, zIndex: 102,
+        display: 'flex', gap: 4,
+      }}>
+        {(['congestion', 'emergency'] as const).map((scene) => (
+          <button
+            key={scene}
+            onClick={() => setCommandScene(scene)}
+            style={{
+              padding: '3px 10px',
+              fontSize: 10,
+              fontWeight: 500,
+              color: commandScene === scene ? (scene === 'emergency' ? '#FF4757' : '#00D0E9') : '#64748B',
+              backgroundColor: commandScene === scene
+                ? (scene === 'emergency' ? 'rgba(255,71,87,0.1)' : 'rgba(0,208,233,0.08)')
+                : 'rgba(10,15,25,0.8)',
+              border: commandScene === scene
+                ? `1px solid ${scene === 'emergency' ? 'rgba(255,71,87,0.4)' : 'rgba(0,208,233,0.4)'}`
+                : '1px solid rgba(100,180,255,0.1)',
+              borderRadius: 4,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            {scene === 'congestion' ? '拥堵' : '应急'}
+          </button>
+        ))}
       </div>
 
       {/* Chat window */}

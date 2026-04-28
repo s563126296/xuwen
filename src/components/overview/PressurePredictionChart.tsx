@@ -9,6 +9,7 @@ import {
   AreaChart,
   Tooltip,
 } from 'recharts';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 interface PredictionPoint {
   time: string;
@@ -119,6 +120,9 @@ interface PressurePredictionChartProps {
 
 export default function PressurePredictionChart({ compact }: PressurePredictionChartProps) {
   const data = useMemo(() => generateMockData(), []);
+  const aiSummary = useOverviewStore((s) => s.aiSummary);
+  const noIntervention2h = aiSummary.noInterventionForecast?.congestionIndex2h;
+  const accuracy = aiSummary.learningStats?.predictionAccuracy ?? 84;
 
   // Find the ~60min mark index for the ship arrival annotation
   const shipArrivalIndex = 12; // 12 * 5min = 60min
@@ -131,8 +135,20 @@ export default function PressurePredictionChart({ compact }: PressurePredictionC
     <div className="module-card animate-in" style={{ animationDelay: '0.1s' }}>
       <div className="module-header">
         <span className="module-title">未来2h压力预测</span>
-        <div className="module-icon">
-          <TrendingUp size={compact ? 14 : 16} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            padding: '2px 8px', borderRadius: 4,
+            background: 'rgba(168, 85, 247, 0.1)',
+            border: '1px solid rgba(168, 85, 247, 0.2)',
+            fontSize: 10, color: '#A855F7', fontWeight: 600,
+          }}>
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#A855F7', animation: 'aiPulse 2s infinite' }} />
+            AI 预测
+          </div>
+          <div className="module-icon">
+            <TrendingUp size={compact ? 14 : 16} />
+          </div>
         </div>
       </div>
 
@@ -208,6 +224,11 @@ export default function PressurePredictionChart({ compact }: PressurePredictionC
           <span style={{ color: '#F5A623' }}>{summaryTime}</span>
           {' '}预计中度拥堵（大船靠港叠加下班高峰），建议
           <span style={{ color: '#00D0E9' }}>14:45前启动S376分流</span>
+          {noIntervention2h && (
+            <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 4 }}>
+              不干预预计 {noIntervention2h} · AI 预测准确率 {accuracy}%
+            </div>
+          )}
         </div>
       )}
     </div>

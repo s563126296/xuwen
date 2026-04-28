@@ -68,6 +68,12 @@ export function computeAiSummary(indicators: OverviewIndicators): AiSummary {
   // v2.0: Generate prediction confidence (mock: 75-95%)
   const predictionConfidence = Math.floor(75 + Math.random() * 20);
 
+  // v2.0: "No intervention" forecast for comparison
+  const noInterventionForecast = {
+    congestionIndex1h: level === 'red' ? 8.5 : level === 'orange' ? 7.2 : level === 'yellow' ? 5.8 : 4.2,
+    congestionIndex2h: level === 'red' ? 9.1 : level === 'orange' ? 7.8 : level === 'yellow' ? 6.2 : 4.5,
+  };
+
   // v2.0 Phase 2: Generate influence factors (mock: weighted by alert level)
   const influenceFactors = {
     port: level === 'red' || level === 'orange' ? 40 : 25,
@@ -106,6 +112,7 @@ export function computeAiSummary(indicators: OverviewIndicators): AiSummary {
     // v2.0 new fields
     riskForecast,
     predictionConfidence,
+    noInterventionForecast,
     influenceFactors,
     similarCases,
     learningStats,

@@ -19,8 +19,12 @@ export default function CommandSummaryBar() {
   const exitCommandMode = useCommandStore((s) => s.exitCommandMode);
   const setActiveModal = useUIStore((s) => s.setActiveModal);
   const causes = useCommandStore((s) => s.commandState.causes);
+  const commandScene = useCommandStore((s) => s.commandState.commandScene);
 
   const { label, color } = getLevel(cmd.congestionIndex);
+
+  // Scene-aware bar color
+  const isEmergencyScene = commandScene === 'emergency';
 
   // Check if any strategy is done
   const hasExecuted = cmd.strategies.some(s => s.status === 'done');
@@ -49,8 +53,8 @@ export default function CommandSummaryBar() {
     (hasExecuted && achievementRate < 50) ||
     hasUrgentAlert;
 
-  // Effective bar color: green when relieved
-  const barColor = isRelieved ? '#2ED573' : color;
+  // Effective bar color: green when relieved, red when emergency scene
+  const barColor = isRelieved ? '#2ED573' : isEmergencyScene ? '#FF4757' : color;
 
   const handleEscalate = () => {
     setActiveModal('escalate-confirm');
@@ -195,7 +199,24 @@ export default function CommandSummaryBar() {
 
       {/* Center section: Strategy recommendation or execution result */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-        {isRelieved && executedStrategy ? (
+        {isEmergencyScene && !isRelieved && (
+          <>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: '2px 8px', borderRadius: 4,
+              background: 'rgba(255, 71, 87, 0.15)',
+              border: '1px solid rgba(255, 71, 87, 0.3)',
+              fontSize: 11, color: '#FF4757', fontWeight: 600,
+            }}>
+              <AlertTriangle size={10} />
+              应急场景
+            </span>
+            <span style={{ fontSize: 12, color: '#94A3B8' }}>
+              特殊车辆 {cmd.specialVehicles.filter(v => v.status !== 'normal').length} 辆预警 · 任务 {cmd.emergencyTasks.filter(t => t.status !== 'completed').length} 项进行中
+            </span>
+          </>
+        )}
+        {!isEmergencyScene && isRelieved && executedStrategy ? (
           <span
             style={{
               fontSize: 12,
@@ -206,7 +227,7 @@ export default function CommandSummaryBar() {
           >
             策略 {executedStrategy.id} {executedStrategy.name} 执行有效
           </span>
-        ) : (
+        ) : !isEmergencyScene ? (
           <>
             {causes.length > 0 && (
               <span style={{ fontSize: 12, color: '#94A3B8' }}>
@@ -226,7 +247,7 @@ export default function CommandSummaryBar() {
               </span>
             )}
           </>
-        )}
+        ) : null}
       </div>
 
       {/* Right section: Action buttons */}
