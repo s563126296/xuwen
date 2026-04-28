@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Volume2, VolumeX, MessageCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useOverviewStore } from '../../stores/overviewStore';
 import { stopSpeaking } from '../../utils/assistantEngine';
@@ -26,6 +26,13 @@ export default function VirtualAssistant() {
   const openChat = useOverviewStore((s) => s.openAssistantChat);
   const isSpeaking = status === 'speaking';
   const [collapsed, setCollapsed] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = isSpeaking ? '/avatars/xiaoyu-speak.png' : '/avatars/xiaoyu-waiting.png';
+    img.onload = () => setImageLoaded(true);
+  }, [isSpeaking]);
 
   if (collapsed) {
     return (
@@ -40,7 +47,7 @@ export default function VirtualAssistant() {
           cursor: 'pointer', pointerEvents: 'auto',
           boxShadow: '0 2px 8px rgba(0, 208, 233, 0.2)',
         }}
-        aria-label="展开小闻"
+        aria-label="展开小语"
       >
         <ChevronLeft size={16} color="#00D0E9" />
       </button>
@@ -65,7 +72,7 @@ export default function VirtualAssistant() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: 'pointer',
         }}
-        aria-label="隐藏小闻"
+        aria-label="隐藏小语"
       >
         <ChevronRight size={10} color="#94A3B8" />
       </button>
@@ -78,16 +85,16 @@ export default function VirtualAssistant() {
         onClick={() => { if (isSpeaking) stopSpeaking(); }}
         role="button"
         tabIndex={0}
-        aria-label={isSpeaking ? '停止播报' : '虚拟助手小闻'}
+        aria-label={isSpeaking ? '停止播报' : '虚拟助手小语'}
       >
-        <CharacterSVG isSpeaking={isSpeaking} />
+        <CharacterImage isSpeaking={isSpeaking} imageLoaded={imageLoaded} />
 
         {/* Name tag */}
         <div style={{ position: 'absolute', bottom: 10, left: '50%',
           transform: 'translateX(-50%)', padding: '4px 12px',
           background: '#0D1137', border: '1px solid rgba(0, 208, 233, 0.3)',
           borderRadius: 12, fontSize: 12, fontWeight: 600, color: '#00D0E9',
-        }}>小闻</div>
+        }}>小语</div>
 
         {/* Controls */}
         <div style={{ position: 'absolute', bottom: -5, left: '50%',
@@ -124,7 +131,7 @@ function SpeechBubble({ text }: { text: string }) {
       overflowY: 'auto',
     }}>
       <div style={{ fontSize: 10, color: '#00D0E9', fontWeight: 600, marginBottom: 6 }}>
-        小闻播报
+        小语播报
       </div>
       {text}
       {/* Tail pointing right to character head */}
@@ -139,116 +146,70 @@ function SpeechBubble({ text }: { text: string }) {
   );
 }
 
-function CharacterSVG({ isSpeaking }: { isSpeaking: boolean }) {
+function CharacterImage({ isSpeaking, imageLoaded }: { isSpeaking: boolean; imageLoaded: boolean }) {
+  const imageSrc = isSpeaking ? '/avatars/xiaoyu-speak.png' : '/avatars/xiaoyu-waiting.png';
+
   return (
-    <svg width="150" height="180" viewBox="0 0 150 180"
-      style={{ filter: 'drop-shadow(0 4px 12px rgba(0, 208, 233, 0.3))' }}>
-
-      {/* Sparkles */}
-      <circle cx="20" cy="40" r="2" fill="#00D0E9" opacity="0.8">
-        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="130" cy="60" r="2" fill="#A855F7" opacity="0.8">
-        <animate attributeName="opacity" values="0.3;1;0.3" dur="2.5s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="25" cy="100" r="2" fill="#2ED573" opacity="0.8">
-        <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite" />
-      </circle>
-
-      {/* Gradients */}
-      <defs>
-        <radialGradient id="lotusGrad">
-          <stop offset="0%" stopColor="#2ED573" />
-          <stop offset="100%" stopColor="#1A9F52" />
-        </radialGradient>
-        <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#00D0E9" />
-          <stop offset="100%" stopColor="#2ED573" />
-        </linearGradient>
-        <radialGradient id="headGrad">
-          <stop offset="0%" stopColor="#7FECF5" />
-          <stop offset="100%" stopColor="#00D0E9" />
-        </radialGradient>
-      </defs>
-
-      {/* Lotus leaf base */}
-      <ellipse cx="75" cy="165" rx="45" ry="12" fill="url(#lotusGrad)" />
-
-      {/* Body (traditional clothing) */}
-      <rect x="55" y="95" width="40" height="45" rx="8" fill="url(#bodyGrad)" />
-
-      {/* Lotus pattern on chest */}
-      <circle cx="75" cy="110" r="6" fill="#FFFFFF" opacity="0.8" />
-      <circle cx="75" cy="110" r="3" fill="#FFB4C5" opacity="0.6" />
-
-      {/* Gold belt */}
-      <rect x="55" y="120" width="40" height="4" fill="#F5A623" />
-      <circle cx="75" cy="122" r="3" fill="#FFD700" />
-
-      {/* Wave pattern */}
-      <path d="M 55 135 Q 65 130 75 135 T 95 135" stroke="#006B7D" strokeWidth="2" fill="none" />
-
-      {/* Arms */}
-      <ellipse cx="50" cy="105" rx="8" ry="12" fill="#00D0E9" />
-      <ellipse cx="100" cy="105" rx="8" ry="12" fill="#00D0E9" />
-
-      {/* Head */}
-      <circle cx="75" cy="60" r="35" fill="url(#headGrad)" />
-
-      {/* Eyes */}
-      <circle cx="65" cy="58" r="4" fill="#0A0F19" />
-      <circle cx="66" cy="57" r="1.5" fill="#FFFFFF" />
-      <circle cx="85" cy="58" r="4" fill="#0A0F19" />
-      <circle cx="86" cy="57" r="1.5" fill="#FFFFFF" />
-
-      {/* Smile */}
-      <path d="M 65 68 Q 75 73 85 68" stroke="#0A0F19" strokeWidth="2" fill="none" strokeLinecap="round" />
-
-      {/* Rosy cheeks */}
-      <circle cx="58" cy="65" r="5" fill="#FFB4C5" opacity="0.5" />
-      <circle cx="92" cy="65" r="5" fill="#FFB4C5" opacity="0.5" />
-
-      {/* Hair bun */}
-      <ellipse cx="75" cy="30" rx="18" ry="15" fill="#00A8B8" />
-
-      {/* Hair pin */}
-      <rect x="73" y="20" width="4" height="12" fill="#F5A623" rx="2" />
-      <circle cx="75" cy="18" r="3" fill="#FF4757" />
-
-      {/* Pagoda on top */}
-      <rect x="68" y="12" width="14" height="4" fill="#00A8B8" stroke="#F5A623" strokeWidth="0.5" />
-      <rect x="70" y="8" width="10" height="4" fill="#00A8B8" stroke="#F5A623" strokeWidth="0.5" />
-      <rect x="72" y="4" width="6" height="4" fill="#00A8B8" stroke="#F5A623" strokeWidth="0.5" />
-      <polygon points="75,0 78,4 72,4" fill="#F5A623" />
-
-      {/* Headphones */}
-      <ellipse cx="45" cy="60" rx="8" ry="10" fill="#E0E8FF" opacity="0.9" />
-      <ellipse cx="105" cy="60" rx="8" ry="10" fill="#E0E8FF" opacity="0.9" />
-      <ellipse cx="45" cy="60" rx="5" ry="7" fill="#00D0E9" opacity="0.3" />
-      <ellipse cx="105" cy="60" rx="5" ry="7" fill="#00D0E9" opacity="0.3" />
-      <path d="M 45 50 Q 75 45 105 50" stroke="#E0E8FF" strokeWidth="3" fill="none" />
+    <div style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative'
+    }}>
+      <img
+        src={imageSrc}
+        alt="小语"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          filter: 'drop-shadow(0 4px 12px rgba(0, 208, 233, 0.3))',
+          opacity: imageLoaded ? 1 : 0,
+          transition: 'opacity 0.3s ease-in-out'
+        }}
+      />
 
       {/* Status indicator */}
-      <circle cx="100" cy="35" r="4" fill={isSpeaking ? '#00D0E9' : '#2ED573'}>
-        {!isSpeaking && (
-          <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite" />
-        )}
-      </circle>
+      <div style={{
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        backgroundColor: isSpeaking ? '#00D0E9' : '#2ED573',
+        boxShadow: `0 0 8px ${isSpeaking ? '#00D0E9' : '#2ED573'}`,
+        animation: !isSpeaking ? 'pulse 2s ease-in-out infinite' : 'none'
+      }} />
 
       {/* Sound waves (when speaking) */}
       {isSpeaking && (
-        <>
-          <path d="M 115 55 Q 120 60 115 65" stroke="#00D0E9" strokeWidth="2" fill="none" opacity="0.6">
-            <animate attributeName="opacity" values="0;0.6;0" dur="1s" repeatCount="indefinite" />
-          </path>
-          <path d="M 120 50 Q 127 60 120 70" stroke="#00D0E9" strokeWidth="2" fill="none" opacity="0.4">
-            <animate attributeName="opacity" values="0;0.4;0" dur="1s" begin="0.2s" repeatCount="indefinite" />
-          </path>
-          <path d="M 125 45 Q 134 60 125 75" stroke="#00D0E9" strokeWidth="2" fill="none" opacity="0.2">
-            <animate attributeName="opacity" values="0;0.2;0" dur="1s" begin="0.4s" repeatCount="indefinite" />
-          </path>
-        </>
+        <div style={{
+          position: 'absolute',
+          top: 10,
+          right: 25,
+          display: 'flex',
+          gap: 4,
+          alignItems: 'center'
+        }}>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                width: 2,
+                height: 12,
+                backgroundColor: '#00D0E9',
+                borderRadius: 1,
+                animation: `soundWave 1s ease-in-out infinite`,
+                animationDelay: `${i * 0.2}s`,
+                opacity: 0.6
+              }}
+            />
+          ))}
+        </div>
       )}
-    </svg>
+    </div>
   );
 }
