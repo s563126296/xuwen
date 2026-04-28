@@ -20,6 +20,29 @@ export interface CongestionCause {
   color: string;
 }
 
+export interface ResourceRequirement {
+  type: 'police' | 'cone' | 'led_screen' | 'tow_truck';
+  quantity: number;
+  estimatedArrivalMin: number;
+}
+
+export interface EffectModel {
+  baseEffect: number;
+  factorModifiers: {
+    weather_rain: number;
+    weather_fog: number;
+    truck_ratio_high: number;
+    road_congested: number;
+    inflow_high: number;
+  };
+}
+
+export interface HistoricalData {
+  executionCount: number;
+  successRate: number;
+  avgReliefMinutes: number;
+}
+
 export type StrategyPermission = 'auto' | 'confirm' | 'approve';
 
 export interface CommandStrategy {
@@ -36,6 +59,10 @@ export interface CommandStrategy {
   risk: string;
   triggerCondition: string;
   status: 'idle' | 'executing' | 'done' | 'failed';
+  reasonTemplate?: string;
+  requiredResources?: ResourceRequirement[];
+  effectModel?: EffectModel;
+  historicalData?: HistoricalData;
 }
 
 export interface StrategyConflict {
@@ -138,6 +165,42 @@ export interface StrategyFeedback {
 
 export type DeviationLevel = 'none' | 'yellow' | 'orange' | 'red';
 
+export interface ExecutionVersion {
+  version: string;
+  content: string;
+  reason: string;
+  expectedCurve: { minutesAfter: number; expected: number }[];
+  timestamp: number;
+}
+
+export interface DeviationEvent {
+  timestamp: number;
+  type: 'strategy' | 'execution' | 'environment';
+  reason: string;
+  action: string;
+  resolutionMinutes: number;
+}
+
+export interface AILearning {
+  newFactor: string;
+  affectedStrategies: string[];
+  accuracyChange: { before: number; after: number };
+}
+
+export interface ExecutionRecord {
+  id: string;
+  strategyId: string;
+  startTime: number;
+  endTime: number | null;
+  versions: ExecutionVersion[];
+  actualCurve: { timestamp: number; congestionIndex: number }[];
+  deviationEvents: DeviationEvent[];
+  resourceArrival: { estimated: number; actual: number };
+  rating: 'effective' | 'moderate' | 'ineffective' | null;
+  comment: string;
+  aiLearnings: AILearning[];
+}
+
 export interface MonitorState {
   isMonitoring: boolean;
   monitorStartTime: number;
@@ -235,6 +298,10 @@ export interface CommandState {
 
   // v2.0 P1-1: Strategy execution closed-loop monitoring
   monitorState: MonitorState;
+
+  // v2.0 Batch1: Execution records for learning loop
+  executionRecords: ExecutionRecord[];
+  activeExecutionId: string | null;
 }
 
 // === Default Command State ===
@@ -433,6 +500,8 @@ const defaultCommandState: CommandState = {
     activeInquiry: null,
     feedback: null,
   },
+  executionRecords: [],
+  activeExecutionId: null,
 };
 
 // === Command Store Interface ===
@@ -457,6 +526,9 @@ interface CommandStoreState {
   addExpectationVersion: (version: ExpectationVersion) => void;
   setActiveInquiry: (inquiry: ActiveInquiry | null) => void;
   setStrategyFeedback: (feedback: StrategyFeedback | null) => void;
+  addExecutionRecord: (record: ExecutionRecord) => void;
+  updateExecutionRecord: (id: string, updates: Partial<ExecutionRecord>) => void;
+  setActiveExecutionId: (id: string | null) => void;
 }
 
 // === Command Store Implementation ===
@@ -511,6 +583,26 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
       ...state.commandState,
       monitorState: { ...state.commandState.monitorState, feedback },
     },
+  })),
+
+  addExecutionRecord: (record) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      executionRecords: [...state.commandState.executionRecords, record],
+    },
+  })),
+
+  updateExecutionRecord: (id, updates) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      executionRecords: state.commandState.executionRecords.map((r) =>
+        r.id === id ? { ...r, ...updates } : r
+      ),
+    },
+  })),
+
+  setActiveExecutionId: (id) => set((state) => ({
+    commandState: { ...state.commandState, activeExecutionId: id },
   })),
 
   enterCommandMode: (action) => set((state) => {

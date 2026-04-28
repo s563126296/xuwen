@@ -33,7 +33,29 @@ export interface EngineStoreSlice {
 // Strategy database (static for now; will be API-driven later)
 // ---------------------------------------------------------------------------
 
-type StrategyMeta = Omit<CommandStrategy, 'status' | 'recommended'>;
+type StrategyMeta = Omit<CommandStrategy, 'status' | 'recommended'> & {
+  reasonTemplate?: string;
+  requiredResources?: Array<{
+    type: 'police' | 'cone' | 'led_screen' | 'tow_truck';
+    quantity: number;
+    estimatedArrivalMin: number;
+  }>;
+  effectModel?: {
+    baseEffect: number;
+    factorModifiers: {
+      weather_rain: number;
+      weather_fog: number;
+      truck_ratio_high: number;
+      road_congested: number;
+      inflow_high: number;
+    };
+  };
+  historicalData?: {
+    executionCount: number;
+    successRate: number;
+    avgReliefMinutes: number;
+  };
+};
 
 const STRATEGY_DB: Record<string, StrategyMeta> = {
   'S-01': {
@@ -48,6 +70,27 @@ const STRATEGY_DB: Record<string, StrategyMeta> = {
     effectTime: '5 分钟生效',
     risk: '应急车辆通行受限，需保留紧急通道',
     triggerCondition: '进港大道拥堵指数 > 6.0 且排队 > 2km',
+    reasonTemplate: '进港大道拥堵指数达到{congestionIndex}，排队长度{queueLength}，超过应急车道启用阈值。预计可增加{laneCapacity}%通行能力。',
+    requiredResources: [
+      { type: 'police', quantity: 4, estimatedArrivalMin: 8 },
+      { type: 'cone', quantity: 20, estimatedArrivalMin: 10 },
+      { type: 'led_screen', quantity: 2, estimatedArrivalMin: 15 },
+    ],
+    effectModel: {
+      baseEffect: 1.7,
+      factorModifiers: {
+        weather_rain: -0.2,
+        weather_fog: -0.15,
+        truck_ratio_high: -0.1,
+        road_congested: 0.15,
+        inflow_high: 0.1,
+      },
+    },
+    historicalData: {
+      executionCount: 23,
+      successRate: 0.87,
+      avgReliefMinutes: 28,
+    },
   },
   'S-02': {
     id: 'S-02',
@@ -61,6 +104,27 @@ const STRATEGY_DB: Record<string, StrategyMeta> = {
     effectTime: '3 分钟生效',
     risk: 'S376 沿线居民出行受影响',
     triggerCondition: '进港大道拥堵指数 > 4.0',
+    reasonTemplate: '进港大道拥堵指数{congestionIndex}，S376省道当前流量{s376Flow}%，具备分流条件。预计分流{divertRatio}%车流。',
+    requiredResources: [
+      { type: 'police', quantity: 2, estimatedArrivalMin: 5 },
+      { type: 'cone', quantity: 15, estimatedArrivalMin: 8 },
+      { type: 'led_screen', quantity: 1, estimatedArrivalMin: 12 },
+    ],
+    effectModel: {
+      baseEffect: 1.3,
+      factorModifiers: {
+        weather_rain: -0.15,
+        weather_fog: -0.1,
+        truck_ratio_high: 0.05,
+        road_congested: 0.1,
+        inflow_high: 0.15,
+      },
+    },
+    historicalData: {
+      executionCount: 45,
+      successRate: 0.91,
+      avgReliefMinutes: 22,
+    },
   },
   'S-04': {
     id: 'S-04',
@@ -74,6 +138,25 @@ const STRATEGY_DB: Record<string, StrategyMeta> = {
     effectTime: '3 分钟生效',
     risk: '交叉方向通行效率降低约15%',
     triggerCondition: '关键路口饱和度 > 80%',
+    reasonTemplate: '关键路口饱和度{saturation}%，主干道绿灯时长调整至{greenTime}秒，预计提升{improvement}%通行效率。',
+    requiredResources: [
+      { type: 'police', quantity: 1, estimatedArrivalMin: 3 },
+    ],
+    effectModel: {
+      baseEffect: 0.9,
+      factorModifiers: {
+        weather_rain: -0.05,
+        weather_fog: -0.05,
+        truck_ratio_high: -0.1,
+        road_congested: 0.2,
+        inflow_high: 0.05,
+      },
+    },
+    historicalData: {
+      executionCount: 67,
+      successRate: 0.94,
+      avgReliefMinutes: 18,
+    },
   },
   'S-05': {
     id: 'S-05',
@@ -87,6 +170,23 @@ const STRATEGY_DB: Record<string, StrategyMeta> = {
     effectTime: '30 分钟生效',
     risk: '需港口方配合，非县政府直接管辖',
     triggerCondition: '港口待舶车辆 > 800 辆',
+    reasonTemplate: '港口待舶车辆{waitingVehicles}辆，当前消化速率{digestRate}辆/小时，增开班次后预计提升消化能力{improvement}%。',
+    requiredResources: [],
+    effectModel: {
+      baseEffect: 1.5,
+      factorModifiers: {
+        weather_rain: -0.3,
+        weather_fog: -0.5,
+        truck_ratio_high: 0.0,
+        road_congested: 0.0,
+        inflow_high: 0.2,
+      },
+    },
+    historicalData: {
+      executionCount: 8,
+      successRate: 0.75,
+      avgReliefMinutes: 55,
+    },
   },
   'S-07': {
     id: 'S-07',
@@ -100,6 +200,27 @@ const STRATEGY_DB: Record<string, StrategyMeta> = {
     effectTime: '到场即生效',
     risk: '需交警+拖车协调',
     triggerCondition: '检测到交通事故',
+    reasonTemplate: '检测到{location}发生交通事故，影响{laneCount}条车道，预计处置时间{estimatedMin}分钟。',
+    requiredResources: [
+      { type: 'police', quantity: 2, estimatedArrivalMin: 6 },
+      { type: 'tow_truck', quantity: 1, estimatedArrivalMin: 12 },
+      { type: 'cone', quantity: 10, estimatedArrivalMin: 6 },
+    ],
+    effectModel: {
+      baseEffect: 2.0,
+      factorModifiers: {
+        weather_rain: -0.2,
+        weather_fog: -0.1,
+        truck_ratio_high: -0.15,
+        road_congested: 0.3,
+        inflow_high: 0.0,
+      },
+    },
+    historicalData: {
+      executionCount: 15,
+      successRate: 0.93,
+      avgReliefMinutes: 35,
+    },
   },
   'S-09': {
     id: 'S-09',
@@ -113,6 +234,25 @@ const STRATEGY_DB: Record<string, StrategyMeta> = {
     effectTime: '即时生效',
     risk: '效果依赖驾驶员配合',
     triggerCondition: '任意拥堵策略执行时自动联动',
+    reasonTemplate: '当前{roadName}拥堵指数{congestionIndex}，发布绕行建议至{screenCount}块诱导屏，引导车辆选择替代路线。',
+    requiredResources: [
+      { type: 'led_screen', quantity: 3, estimatedArrivalMin: 0 },
+    ],
+    effectModel: {
+      baseEffect: 0.3,
+      factorModifiers: {
+        weather_rain: -0.05,
+        weather_fog: -0.05,
+        truck_ratio_high: -0.05,
+        road_congested: 0.1,
+        inflow_high: 0.1,
+      },
+    },
+    historicalData: {
+      executionCount: 89,
+      successRate: 0.82,
+      avgReliefMinutes: 12,
+    },
   },
 };
 
