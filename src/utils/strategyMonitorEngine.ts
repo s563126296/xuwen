@@ -1,4 +1,5 @@
 import { useCommandStore } from '../stores/commandStore';
+import { useEvolutionStore } from '../stores/evolutionStore';
 import type {
   CurveDataPoint,
   ExpectationVersion,
@@ -373,6 +374,29 @@ export function startMonitoring(strategyId: string) {
     timestamp: Date.now(),
   };
 
+  // Create initial execution record
+  const execId = `exec-${Date.now()}`;
+  store.addExecutionRecord({
+    id: execId,
+    strategyId: strategyId,
+    startTime: Date.now(),
+    endTime: null,
+    versions: [{
+      version: 'v1',
+      content: `执行策略 ${strategyId}`,
+      reason: '初始方案',
+      expectedCurve: checkpoints,
+      timestamp: Date.now(),
+    }],
+    actualCurve: [{ timestamp: Date.now(), congestionIndex: store.commandState.congestionIndex }],
+    deviationEvents: [],
+    resourceArrival: { estimated: 10, actual: 0 },
+    rating: null,
+    comment: '',
+    aiLearnings: [],
+  });
+  store.setActiveExecutionId(execId);
+
   store.setMonitorState({
     isMonitoring: true,
     monitorStartTime: Date.now(),
@@ -407,6 +431,54 @@ export function stopMonitoring() {
   store.setMonitorState({ isMonitoring: false });
 
   pushFeedMessage('ai', '策略执行监控已结束', 'info');
+}
+
+export function completeExecution() {
+  const cmdStore = useCommandStore.getState();
+  const evoStore = useEvolutionStore.getState();
+  const { monitorState, congestionIndex, activeExecutionId } = cmdStore.commandState;
+
+  if (!monitorState.isMonitoring || !monitorState.monitorStrategyId) return;
+
+  // Stop monitoring timers
+  stopMonitoring();
+
+  // If there's an active execution record, finalize it
+  if (activeExecutionId) {
+    const record = cmdStore.commandState.executionRecords.find(r => r.id === activeExecutionId);
+    if (record) {
+      cmdStore.updateExecutionRecord(activeExecutionId, {
+        endTime: Date.now(),
+        actualCurve: [
+          ...record.actualCurve,
+          { timestamp: Date.now(), congestionIndex },
+        ],
+      });
+
+      // Check if we should create an evolution record
+      if (record.aiLearnings.length > 0) {
+        const lastVersion = evoStore.currentVersion;
+        const versionNum = parseFloat(lastVersion.replace('v', ''));
+        const newVersion = `v${(versionNum + 0.1).toFixed(1)}`;
+
+        record.aiLearnings.forEach((learning) => {
+          evoStore.addRecord({
+            version: newVersion,
+            date: new Date().toISOString().split('T')[0],
+            triggerEvent: learning.newFactor,
+            triggerExecutionId: record.id,
+            changeDescription: `+${learning.newFactor}`,
+            affectedStrategies: learning.affectedStrategies,
+            accuracyBefore: evoStore.currentAccuracy,
+            accuracyAfter: Math.min(
+              evoStore.currentAccuracy + (learning.accuracyChange.after - learning.accuracyChange.before),
+              99
+            ),
+          });
+        });
+      }
+    }
+  }
 }
 
 export { calculateDeviation, interpolateExpected, generateExpectedCurve, analyzeDeviation };

@@ -97,6 +97,10 @@ export type {
   AnalysisState,
 } from './analysisStore';
 
+// Evolution Store
+export { useEvolutionStore } from './evolutionStore';
+export type { EvolutionRecord } from './evolutionStore';
+
 // AI Analysis Store
 export { useAIAnalysisStore } from './aiAnalysisStore';
 export type {
