@@ -42,10 +42,10 @@ export default function Header({ time, children }: Props) {
       </div>
 
       <style>{`
-        .header-left { flex: 1; }
+        .header-left { flex: 0 0 auto; }
         .header-center { flex: 1; display: flex; justify-content: center; align-items: center; }
-        .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
-        .logo { display: flex; align-items: center; gap: 14px; }
+        .header-right { flex: 0 0 auto; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+        .logo { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
         .logo-icon {
           width: 40px; height: 40px;
           background: linear-gradient(135deg, #00D0E9 0%, #0066FF 100%);
