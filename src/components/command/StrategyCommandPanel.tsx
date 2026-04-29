@@ -95,7 +95,7 @@ export default function StrategyCommandPanel() {
               {altStrategies.length} 个备选方案
             </div>
           }
-          defaultExpanded={false}
+          defaultExpanded={true}
         >
           {altStrategies.map((s, idx) => (
             <AltStrategyCard

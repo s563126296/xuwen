@@ -1,6 +1,7 @@
 import { ArrowLeft, FileText, AlertTriangle } from 'lucide-react';
 import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
+import { useOverviewStore } from '../../stores/overviewStore';
 
 const INITIAL_INDEX = 6.5;
 
@@ -21,14 +22,31 @@ export default function CommandSummaryBar() {
   const causes = useCommandStore((s) => s.commandState.causes);
   const commandScene = useCommandStore((s) => s.commandState.commandScene);
 
-  const { label, color } = getLevel(cmd.congestionIndex);
+  // Sync with overview mode data
+  const portData = useOverviewStore((s) => s.portData);
+  const portDigestion = useOverviewStore((s) => s.portDigestion);
+  const corridorPressure = useOverviewStore((s) => s.corridorPressure);
+  const systemResilience = useOverviewStore((s) => s.systemResilience);
+
+  // Use overview data if available, fallback to command state
+  const displayCongestionIndex = portData.xuwen?.congestionIndex ?? cmd.congestionIndex;
+  const displayWaitingVehicles = portDigestion.xuwen?.waitingVehicles ?? 0;
+  const maxCorridorPressure = Math.max(
+    corridorPressure.north?.pressure ?? 0,
+    corridorPressure.south?.pressure ?? 0,
+    corridorPressure.east?.pressure ?? 0,
+    corridorPressure.west?.pressure ?? 0
+  );
+  const resilienceScore = systemResilience?.score ?? 0;
+
+  const { label, color } = getLevel(displayCongestionIndex);
 
   // Scene-aware bar color
   const isEmergencyScene = commandScene === 'emergency';
 
   // Check if any strategy is done
   const hasExecuted = cmd.strategies.some(s => s.status === 'done');
-  const isRelieved = hasExecuted && cmd.congestionIndex <= 3.0;
+  const isRelieved = hasExecuted && displayCongestionIndex <= 3.0;
 
   // Get executed strategy for name display
   const executedStrategy = cmd.strategies.find(s => s.status === 'done');
@@ -39,7 +57,7 @@ export default function CommandSummaryBar() {
     .slice(0, 2);
 
   // Breathing animation for severe congestion (index > 6)
-  const shouldPulse = cmd.congestionIndex > 6 && !isRelieved;
+  const shouldPulse = displayCongestionIndex > 6 && !isRelieved;
 
   // Achievement calculation for escalation check
   const targetDrop = INITIAL_INDEX - cmd.predictedIndex;
@@ -49,7 +67,7 @@ export default function CommandSummaryBar() {
   // Check if escalation should be shown
   const hasUrgentAlert = cmd.commandFeed.some(f => f.type === 'alert' && f.urgent);
   const shouldShowEscalate =
-    cmd.congestionIndex > 8.0 ||
+    displayCongestionIndex > 8.0 ||
     (hasExecuted && achievementRate < 50) ||
     hasUrgentAlert;
 
@@ -132,7 +150,7 @@ export default function CommandSummaryBar() {
                 lineHeight: 1,
               }}
             >
-              {cmd.congestionIndex.toFixed(1)}
+              {displayCongestionIndex.toFixed(1)}
             </span>
             <span
               style={{
@@ -150,7 +168,7 @@ export default function CommandSummaryBar() {
               道路通畅
             </span>
             <span style={{ fontSize: 12, color: '#2ED573' }}>
-              拥堵已缓解（指数 {cmd.congestionIndex.toFixed(1)}，持续下降中）
+              拥堵已缓解（指数 {displayCongestionIndex.toFixed(1)}，持续下降中）
             </span>
           </>
         ) : (
@@ -166,7 +184,7 @@ export default function CommandSummaryBar() {
                 lineHeight: 1,
               }}
             >
-              {cmd.congestionIndex.toFixed(1)}
+              {displayCongestionIndex.toFixed(1)}
             </span>
 
             {/* Level badge */}
@@ -186,12 +204,15 @@ export default function CommandSummaryBar() {
               {label}
             </span>
 
-            {/* Metrics below */}
+            {/* Metrics synced from overview AI summary */}
             <span style={{ fontSize: 12, color: '#64748B' }}>
-              排队 {cmd.congestionDist}
+              待渡 {displayWaitingVehicles} 辆
             </span>
             <span style={{ fontSize: 12, color: '#64748B' }}>
-              持续 {cmd.congestionTime}min
+              通道压力 {maxCorridorPressure}%
+            </span>
+            <span style={{ fontSize: 12, color: '#64748B' }}>
+              韧性 {resilienceScore}
             </span>
           </>
         )}
