@@ -13,6 +13,7 @@ import CommandMode from './components/command/CommandMode';
 // import EmergencyMode from './components/emergency/EmergencyMode';
 import AnalysisMode from './components/analysis/AnalysisMode';
 import AIAnalysisMode from './components/ai-analysis/AIAnalysisMode';
+import AIStrategyMode from './components/ai-strategy/AIStrategyMode';
 import CheckpointModal from './components/CheckpointModal';
 import CongestionPredictionModal from './components/CongestionPredictionModal';
 import PoiDetailModal from './components/PoiDetailModal';
@@ -371,6 +372,7 @@ function App() {
         {/* {systemMode === 'emergency' && <EmergencyMode />} */}
         {systemMode === 'analysis' && <AnalysisMode />}
         {systemMode === 'ai-analysis' && <AIAnalysisMode />}
+        {systemMode === 'ai-strategy' && <AIStrategyMode />}
 
         {/* Modals */}
         <CheckpointModal />

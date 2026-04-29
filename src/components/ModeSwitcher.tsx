@@ -14,7 +14,9 @@ export default function ModeSwitcher() {
     // v2.0: 应急模式已合并到指挥模式，从导航栏隐藏
     // { id: 'emergency', label: '应急' },
     { id: 'analysis', label: '统计分析' },
-    { id: 'ai-analysis', label: 'AI分析' },
+    { id: 'ai-strategy', label: 'AI策略' },
+    // v2.0: AI分析模式已拆分，从导航栏隐藏
+    // { id: 'ai-analysis', label: 'AI分析' },
   ];
 
   return (

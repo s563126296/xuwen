@@ -1,20 +1,18 @@
-import { TrendingUp, GitCompare, Target, Clock, Grid3X3 } from 'lucide-react';
+import { Zap, TrendingUp, GitBranch, Share2 } from 'lucide-react';
 import { useAnalysisStore } from '../../stores';
-import TrendView from './TrendView';
-import CompareView from './CompareView';
-import StrategyAnalysisView from './StrategyAnalysisView';
-import EventTimelineView from './EventTimelineView';
-import HeatmapView from './HeatmapView';
+import StrategySimulator from '../analysis/StrategySimulator';
+import EvolutionRecords from '../analysis/EvolutionRecords';
+import DecisionTree from '../analysis/DecisionTree';
+import KnowledgeGraph from '../analysis/KnowledgeGraph';
 
 const TABS = [
-  { id: 'trend' as const, label: '趋势分析', icon: TrendingUp },
-  { id: 'compare' as const, label: '场景对比', icon: GitCompare },
-  { id: 'strategy' as const, label: '策略效果', icon: Target },
-  { id: 'event' as const, label: '事件详情', icon: Clock },
-  { id: 'heatmap' as const, label: '热力图', icon: Grid3X3 },
+  { id: 'simulator' as const, label: '策略模拟器', icon: Zap },
+  { id: 'evolution' as const, label: '进化记录', icon: TrendingUp },
+  { id: 'decision' as const, label: '决策树', icon: GitBranch },
+  { id: 'knowledge' as const, label: '知识图谱', icon: Share2 },
 ];
 
-export default function MainViewArea() {
+export default function AIStrategyMainView() {
   const activeView = useAnalysisStore((s) => s.analysisState.activeView);
   const setAnalysisView = useAnalysisStore((s) => s.setAnalysisView);
 
@@ -63,11 +61,10 @@ export default function MainViewArea() {
 
       {/* View content */}
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: 16, paddingRight: 24 }}>
-        {activeView === 'trend' && <TrendView />}
-        {activeView === 'compare' && <CompareView />}
-        {activeView === 'strategy' && <StrategyAnalysisView />}
-        {activeView === 'event' && <EventTimelineView />}
-        {activeView === 'heatmap' && <HeatmapView />}
+        {activeView === 'simulator' && <StrategySimulator />}
+        {activeView === 'evolution' && <EvolutionRecords />}
+        {activeView === 'decision' && <DecisionTree />}
+        {activeView === 'knowledge' && <KnowledgeGraph />}
       </div>
     </div>
   );
