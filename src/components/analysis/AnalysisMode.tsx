@@ -1,38 +1,54 @@
-import { useState } from 'react';
 import DataRangeBanner from './DataRangeBanner';
-import AnalysisElementList from '../ai-analysis/panels/AnalysisElementList';
-import StrategyRecommendationPanel from '../ai-analysis/panels/StrategyRecommendationPanel';
-import AIAnalysisMap from '../ai-analysis/AIAnalysisMap';
-import '../ai-analysis/ai-analysis-mode.css';
+import QueryFilterPanel from './QueryFilterPanel';
+import HistoryEventList from './HistoryEventList';
+import MainViewArea from './MainViewArea';
+import StatsSummaryPanel from './StatsSummaryPanel';
+import QuickFilterPanel from './QuickFilterPanel';
 
 export default function AnalysisMode() {
-  const [selectedElementId, setSelectedElementId] = useState<string | undefined>();
-
-  const handleElementClick = (elementId: string) => {
-    setSelectedElementId(elementId);
-    // TODO: 地图聚焦到对应区域
-  };
-
   return (
-    <div className="ai-analysis-mode">
+    <>
       <DataRangeBanner />
+      <div style={{
+        position: 'absolute',
+        top: 136,
+        bottom: 16,
+        left: 16,
+        right: 16,
+        display: 'flex',
+        gap: 12,
+      }}>
+        {/* Left column */}
+        <div style={{
+          width: 340,
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          overflow: 'hidden',
+        }}>
+          <QueryFilterPanel />
+          <HistoryEventList />
+        </div>
 
-      <div className="ai-analysis-content">
-        <aside className="ai-analysis-side ai-analysis-side--left">
-          <AnalysisElementList
-            onElementClick={handleElementClick}
-            selectedElementId={selectedElementId}
-          />
-        </aside>
+        {/* Center */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <MainViewArea />
+        </div>
 
-        <main className="ai-analysis-center">
-          <AIAnalysisMap />
-        </main>
-
-        <aside className="ai-analysis-side ai-analysis-side--right">
-          <StrategyRecommendationPanel selectedElementId={selectedElementId} />
-        </aside>
+        {/* Right column */}
+        <div style={{
+          width: 340,
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          overflow: 'hidden',
+        }}>
+          <StatsSummaryPanel />
+          <QuickFilterPanel />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
