@@ -1,7 +1,7 @@
 import CommandSummaryBar from './CommandSummaryBar';
 import CommandMap from './CommandMap';
 import StrategyCommandPanel from './StrategyCommandPanel';
-import CommandCommPanel from './CommandCommPanel';
+import ProcessTimeline from './ProcessTimeline';
 import StrategyConfirmModal from './StrategyConfirmModal';
 import PhotoViewerModal from './PhotoViewerModal';
 import ChatWindow from './ChatWindow';
@@ -130,8 +130,8 @@ export default function CommandMode() {
       {/* Video call window */}
       <VideoCallWindow />
 
-      {/* Bottom: comms panel */}
-      <CommandCommPanel />
+      {/* Bottom: process timeline */}
+      <ProcessTimeline />
 
       {/* Modals */}
       <StrategyConfirmModal />
