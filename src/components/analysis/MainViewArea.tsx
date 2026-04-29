@@ -1,4 +1,4 @@
-import { TrendingUp, GitCompare, Target, Clock, Grid3X3, Zap } from 'lucide-react';
+import { TrendingUp, GitCompare, Target, Clock, Grid3X3, Zap, Share2 } from 'lucide-react';
 import { useAnalysisStore } from '../../stores';
 import StrategySimulator from './StrategySimulator';
 import TrendView from './TrendView';
@@ -6,6 +6,7 @@ import CompareView from './CompareView';
 import StrategyAnalysisView from './StrategyAnalysisView';
 import EventTimelineView from './EventTimelineView';
 import HeatmapView from './HeatmapView';
+import KnowledgeGraph from './KnowledgeGraph';
 
 const TABS = [
   { id: 'simulator' as const, label: '策略模拟器', icon: Zap },
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'strategy' as const, label: '策略效果', icon: Target },
   { id: 'event' as const, label: '事件详情', icon: Clock },
   { id: 'heatmap' as const, label: '热力图', icon: Grid3X3 },
+  { id: 'knowledge' as const, label: '知识图谱', icon: Share2 },
 ];
 
 export default function MainViewArea() {
@@ -71,6 +73,7 @@ export default function MainViewArea() {
         {activeView === 'strategy' && <StrategyAnalysisView />}
         {activeView === 'event' && <EventTimelineView />}
         {activeView === 'heatmap' && <HeatmapView />}
+        {activeView === 'knowledge' && <KnowledgeGraph />}
       </div>
     </div>
   );

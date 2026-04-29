@@ -51,7 +51,7 @@ export interface AnalysisState {
   events: HistoryEvent[];
   strategyRecords: StrategyRecord[];
   selectedEventId: string | null;
-  activeView: 'simulator' | 'trend' | 'compare' | 'strategy' | 'event' | 'heatmap';
+  activeView: 'simulator' | 'trend' | 'compare' | 'strategy' | 'event' | 'heatmap' | 'knowledge';
   activeQuickFilter: string | null;
 }
 
