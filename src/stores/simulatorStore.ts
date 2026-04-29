@@ -1,16 +1,50 @@
 import { create } from 'zustand';
 
-// Simulation parameters
-export interface SimulatorParams {
-  selectedStrategies: string[]; // strategy IDs from STRATEGY_DB
+// Common environment parameters
+export interface CommonEnvParams {
   weather: 'clear' | 'rain' | 'fog';
   trafficVolume: 'low' | 'medium' | 'high';
   truckRatio: 'low' | 'medium' | 'high';
-  diversionRoadStatus: 'smooth' | 'congested';
   portCapacity: 'normal' | 'reduced' | 'enhanced';
   timePeriod: 'morning' | 'noon' | 'evening' | 'night';
   inflowRate: 'low' | 'medium' | 'high';
-  signalPlan: 'default' | 'peak' | 'emergency';
+}
+
+// Strategy-specific parameters
+export interface StrategySpecificParams {
+  // S-02/S-03: Diversion strategies
+  diversionRatio?: number; // 10-50 for S-02, 10-30 for S-03
+
+  // S-04: Signal timing
+  signalPlan?: 'A' | 'B' | 'C';
+  greenLightDuration?: number; // seconds
+
+  // S-06: Flow restriction
+  releaseInterval?: number; // minutes
+  vehiclesPerBatch?: number;
+
+  // S-07: Accident response
+  accidentLevel?: 'minor' | 'moderate' | 'severe';
+  resourceLevel?: 'level1' | 'level2' | 'level3';
+
+  // S-08: Parking area
+  parkingCapacity?: number; // vehicles
+  activationScope?: 'partial' | 'full';
+
+  // S-11: Time-sharing
+  passengerPriorityHours?: string; // e.g., "08:00-10:00,14:00-18:00"
+  cargoRestrictionHours?: string;
+
+  // S-15: Appointment
+  appointmentCoverage?: number; // 0-100%
+  slotCapacity?: number; // vehicles per hour
+}
+
+// Simulation parameters
+export interface SimulatorParams {
+  selectedStrategies: string[]; // strategy IDs from STRATEGY_DB
+  commonEnv: CommonEnvParams;
+  strategyParams: Record<string, StrategySpecificParams>; // keyed by strategy ID
 }
 
 // Simulation result for a single strategy
@@ -43,22 +77,27 @@ interface SimulatorState {
 
 // Store actions
 interface SimulatorActions {
-  setParam: <K extends keyof SimulatorParams>(key: K, value: SimulatorParams[K]) => void;
+  setCommonEnv: <K extends keyof CommonEnvParams>(key: K, value: CommonEnvParams[K]) => void;
+  setStrategyParam: (strategyId: string, key: keyof StrategySpecificParams, value: any) => void;
+  setSelectedStrategies: (strategies: string[]) => void;
   runSimulation: () => void;
   clearResults: () => void;
 }
 
 // Default parameters
-const DEFAULT_PARAMS: SimulatorParams = {
-  selectedStrategies: ['S-01', 'S-02'],
+const DEFAULT_COMMON_ENV: CommonEnvParams = {
   weather: 'clear',
   trafficVolume: 'high',
   truckRatio: 'medium',
-  diversionRoadStatus: 'smooth',
   portCapacity: 'normal',
   timePeriod: 'morning',
   inflowRate: 'high',
-  signalPlan: 'default',
+};
+
+const DEFAULT_PARAMS: SimulatorParams = {
+  selectedStrategies: ['S-01', 'S-02'],
+  commonEnv: DEFAULT_COMMON_ENV,
+  strategyParams: {},
 };
 
 export const useSimulatorStore = create<SimulatorState & SimulatorActions>((set, get) => ({
@@ -68,8 +107,25 @@ export const useSimulatorStore = create<SimulatorState & SimulatorActions>((set,
   isSimulating: false,
   aiRecommendation: null,
 
-  setParam: (key, value) => set((state) => ({
-    params: { ...state.params, [key]: value },
+  setCommonEnv: (key, value) => set((state) => ({
+    params: { ...state.params, commonEnv: { ...state.params.commonEnv, [key]: value } },
+  })),
+
+  setStrategyParam: (strategyId, key, value) => set((state) => ({
+    params: {
+      ...state.params,
+      strategyParams: {
+        ...state.params.strategyParams,
+        [strategyId]: {
+          ...state.params.strategyParams[strategyId],
+          [key]: value,
+        },
+      },
+    },
+  })),
+
+  setSelectedStrategies: (strategies) => set((state) => ({
+    params: { ...state.params, selectedStrategies: strategies },
   })),
 
   runSimulation: async () => {

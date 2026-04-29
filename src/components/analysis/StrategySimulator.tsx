@@ -6,25 +6,25 @@ import { useSimulatorStore } from '../../stores/simulatorStore';
 const STRATEGY_OPTIONS = [
   { id: 'S-01', name: '应急车道开放' },
   { id: 'S-02', name: 'S376 省道分流' },
-  { id: 'S-03', name: '进港大道信号灯优化' },
-  { id: 'S-04', name: '诱导屏引导' },
+  { id: 'S-03', name: 'G207 国道分流' },
+  { id: 'S-04', name: '信号灯配时优化' },
   { id: 'S-05', name: '港口增开班次' },
-  { id: 'S-06', name: '临时停车场启用' },
+  { id: 'S-06', name: '限流入港' },
   { id: 'S-07', name: '事故快速处置' },
-  { id: 'S-08', name: '交警现场疏导' },
-  { id: 'S-09', name: '社会化停车场协调' },
-  { id: 'S-10', name: '公交专线调度' },
-  { id: 'S-11', name: '货车限行' },
-  { id: 'S-12', name: '预约通行' },
-  { id: 'S-13', name: '动态车道调整' },
-  { id: 'S-14', name: '远端分流预警' },
-  { id: 'S-15', name: '应急通道启用' },
+  { id: 'S-08', name: '临时停车区启用' },
+  { id: 'S-09', name: '诱导屏信息发布' },
+  { id: 'S-10', name: '海安新港分流' },
+  { id: 'S-11', name: '货客分时通行' },
+  { id: 'S-12', name: '冷链车优先通道' },
+  { id: 'S-13', name: '潮汐车道借用' },
+  { id: 'S-14', name: '交警增援部署' },
+  { id: 'S-15', name: '预约通行引导' },
 ];
 
 const COLORS = ['#00D0E9', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444', '#EC4899'];
 
 export default function StrategySimulator() {
-  const { params, results, baselineCurve, isSimulating, aiRecommendation, setParam, runSimulation, clearResults } = useSimulatorStore();
+  const { params, results, baselineCurve, isSimulating, aiRecommendation, setCommonEnv, setStrategyParam, setSelectedStrategies, runSimulation, clearResults } = useSimulatorStore();
   const [hasRun, setHasRun] = useState(false);
 
   const handleRun = () => {
@@ -52,145 +52,168 @@ export default function StrategySimulator() {
         <div style={{
           width: 280,
           flexShrink: 0,
-          padding: 16,
+          display: 'flex',
+          flexDirection: 'column',
           background: 'rgba(13,27,42,0.6)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 8,
-          overflowY: 'auto',
+          overflow: 'hidden',
         }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#E2E8F0', marginBottom: 12 }}>
-            模拟参数
+          {/* Scrollable content area */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: 16,
+            paddingBottom: 8,
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#E2E8F0', marginBottom: 12 }}>
+              模拟参数
+            </div>
+
+            {/* Strategy Selection */}
+            <ParamSection label="选择策略">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {STRATEGY_OPTIONS.map((opt) => (
+                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={params.selectedStrategies.includes(opt.id)}
+                      onChange={(e) => {
+                        const newList = e.target.checked
+                          ? [...params.selectedStrategies, opt.id]
+                          : params.selectedStrategies.filter((id) => id !== opt.id);
+                        setSelectedStrategies(newList);
+                      }}
+                      style={{ accentColor: '#00D0E9' }}
+                    />
+                    <span style={{ fontSize: 11, color: '#CBD5E1' }}>{opt.name}</span>
+                  </label>
+                ))}
+              </div>
+            </ParamSection>
+
+            {/* Divider */}
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '12px 0' }} />
+
+            {/* Common Environment Parameters */}
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#00D0E9', marginBottom: 10 }}>
+              通用环境参数
+            </div>
+
+            <ParamSection label="天气条件">
+              <Select value={params.commonEnv.weather} onChange={(v) => setCommonEnv('weather', v as any)} options={[
+                { value: 'clear', label: '晴朗' },
+                { value: 'rain', label: '降雨' },
+                { value: 'fog', label: '大雾' },
+              ]} />
+            </ParamSection>
+
+            <ParamSection label="车流量">
+              <Select value={params.commonEnv.trafficVolume} onChange={(v) => setCommonEnv('trafficVolume', v as any)} options={[
+                { value: 'low', label: '低' },
+                { value: 'medium', label: '中' },
+                { value: 'high', label: '高' },
+              ]} />
+            </ParamSection>
+
+            <ParamSection label="货车比例">
+              <Select value={params.commonEnv.truckRatio} onChange={(v) => setCommonEnv('truckRatio', v as any)} options={[
+                { value: 'low', label: '低 (<20%)' },
+                { value: 'medium', label: '中 (20-40%)' },
+                { value: 'high', label: '高 (>40%)' },
+              ]} />
+            </ParamSection>
+
+            <ParamSection label="港口消化能力">
+              <Select value={params.commonEnv.portCapacity} onChange={(v) => setCommonEnv('portCapacity', v as any)} options={[
+                { value: 'reduced', label: '降低' },
+                { value: 'normal', label: '正常' },
+                { value: 'enhanced', label: '增强' },
+              ]} />
+            </ParamSection>
+
+            <ParamSection label="时段">
+              <Select value={params.commonEnv.timePeriod} onChange={(v) => setCommonEnv('timePeriod', v as any)} options={[
+                { value: 'morning', label: '早高峰' },
+                { value: 'noon', label: '午间' },
+                { value: 'evening', label: '晚高峰' },
+                { value: 'night', label: '夜间' },
+              ]} />
+            </ParamSection>
+
+            <ParamSection label="流入速率">
+              <Select value={params.commonEnv.inflowRate} onChange={(v) => setCommonEnv('inflowRate', v as any)} options={[
+                { value: 'low', label: '低' },
+                { value: 'medium', label: '中' },
+                { value: 'high', label: '高' },
+              ]} />
+            </ParamSection>
+
+            {/* Divider */}
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '12px 0' }} />
+
+            {/* Strategy-Specific Parameters */}
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#00D0E9', marginBottom: 10 }}>
+              策略专属参数
+            </div>
+
+            <StrategySpecificSection
+              selectedStrategies={params.selectedStrategies}
+              strategyParams={params.strategyParams}
+              setStrategyParam={setStrategyParam}
+            />
           </div>
 
-          {/* Selected Strategies */}
-          <ParamSection label="选择策略">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {STRATEGY_OPTIONS.map((opt) => (
-                <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={params.selectedStrategies.includes(opt.id)}
-                    onChange={(e) => {
-                      const newList = e.target.checked
-                        ? [...params.selectedStrategies, opt.id]
-                        : params.selectedStrategies.filter((id) => id !== opt.id);
-                      setParam('selectedStrategies', newList);
-                    }}
-                    style={{ accentColor: '#00D0E9' }}
-                  />
-                  <span style={{ fontSize: 11, color: '#CBD5E1' }}>{opt.name}</span>
-                </label>
-              ))}
+          {/* Fixed bottom button area */}
+          <div style={{
+            padding: '12px 16px',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(13,27,42,0.9)',
+            flexShrink: 0,
+          }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={handleRun}
+                disabled={isSimulating || params.selectedStrategies.length === 0}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  background: params.selectedStrategies.length === 0 ? 'rgba(100,116,139,0.3)' : 'linear-gradient(135deg, #00D0E9 0%, #0891B2 100%)',
+                  border: 'none',
+                  borderRadius: 6,
+                  color: '#FFF',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: params.selectedStrategies.length === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  opacity: isSimulating ? 0.6 : 1,
+                }}
+              >
+                <Play size={14} />
+                {isSimulating ? '模拟中...' : '运行模拟'}
+              </button>
+              <button
+                onClick={handleReset}
+                disabled={!hasRun}
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(100,116,139,0.3)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 6,
+                  color: '#94A3B8',
+                  fontSize: 12,
+                  cursor: hasRun ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <RotateCcw size={14} />
+              </button>
             </div>
-          </ParamSection>
-
-          <ParamSection label="天气条件">
-            <Select value={params.weather} onChange={(v) => setParam('weather', v as any)} options={[
-              { value: 'clear', label: '晴朗' },
-              { value: 'rain', label: '降雨' },
-              { value: 'fog', label: '大雾' },
-            ]} />
-          </ParamSection>
-
-          <ParamSection label="车流量">
-            <Select value={params.trafficVolume} onChange={(v) => setParam('trafficVolume', v as any)} options={[
-              { value: 'low', label: '低' },
-              { value: 'medium', label: '中' },
-              { value: 'high', label: '高' },
-            ]} />
-          </ParamSection>
-
-          <ParamSection label="货车比例">
-            <Select value={params.truckRatio} onChange={(v) => setParam('truckRatio', v as any)} options={[
-              { value: 'low', label: '低 (<20%)' },
-              { value: 'medium', label: '中 (20-40%)' },
-              { value: 'high', label: '高 (>40%)' },
-            ]} />
-          </ParamSection>
-
-          <ParamSection label="分流道路状态">
-            <Select value={params.diversionRoadStatus} onChange={(v) => setParam('diversionRoadStatus', v as any)} options={[
-              { value: 'smooth', label: '畅通' },
-              { value: 'congested', label: '拥堵' },
-            ]} />
-          </ParamSection>
-
-          <ParamSection label="港口消化能力">
-            <Select value={params.portCapacity} onChange={(v) => setParam('portCapacity', v as any)} options={[
-              { value: 'reduced', label: '降低' },
-              { value: 'normal', label: '正常' },
-              { value: 'enhanced', label: '增强' },
-            ]} />
-          </ParamSection>
-
-          <ParamSection label="时段">
-            <Select value={params.timePeriod} onChange={(v) => setParam('timePeriod', v as any)} options={[
-              { value: 'morning', label: '早高峰' },
-              { value: 'noon', label: '午间' },
-              { value: 'evening', label: '晚高峰' },
-              { value: 'night', label: '夜间' },
-            ]} />
-          </ParamSection>
-
-          <ParamSection label="流入速率">
-            <Select value={params.inflowRate} onChange={(v) => setParam('inflowRate', v as any)} options={[
-              { value: 'low', label: '低' },
-              { value: 'medium', label: '中' },
-              { value: 'high', label: '高' },
-            ]} />
-          </ParamSection>
-
-          <ParamSection label="信号配时方案">
-            <Select value={params.signalPlan} onChange={(v) => setParam('signalPlan', v as any)} options={[
-              { value: 'default', label: '默认' },
-              { value: 'peak', label: '高峰' },
-              { value: 'emergency', label: '应急' },
-            ]} />
-          </ParamSection>
-
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <button
-              onClick={handleRun}
-              disabled={isSimulating || params.selectedStrategies.length === 0}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                background: params.selectedStrategies.length === 0 ? 'rgba(100,116,139,0.3)' : 'linear-gradient(135deg, #00D0E9 0%, #0891B2 100%)',
-                border: 'none',
-                borderRadius: 6,
-                color: '#FFF',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: params.selectedStrategies.length === 0 ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                opacity: isSimulating ? 0.6 : 1,
-              }}
-            >
-              <Play size={14} />
-              {isSimulating ? '模拟中...' : '运行模拟'}
-            </button>
-            <button
-              onClick={handleReset}
-              disabled={!hasRun}
-              style={{
-                padding: '8px 12px',
-                background: 'rgba(100,116,139,0.3)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 6,
-                color: '#94A3B8',
-                fontSize: 12,
-                cursor: hasRun ? 'pointer' : 'not-allowed',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
-              <RotateCcw size={14} />
-            </button>
           </div>
         </div>
 
@@ -344,11 +367,244 @@ export default function StrategySimulator() {
   );
 }
 
+// Strategy-specific parameter section
+function StrategySpecificSection({
+  selectedStrategies,
+  strategyParams,
+  setStrategyParam,
+}: {
+  selectedStrategies: string[];
+  strategyParams: Record<string, any>;
+  setStrategyParam: (strategyId: string, key: any, value: any) => void;
+}) {
+  if (selectedStrategies.length === 0) {
+    return (
+      <div style={{
+        padding: '12px 10px',
+        background: 'rgba(15,23,42,0.5)',
+        border: '1px dashed rgba(255,255,255,0.12)',
+        borderRadius: 6,
+        color: '#64748B',
+        fontSize: 11,
+        textAlign: 'center',
+      }}>
+        请选择至少一个策略查看专属参数
+      </div>
+    );
+  }
+
+  // Only show cards for strategies that have specific params
+  const strategiesWithParams = selectedStrategies.filter((id) =>
+    ['S-02', 'S-03', 'S-04', 'S-06', 'S-07', 'S-08', 'S-11', 'S-15'].includes(id)
+  );
+
+  if (strategiesWithParams.length === 0) {
+    return (
+      <div style={{
+        padding: '12px 10px',
+        background: 'rgba(15,23,42,0.5)',
+        border: '1px dashed rgba(255,255,255,0.12)',
+        borderRadius: 6,
+        color: '#64748B',
+        fontSize: 11,
+        textAlign: 'center',
+      }}>
+        已选策略暂无专属参数配置
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {strategiesWithParams.map((strategyId) => (
+        <StrategyParamCard
+          key={strategyId}
+          strategyId={strategyId}
+          params={strategyParams[strategyId] || {}}
+          setStrategyParam={setStrategyParam}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Strategy parameter card
+function StrategyParamCard({
+  strategyId,
+  params,
+  setStrategyParam,
+}: {
+  strategyId: string;
+  params: Record<string, any>;
+  setStrategyParam: (strategyId: string, key: any, value: any) => void;
+}) {
+  const strategy = STRATEGY_OPTIONS.find((s) => s.id === strategyId);
+  if (!strategy) return null;
+
+  return (
+    <div style={{
+      padding: 10,
+      background: 'rgba(15,23,42,0.5)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 6,
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: '#E2E8F0', marginBottom: 8 }}>
+        {strategy.name}
+      </div>
+
+      {strategyId === 'S-02' && (
+        <ParamSection label="分流比例">
+          <Select value={String(params.diversionRatio ?? 30)} onChange={(v) => setStrategyParam(strategyId, 'diversionRatio', Number(v))} options={[
+            { value: '10', label: '10%' },
+            { value: '20', label: '20%' },
+            { value: '30', label: '30%' },
+            { value: '40', label: '40%' },
+            { value: '50', label: '50%' },
+          ]} />
+        </ParamSection>
+      )}
+
+      {strategyId === 'S-03' && (
+        <>
+          <ParamSection label="分流比例">
+            <Select value={String(params.diversionRatio ?? 20)} onChange={(v) => setStrategyParam(strategyId, 'diversionRatio', Number(v))} options={[
+              { value: '10', label: '10%' },
+              { value: '15', label: '15%' },
+              { value: '20', label: '20%' },
+              { value: '25', label: '25%' },
+              { value: '30', label: '30%' },
+            ]} />
+          </ParamSection>
+          <div style={{ fontSize: 10, color: '#F59E0B', marginTop: 6, lineHeight: 1.4 }}>
+            提示：S-02 + S-03 总分流比例建议不超过 60%
+          </div>
+        </>
+      )}
+
+      {strategyId === 'S-04' && (
+        <>
+          <ParamSection label="配时方案">
+            <Select value={params.signalPlan ?? 'A'} onChange={(v) => setStrategyParam(strategyId, 'signalPlan', v)} options={[
+              { value: 'A', label: '方案 A（轻度）' },
+              { value: 'B', label: '方案 B（中度）' },
+              { value: 'C', label: '方案 C（重度）' },
+            ]} />
+          </ParamSection>
+          <ParamSection label="绿灯时长">
+            <Select value={String(params.greenLightDuration ?? 50)} onChange={(v) => setStrategyParam(strategyId, 'greenLightDuration', Number(v))} options={[
+              { value: '50', label: '50 秒' },
+              { value: '60', label: '60 秒' },
+              { value: '70', label: '70 秒' },
+            ]} />
+          </ParamSection>
+        </>
+      )}
+
+      {strategyId === 'S-06' && (
+        <>
+          <ParamSection label="放行间隔">
+            <Select value={String(params.releaseInterval ?? 5)} onChange={(v) => setStrategyParam(strategyId, 'releaseInterval', Number(v))} options={[
+              { value: '3', label: '3 分钟' },
+              { value: '5', label: '5 分钟' },
+              { value: '8', label: '8 分钟' },
+              { value: '10', label: '10 分钟' },
+            ]} />
+          </ParamSection>
+          <ParamSection label="每批车辆数">
+            <Select value={String(params.vehiclesPerBatch ?? 40)} onChange={(v) => setStrategyParam(strategyId, 'vehiclesPerBatch', Number(v))} options={[
+              { value: '20', label: '20 辆' },
+              { value: '30', label: '30 辆' },
+              { value: '40', label: '40 辆' },
+              { value: '50', label: '50 辆' },
+            ]} />
+          </ParamSection>
+        </>
+      )}
+
+      {strategyId === 'S-07' && (
+        <>
+          <ParamSection label="事故等级">
+            <Select value={params.accidentLevel ?? 'moderate'} onChange={(v) => setStrategyParam(strategyId, 'accidentLevel', v)} options={[
+              { value: 'minor', label: '轻微事故' },
+              { value: 'moderate', label: '一般事故' },
+              { value: 'severe', label: '严重事故' },
+            ]} />
+          </ParamSection>
+          <ParamSection label="资源等级">
+            <Select value={params.resourceLevel ?? 'level2'} onChange={(v) => setStrategyParam(strategyId, 'resourceLevel', v)} options={[
+              { value: 'level1', label: '一级响应' },
+              { value: 'level2', label: '二级响应' },
+              { value: 'level3', label: '三级响应' },
+            ]} />
+          </ParamSection>
+        </>
+      )}
+
+      {strategyId === 'S-08' && (
+        <>
+          <ParamSection label="停车区容量">
+            <Select value={String(params.parkingCapacity ?? 300)} onChange={(v) => setStrategyParam(strategyId, 'parkingCapacity', Number(v))} options={[
+              { value: '200', label: '200 辆' },
+              { value: '300', label: '300 辆' },
+              { value: '400', label: '400 辆' },
+              { value: '500', label: '500 辆' },
+            ]} />
+          </ParamSection>
+          <ParamSection label="启用范围">
+            <Select value={params.activationScope ?? 'partial'} onChange={(v) => setStrategyParam(strategyId, 'activationScope', v)} options={[
+              { value: 'partial', label: '部分启用' },
+              { value: 'full', label: '全部启用' },
+            ]} />
+          </ParamSection>
+        </>
+      )}
+
+      {strategyId === 'S-11' && (
+        <>
+          <ParamSection label="客车优先时段">
+            <Select value={params.passengerPriorityHours ?? '08:00-10:00,14:00-18:00'} onChange={(v) => setStrategyParam(strategyId, 'passengerPriorityHours', v)} options={[
+              { value: '08:00-10:00,14:00-18:00', label: '08:00-10:00, 14:00-18:00' },
+              { value: '07:00-10:00,15:00-19:00', label: '07:00-10:00, 15:00-19:00' },
+            ]} />
+          </ParamSection>
+          <ParamSection label="货车限制时段">
+            <Select value={params.cargoRestrictionHours ?? '06:00-08:00,10:00-14:00,18:00-22:00'} onChange={(v) => setStrategyParam(strategyId, 'cargoRestrictionHours', v)} options={[
+              { value: '06:00-08:00,10:00-14:00,18:00-22:00', label: '06:00-08:00, 10:00-14:00, 18:00-22:00' },
+              { value: '06:00-09:00,11:00-15:00,19:00-22:00', label: '06:00-09:00, 11:00-15:00, 19:00-22:00' },
+            ]} />
+          </ParamSection>
+        </>
+      )}
+
+      {strategyId === 'S-15' && (
+        <>
+          <ParamSection label="预约覆盖率">
+            <Select value={String(params.appointmentCoverage ?? 50)} onChange={(v) => setStrategyParam(strategyId, 'appointmentCoverage', Number(v))} options={[
+              { value: '30', label: '30%' },
+              { value: '50', label: '50%' },
+              { value: '70', label: '70%' },
+              { value: '80', label: '80%' },
+            ]} />
+          </ParamSection>
+          <ParamSection label="时段容量">
+            <Select value={String(params.slotCapacity ?? 400)} onChange={(v) => setStrategyParam(strategyId, 'slotCapacity', Number(v))} options={[
+              { value: '300', label: '300 辆/时' },
+              { value: '400', label: '400 辆/时' },
+              { value: '500', label: '500 辆/时' },
+              { value: '600', label: '600 辆/时' },
+            ]} />
+          </ParamSection>
+        </>
+      )}
+    </div>
+  );
+}
+
 // Helper components
 function ParamSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ fontSize: 11, color: '#94A3B8', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ fontSize: 10, color: '#94A3B8', marginBottom: 5, fontWeight: 500 }}>{label}</div>
       {children}
     </div>
   );
@@ -361,12 +617,12 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
       onChange={(e) => onChange(e.target.value)}
       style={{
         width: '100%',
-        padding: '6px 8px',
+        padding: '5px 7px',
         background: 'rgba(15,23,42,0.8)',
         border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 4,
         color: '#E2E8F0',
-        fontSize: 11,
+        fontSize: 10,
         cursor: 'pointer',
       }}
     >
@@ -376,3 +632,4 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
     </select>
   );
 }
+

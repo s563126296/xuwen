@@ -114,11 +114,12 @@ const TARGET_CONGESTION = 3.0;
  */
 function computeModifier(params: SimulatorParams, modifiers: StrategyEffectData['effectModel']['factorModifiers']): number {
   let mod = 0;
-  if (params.weather === 'rain') mod += modifiers.weather_rain;
-  if (params.weather === 'fog') mod += modifiers.weather_fog;
-  if (params.truckRatio === 'high') mod += modifiers.truck_ratio_high;
-  if (params.diversionRoadStatus === 'congested') mod += modifiers.road_congested;
-  if (params.inflowRate === 'high') mod += modifiers.inflow_high;
+  const env = params.commonEnv;
+  if (env.weather === 'rain') mod += modifiers.weather_rain;
+  if (env.weather === 'fog') mod += modifiers.weather_fog;
+  if (env.truckRatio === 'high') mod += modifiers.truck_ratio_high;
+  if (env.inflowRate === 'high') mod += modifiers.inflow_high;
+  // Note: road_congested modifier removed as it's now strategy-specific
   return mod;
 }
 
@@ -140,20 +141,52 @@ export function generateBaselineCurve(): Array<{ time: number; congestion: numbe
 /**
  * Simulate a single strategy and return its congestion curve.
  */
-function simulateStrategy(strategyData: StrategyEffectData, params: SimulatorParams): SimulationResult {
+function simulateStrategy(strategyData: StrategyEffectData, params: SimulatorParams, strategyParams?: any): SimulationResult {
   const modifier = computeModifier(params, strategyData.effectModel.factorModifiers);
   const effectiveEffect = Math.max(0.1, strategyData.effectModel.baseEffect + modifier);
 
-  // Volume multiplier from traffic volume param
-  const volumeMultiplier = params.trafficVolume === 'high' ? 0.85 : params.trafficVolume === 'medium' ? 1.0 : 1.15;
-  // Port capacity affects strategies differently
-  const portMultiplier = params.portCapacity === 'enhanced' ? 1.1 : params.portCapacity === 'reduced' ? 0.8 : 1.0;
-  // Signal plan bonus for signal-related strategies
-  const signalBonus = (strategyData.id === 'S-04' && params.signalPlan === 'peak') ? 0.2 : 0;
-  // Time period affects effectiveness
-  const timeMult = params.timePeriod === 'night' ? 1.2 : params.timePeriod === 'evening' ? 0.9 : 1.0;
+  const env = params.commonEnv;
 
-  const totalEffect = effectiveEffect * volumeMultiplier * portMultiplier * timeMult + signalBonus;
+  // Volume multiplier from traffic volume param
+  const volumeMultiplier = env.trafficVolume === 'high' ? 0.85 : env.trafficVolume === 'medium' ? 1.0 : 1.15;
+  // Port capacity affects strategies differently
+  const portMultiplier = env.portCapacity === 'enhanced' ? 1.1 : env.portCapacity === 'reduced' ? 0.8 : 1.0;
+
+  // Strategy-specific parameter bonuses
+  let strategyBonus = 0;
+  if (strategyData.id === 'S-02' || strategyData.id === 'S-03') {
+    // Diversion ratio affects effectiveness
+    const ratio = strategyParams?.diversionRatio ?? (strategyData.id === 'S-02' ? 30 : 20);
+    strategyBonus = (ratio - 20) * 0.01; // Higher ratio = more effect
+  } else if (strategyData.id === 'S-04') {
+    // Signal plan affects effectiveness
+    const plan = strategyParams?.signalPlan ?? 'A';
+    strategyBonus = plan === 'C' ? 0.3 : plan === 'B' ? 0.2 : 0.1;
+  } else if (strategyData.id === 'S-06') {
+    // Flow restriction effectiveness
+    const interval = strategyParams?.releaseInterval ?? 5;
+    strategyBonus = (10 - interval) * 0.02; // Shorter interval = more flow = more effect
+  } else if (strategyData.id === 'S-07') {
+    // Accident response level
+    const level = strategyParams?.resourceLevel ?? 'level2';
+    strategyBonus = level === 'level3' ? 0.3 : level === 'level2' ? 0.15 : 0;
+  } else if (strategyData.id === 'S-08') {
+    // Parking capacity
+    const capacity = strategyParams?.parkingCapacity ?? 300;
+    strategyBonus = (capacity - 200) * 0.001;
+  } else if (strategyData.id === 'S-11') {
+    // Time-sharing effectiveness (higher in high truck ratio scenarios)
+    if (env.truckRatio === 'high') strategyBonus = 0.25;
+  } else if (strategyData.id === 'S-15') {
+    // Appointment coverage
+    const coverage = strategyParams?.appointmentCoverage ?? 50;
+    strategyBonus = coverage * 0.003;
+  }
+
+  // Time period affects effectiveness
+  const timeMult = env.timePeriod === 'night' ? 1.2 : env.timePeriod === 'evening' ? 0.9 : 1.0;
+
+  const totalEffect = effectiveEffect * volumeMultiplier * portMultiplier * timeMult + strategyBonus;
   const arrivalTime = strategyData.arrivalMin;
 
   // Generate curve using exponential decay after resource arrival
@@ -185,7 +218,7 @@ function simulateStrategy(strategyData: StrategyEffectData, params: SimulatorPar
 
   // Compute confidence based on historical data and param alignment
   const baseConfidence = strategyData.historicalSuccessRate * 100;
-  const weatherPenalty = params.weather !== 'clear' ? 8 : 0;
+  const weatherPenalty = env.weather !== 'clear' ? 8 : 0;
   const confidence = Math.round(Math.min(95, Math.max(30, baseConfidence - weatherPenalty)));
 
   return {
@@ -206,7 +239,7 @@ export function simulateStrategies(params: SimulatorParams): SimulationResult[] 
   return params.selectedStrategies
     .map((id) => STRATEGY_EFFECTS[id])
     .filter(Boolean)
-    .map((data) => simulateStrategy(data, params));
+    .map((data) => simulateStrategy(data, params, params.strategyParams[data.id]));
 }
 
 /**
@@ -223,12 +256,12 @@ export function generateAIRecommendation(results: SimulationResult[], params: Si
   scored.sort((a, b) => b.score - a.score);
   const best = scored[0];
 
+  const env = params.commonEnv;
   const riskFactors: string[] = [];
-  if (params.weather === 'rain') riskFactors.push('降雨天气降低策略效果');
-  if (params.weather === 'fog') riskFactors.push('大雾天气严重影响港口班次和能见度');
-  if (params.inflowRate === 'high') riskFactors.push('高流入量可能导致策略效果延迟');
-  if (params.diversionRoadStatus === 'congested') riskFactors.push('分流道路已拥堵，分流效果受限');
-  if (params.truckRatio === 'high') riskFactors.push('货车比例高，车道利用率下降');
+  if (env.weather === 'rain') riskFactors.push('降雨天气降低策略效果');
+  if (env.weather === 'fog') riskFactors.push('大雾天气严重影响港口班次和能见度');
+  if (env.inflowRate === 'high') riskFactors.push('高流入量可能导致策略效果延迟');
+  if (env.truckRatio === 'high') riskFactors.push('货车比例高，车道利用率下降');
 
   return {
     bestStrategyId: best.strategyId,
