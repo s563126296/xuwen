@@ -25,6 +25,9 @@ import BottomChartsBar from './components/overview/BottomChartsBar';
 import { useUIStore, useOverviewStore } from './stores';
 import { computeAiSummary } from './utils/aiSummaryEngine';
 import { initTTS, BroadcastScenarios } from './utils/assistantEngine';
+import { predictRisk } from './utils/riskPredictionEngine';
+import { useCommandStore } from './stores/commandStore';
+import { computeCauses, recommendStrategies } from './utils/commandEngine';
 import './App.css';
 
 interface DeviceData {
@@ -133,6 +136,88 @@ function App() {
       BroadcastScenarios.alertTriggered(activeAlert.content);
     }
   }, [activeAlert, systemMode]);
+
+  // v2.0 Batch3: Predictive risk monitoring (runs every 15s in overview mode)
+  const portDigestionForRisk = useOverviewStore((s) => s.portDigestion);
+  const corridorPressureForRisk = useOverviewStore((s) => s.corridorPressure);
+  const weatherCouplingForRisk = useOverviewStore((s) => s.weatherCoupling);
+  const specialEventsForRisk = useOverviewStore((s) => s.specialEvents);
+  const setActiveAlertForRisk = useOverviewStore((s) => s.setActiveAlert);
+  const enterCommandModeForRisk = useCommandStore((s) => s.enterCommandMode);
+
+  useEffect(() => {
+    if (systemMode !== 'overview') return;
+
+    const runPrediction = () => {
+      const overviewState = useOverviewStore.getState();
+      const portData = overviewState.portData.xuwen;
+      const maxPressure = Math.max(
+        ...Object.values(overviewState.corridorPressure).map((c) => c.pressure)
+      );
+      const hasAccident = overviewState.specialEvents.some(
+        (e) => /事故/.test(e.type) && e.impactLevel === 'critical'
+      );
+      const holiday = overviewState.specialEvents.find((e) => e.isHoliday);
+
+      const prediction = predictRisk({
+        currentIndex: portData.congestionIndex,
+        trend: portData.congestionIndex > 4 ? 'rising' : portData.congestionIndex > 2.5 ? 'stable' : 'falling',
+        portBacklog: overviewState.portDigestion.xuwen.waitingVehicles,
+        weatherSeverity: overviewState.weatherCoupling.overallScore,
+        corridorPressureMax: maxPressure,
+        hasAccident,
+        isHoliday: !!holiday,
+        holidayMultiplier: holiday?.baselineMultiplier ?? 1,
+      });
+
+      if (prediction.level === 'emergency') {
+        // Auto-switch to command mode with precomputed data
+        const engineSlice = {
+          portDigestion: overviewState.portDigestion,
+          tidalEffect: overviewState.tidalEffect,
+          corridorPressure: overviewState.corridorPressure,
+          weatherCoupling: overviewState.weatherCoupling,
+          specialEvents: overviewState.specialEvents,
+        };
+        const causes = computeCauses(engineSlice);
+        const strategies = recommendStrategies(causes, engineSlice);
+
+        enterCommandModeForRisk(
+          { title: '紧急自动切换', description: prediction.reason, priority: 'high', mode: 'command' },
+          { riskPrediction: prediction, precomputedCauses: causes, precomputedStrategies: strategies, earlyEntry: true }
+        );
+      } else if (prediction.level === 'high') {
+        // Show popup suggesting early command mode entry
+        setActiveAlertForRisk({
+          id: `risk-high-${Date.now()}`,
+          type: 'predictive',
+          title: '高风险预警',
+          content: prediction.reason,
+          factors: [
+            { name: '港口积压', weight: overviewState.portDigestion.xuwen.waitingVehicles > 800 ? 60 : 30 },
+            { name: '通道压力', weight: maxPressure > 85 ? 25 : 10 },
+            { name: '天气影响', weight: overviewState.weatherCoupling.overallScore > 50 ? 15 : 5 },
+          ],
+          suggestion: `建议提前进入指挥模式，预计 ${prediction.timeToReach} 分钟后拥堵指数达 ${prediction.predictedIndex.toFixed(1)}（置信度 ${prediction.confidence}%）`,
+          timestamp: Date.now(),
+        });
+      }
+      // Low risk: the AiSummaryBar already shows yellow warning via riskForecast field
+    };
+
+    // Run once immediately, then every 15 seconds
+    runPrediction();
+    const interval = setInterval(runPrediction, 15000);
+    return () => clearInterval(interval);
+  }, [
+    systemMode,
+    portDigestionForRisk,
+    corridorPressureForRisk,
+    weatherCouplingForRisk,
+    specialEventsForRisk,
+    setActiveAlertForRisk,
+    enterCommandModeForRisk,
+  ]);
 
   // 感知设备数据
   const deviceData: DeviceData[] = [

@@ -1,5 +1,6 @@
 import { Navigation } from 'lucide-react';
 import HeaderWeather from './overview/HeaderWeather';
+import ScenarioPresetPanel from './common/ScenarioPresetPanel';
 
 interface Props {
   time: Date;
@@ -44,6 +45,7 @@ export default function Header({ time, children }: Props) {
           <span className="time-label">{year}.{month}.{day} 星期{weekday}</span>
         </div>
         <HeaderWeather />
+        <ScenarioPresetPanel />
       </div>
 
       <style>{`

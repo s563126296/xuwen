@@ -3,10 +3,19 @@ import { computeCauses, recommendStrategies } from '../utils/commandEngine';
 import { useUIStore } from './uiStore';
 import { useOverviewStore } from './overviewStore';
 import type { AiSummaryAction } from './overviewStore';
+import type { RiskPrediction } from '../utils/riskPredictionEngine';
 
 type SystemMode = 'overview' | 'port' | 'command' | 'emergency' | 'analysis';
 type PortType = 'xuwen' | 'haian' | 'overview';
 type DirectionType = 'inbound' | 'outbound';
+
+// Pre-computed data for early command mode entry (high-risk pre-preparation)
+export interface PrecomputedCommandData {
+  riskPrediction?: RiskPrediction;
+  precomputedCauses?: import('./commandStore').CongestionCause[];
+  precomputedStrategies?: import('./commandStore').CommandStrategy[];
+  earlyEntry?: boolean; // true when entering before actual threshold
+}
 
 // === Command Mode Type Definitions ===
 
@@ -527,7 +536,7 @@ interface CommandStoreState {
   commandState: CommandState;
   setCommandState: (data: Partial<CommandState>) => void;
   setCommandScene: (scene: 'congestion' | 'emergency') => void;
-  enterCommandMode: (action: AiSummaryAction | null) => void;
+  enterCommandMode: (action: AiSummaryAction | null, precomputed?: PrecomputedCommandData) => void;
   exitCommandMode: () => void;
   executeStrategy: (strategyId: string) => void;
   deployDrone: () => void;
@@ -623,7 +632,7 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
     commandState: { ...state.commandState, activeExecutionId: id },
   })),
 
-  enterCommandMode: (action) => set((state) => {
+  enterCommandMode: (action, precomputed) => set((state) => {
     // Get overview data for cause computation
     const overviewState = useOverviewStore.getState();
     const engineSlice = {
@@ -634,8 +643,39 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
       specialEvents: overviewState.specialEvents,
     };
 
-    const causes = computeCauses(engineSlice);
-    const strategies = recommendStrategies(causes, engineSlice);
+    // Use precomputed attribution/recommendation when entering early from predictive trigger
+    const causes = precomputed?.precomputedCauses ?? computeCauses(engineSlice);
+    const strategies = precomputed?.precomputedStrategies ?? recommendStrategies(causes, engineSlice);
+
+    // Pre-query available resources for early entry
+    const availableResources = {
+      policeOnDuty: 10,
+      policeAvailable: 4,
+      dronesAvailable: 2,
+      towTrucksAvailable: 2,
+    };
+
+    // Add pre-preparation feed entries when entering early
+    const precomputedFeedItems = precomputed?.earlyEntry
+      ? [
+          {
+            id: `precompute-system-${Date.now()}`,
+            type: 'system' as const,
+            source: '系统',
+            time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            content: `已提前进入指挥模式，预测 ${precomputed.riskPrediction?.timeToReach ?? 30} 分钟后拥堵指数将达 ${precomputed.riskPrediction?.predictedIndex.toFixed(1) ?? '6.0'}`,
+            icon: 'warning' as const,
+          },
+          {
+            id: `precompute-ai-${Date.now() + 1}`,
+            type: 'ai' as const,
+            source: 'AI分析',
+            time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            content: `已完成预判归因、策略预推荐和资源预查询。当前可用资源：警力 ${availableResources.policeAvailable} 组、无人机 ${availableResources.dronesAvailable} 架、拖车 ${availableResources.towTrucksAvailable} 台`,
+            icon: 'ai' as const,
+          },
+        ]
+      : [];
 
     // Update UI store for cross-store communication
     useUIStore.getState().setSystemMode('command' as SystemMode);
@@ -648,9 +688,17 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
         context: { triggerAction: action, activatedAt: Date.now() },
         causes,
         strategies,
+        resources: availableResources,
+        congestionIndex: precomputed?.earlyEntry && precomputed.riskPrediction
+          ? Math.max(state.commandState.congestionIndex, precomputed.riskPrediction.predictedIndex - 1.2)
+          : state.commandState.congestionIndex,
+        predictedIndex: precomputed?.riskPrediction?.predictedIndex ?? state.commandState.predictedIndex,
         executionSteps: state.commandState.executionSteps.map((s) => ({ ...s, status: 'pending' as const })),
         actualIndex: null,
         currentStep: 1,
+        commandFeed: precomputedFeedItems.length > 0
+          ? [...precomputedFeedItems, ...state.commandState.commandFeed]
+          : state.commandState.commandFeed,
       },
     };
   }),
