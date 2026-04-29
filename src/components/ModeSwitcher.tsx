@@ -27,7 +27,10 @@ export default function ModeSwitcher() {
         <button
           key={mode.id}
           aria-label={`切换到${mode.label}`}
-          onClick={() => setSystemMode(mode.id)}
+          onClick={() => {
+            (window as any).__lastManualModeSwitch = Date.now();
+            setSystemMode(mode.id);
+          }}
           style={{
             padding: '6px 14px',
             borderRadius: 4,

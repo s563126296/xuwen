@@ -171,6 +171,11 @@ function App() {
       });
 
       if (prediction.level === 'emergency') {
+        // Only auto-switch if user hasn't manually navigated back to overview recently
+        // (prevents loop: user clicks overview → 15s later auto-switches back to command)
+        const lastManualSwitch = (window as any).__lastManualModeSwitch || 0;
+        if (Date.now() - lastManualSwitch < 30000) return; // 30s cooldown after manual switch
+
         // Auto-switch to command mode with precomputed data
         const engineSlice = {
           portDigestion: overviewState.portDigestion,

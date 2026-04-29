@@ -54,8 +54,9 @@ export function predictRisk(inputs: RiskInputs): RiskPrediction {
   // Predict 30-min-ahead congestion index
   const predicted = predict30MinIndex(inputs);
 
-  // Emergency: predicted > 7 with high confidence
-  if (predicted.index > 7 && predicted.confidence > 70) {
+  // Emergency: predicted > 7 with high confidence AND current index already > 5
+  // (prevents scenario presets from triggering emergency when current index is moderate)
+  if (predicted.index > 7 && predicted.confidence > 70 && currentIndex > 5) {
     return {
       level: 'emergency',
       predictedIndex: predicted.index,
