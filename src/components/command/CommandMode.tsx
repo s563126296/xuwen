@@ -20,6 +20,7 @@ import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
 export default function CommandMode() {
   const commandFeed = useCommandStore((s) => s.commandState.commandFeed);
   const fieldPersons = useCommandStore((s) => s.commandState.fieldPersons);
+  const strategies = useCommandStore((s) => s.commandState.strategies);
   const commandScene = useCommandStore((s) => s.commandState.commandScene);
   const setCommandScene = useCommandStore((s) => s.setCommandScene);
   const startCall = useCommandStore((s) => s.startCall);
@@ -33,7 +34,7 @@ export default function CommandMode() {
     incomingCallMessage,
     incomingCallPerson,
     setShowIncomingCall,
-  } = useIncomingCallHandler(commandFeed, fieldPersons);
+  } = useIncomingCallHandler(commandFeed, fieldPersons, strategies);
 
   const handleAcceptVideo = () => {
     setShowIncomingCall(false);
