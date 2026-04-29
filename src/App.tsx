@@ -71,10 +71,13 @@ function App() {
   const weatherCoupling = useOverviewStore((s) => s.weatherCoupling);
   const specialEvents = useOverviewStore((s) => s.specialEvents);
   const setAiSummary = useOverviewStore((s) => s.setAiSummary);
+  const scenarioPresetActive = useOverviewStore((s) => s.scenarioPresetActive);
 
   // Auto-compute AI summary when indicators change (overview mode only)
   useEffect(() => {
     if (systemMode !== 'overview') return;
+    // Skip auto-computation when scenario preset is active
+    if (scenarioPresetActive) return;
 
     const summary = computeAiSummary({
       portDigestion: portDigestion.xuwen,
@@ -94,6 +97,7 @@ function App() {
     setAiSummary(summary);
   }, [
     systemMode,
+    scenarioPresetActive,
     portDigestion,
     tidalEffect,
     corridorPressure,

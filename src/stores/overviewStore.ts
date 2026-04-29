@@ -575,6 +575,10 @@ interface OverviewState {
   currentWeather: CurrentWeather;
   setCurrentWeather: (data: CurrentWeather) => void;
 
+  // v2.0 Batch3: Scenario preset lock — pauses auto-computation of AI summary
+  scenarioPresetActive: boolean;
+  setScenarioPresetActive: (active: boolean) => void;
+
   // v2.0 Phase 2: Active alert popup
   activeAlert: {
     id: string;
@@ -666,6 +670,10 @@ export const useOverviewStore = create<OverviewState>((set) => ({
 
   currentWeather: defaultCurrentWeather,
   setCurrentWeather: (data) => set({ currentWeather: data }),
+
+  // v2.0 Batch3: Scenario preset lock
+  scenarioPresetActive: false,
+  setScenarioPresetActive: (active) => set({ scenarioPresetActive: active }),
 
   // v2.0 Phase 2: Active alert popup
   activeAlert: null,

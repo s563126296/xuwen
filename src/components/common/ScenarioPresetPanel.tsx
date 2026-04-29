@@ -15,6 +15,7 @@ interface ScenarioPreset {
 export default function ScenarioPresetPanel() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const presetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setSystemMode = useUIStore((s) => s.setSystemMode);
   const updatePortData = useOverviewStore((s) => s.updatePortData);
@@ -23,6 +24,7 @@ export default function ScenarioPresetPanel() {
   const setActiveAlert = useOverviewStore((s) => s.setActiveAlert);
   const clearActiveAlert = useOverviewStore((s) => s.clearActiveAlert);
   const setCorridorPressure = useOverviewStore((s) => s.setCorridorPressure);
+  const setScenarioPresetActive = useOverviewStore((s) => s.setScenarioPresetActive);
   const setCommandState = useCommandStore((s) => s.setCommandState);
   const setMonitorState = useCommandStore((s) => s.setMonitorState);
 
@@ -38,6 +40,21 @@ export default function ScenarioPresetPanel() {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
+  // Helper to activate scenario preset lock with auto-clear after 30s
+  const activatePresetLock = () => {
+    // Clear any existing timer
+    if (presetTimerRef.current) {
+      clearTimeout(presetTimerRef.current);
+    }
+    // Set flag to pause auto-computation
+    setScenarioPresetActive(true);
+    // Auto-clear after 30 seconds
+    presetTimerRef.current = setTimeout(() => {
+      setScenarioPresetActive(false);
+      presetTimerRef.current = null;
+    }, 30000);
+  };
+
   const scenarios: ScenarioPreset[] = [
     {
       id: 'normal',
@@ -45,6 +62,7 @@ export default function ScenarioPresetPanel() {
       description: '拥堵指数 2.5，港口正常运转',
       color: '#2ED573',
       apply: () => {
+        activatePresetLock();
         setSystemMode('overview');
         updatePortData('xuwen', { congestionIndex: 2.5, status: 'normal' });
         setPortDigestion({
@@ -80,6 +98,7 @@ export default function ScenarioPresetPanel() {
       description: '车流上升，港口排队增加',
       color: '#F5A623',
       apply: () => {
+        activatePresetLock();
         setSystemMode('overview');
         updatePortData('xuwen', { congestionIndex: 3.8, status: 'busy' });
         setPortDigestion({
@@ -124,6 +143,7 @@ export default function ScenarioPresetPanel() {
       description: '港口积压+车流激增',
       color: '#FF6B35',
       apply: () => {
+        activatePresetLock();
         setSystemMode('overview');
         updatePortData('xuwen', { congestionIndex: 5.2, status: 'congested' });
         setPortDigestion({
@@ -183,6 +203,7 @@ export default function ScenarioPresetPanel() {
       description: '事故发生，拥堵指数7.0',
       color: '#DC2626',
       apply: () => {
+        activatePresetLock();
         setSystemMode('overview');
         updatePortData('xuwen', { congestionIndex: 7.0, status: 'congested' });
         setPortDigestion({
