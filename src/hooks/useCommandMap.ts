@@ -49,7 +49,7 @@ export function useCommandMap(
   const personMarkersRef = useRef<Record<string, any>>({});
 
   const commandState = useCommandStore((s) => s.commandState);
-  const { congestionIndex, focusRoad, fieldPersons } = commandState;
+  const { congestionIndex, focusRoad, fieldPersons, strategies } = commandState;
 
   // 初始化地图
   useEffect(() => {
@@ -599,6 +599,192 @@ export function useCommandMap(
       `);
     });
   }, [fieldPersons, mapReady]);
+
+  // === Strategy execution visual effects ===
+  useEffect(() => {
+    if (!mapReady) return;
+
+    const executingStrategy = strategies.find((s) => s.status === 'executing');
+    if (!executingStrategy) return;
+
+    const timers: NodeJS.Timeout[] = [];
+
+    // Stage 1 (immediate): Route activation
+    const activateRoute = () => {
+      if (executingStrategy.id === 'S-02' && s376LineRef.current) {
+        // S376 diversion: dashed → animated flow
+        s376LineRef.current.setOptions({
+          strokeColor: '#00D0E9',
+          strokeWeight: 6,
+          strokeOpacity: 1.0,
+          strokeStyle: 'solid',
+          strokeDasharray: undefined,
+        });
+        // Add animation class via custom overlay
+        const path = s376LineRef.current.getPath();
+        if (path && path.length > 0) {
+          // Create animated overlay
+          const animatedLine = new (window as any).AMap.Polyline({
+            path: S376_PATH,
+            strokeColor: '#00D0E9',
+            strokeWeight: 6,
+            strokeOpacity: 0.8,
+            lineJoin: 'round',
+            lineCap: 'round',
+            zIndex: 15,
+            showDir: true,
+          });
+          mapInstance.current?.add(animatedLine);
+          timers.push(setTimeout(() => animatedLine.hide(), 15000) as any);
+        }
+      } else if (executingStrategy.id === 'S-01' && emergencyLaneRef.current) {
+        // Emergency lane: dashed → animated flow
+        emergencyLaneRef.current.setOptions({
+          strokeColor: '#00D0E9',
+          strokeWeight: 6,
+          strokeOpacity: 1.0,
+          strokeStyle: 'solid',
+          strokeDasharray: undefined,
+        });
+        const animatedLine = new (window as any).AMap.Polyline({
+          path: EMERGENCY_LANE_PATH,
+          strokeColor: '#00D0E9',
+          strokeWeight: 6,
+          strokeOpacity: 0.8,
+          lineJoin: 'round',
+          lineCap: 'round',
+          zIndex: 15,
+          showDir: true,
+        });
+        mapInstance.current?.add(animatedLine);
+        timers.push(setTimeout(() => animatedLine.hide(), 15000) as any);
+      } else if (executingStrategy.id === 'S-03' && g207LineRef.current) {
+        // G207 diversion
+        g207LineRef.current.setOptions({
+          strokeColor: '#00D0E9',
+          strokeWeight: 7,
+          strokeOpacity: 1.0,
+        });
+      }
+    };
+
+    activateRoute();
+
+    // Stage 2 (~3s): Personnel movement animation
+    const timer1 = setTimeout(() => {
+      // Find personnel assigned to this strategy
+      const assignedPersonIds = executingStrategy.id === 'S-02'
+        ? ['p-01'] // Zhang San for S376
+        : executingStrategy.id === 'S-01'
+        ? ['p-06'] // Zhou Ba for emergency lane
+        : [];
+
+      assignedPersonIds.forEach((personId) => {
+        const marker = personMarkersRef.current[personId];
+        if (marker) {
+          const person = fieldPersons.find((p) => p.id === personId);
+          if (person) {
+            const roleColorMap: Record<string, string> = {
+              '交警': '#00D0E9',
+              '拖车司机': '#F5A623',
+              '无人机操作员': '#60A5FA',
+              '港口调度员': '#2ED573',
+            };
+            const roleIcons: Record<string, string> = {
+              '交警': '警',
+              '拖车司机': '拖',
+              '无人机操作员': '机',
+              '港口调度员': '调',
+            };
+            const roleChar = roleIcons[person.role] || '人';
+            const roleColor = roleColorMap[person.role] || '#00D0E9';
+
+            // Add pulsing animation
+            marker.setContent(`
+              <div class="command-person command-person--executing" data-status="executing">
+                <div class="command-person__core" style="background:${roleColor}44;border-color:${roleColor};color:${roleColor};box-shadow:0 0 12px ${roleColor}88">${roleChar}</div>
+                <div class="command-person__info">
+                  <div class="command-person__name" style="color:${roleColor}">${person.name} ${person.role}</div>
+                  <div class="command-person__task">执行中...</div>
+                </div>
+              </div>
+            `);
+          }
+        }
+      });
+    }, 3000);
+    timers.push(timer1);
+
+    // Stage 3 (~6s): Equipment activation
+    const timer2 = setTimeout(() => {
+      // Flash equipment markers related to the strategy
+      const equipmentNodes = executingStrategy.id === 'S-02'
+        ? ['huasi-gate', 's376-gate']
+        : executingStrategy.id === 'S-01'
+        ? ['lane-control', 'maichen-gate']
+        : [];
+
+      equipmentNodes.forEach((nodeId) => {
+        const marker = nodeMarkersRef.current[nodeId];
+        if (marker) {
+          const content = marker.getContent();
+          if (typeof content === 'string') {
+            // Add flashing effect by temporarily changing color
+            const flashContent = content.replace(/color:#[A-F0-9]{6}/gi, 'color:#00D0E9');
+            marker.setContent(flashContent);
+
+            // Restore after 2s
+            timers.push(setTimeout(() => {
+              marker.setContent(content);
+            }, 2000) as any);
+          }
+        }
+      });
+    }, 6000);
+    timers.push(timer2);
+
+    // Stage 4 (~15s): Result visualization - congestion heat change
+    const timer3 = setTimeout(() => {
+      // Gradually change congestion segment colors
+      mainPressureSegmentsRef.current.forEach((segment, i) => {
+        const style = SEGMENT_STYLES[i];
+        // Reduce intensity to show relief
+        const reliefFactor = 0.6;
+        segment.setOptions({
+          strokeOpacity: style.opacity * reliefFactor,
+          strokeColor: i < SEGMENT_STYLES.length - 1 ? style.color : '#F59E0B', // Last segment improves
+        });
+      });
+
+      // Update main pressure label
+      if (mainPressureLabelRef.current) {
+        const reducedVehicles = Math.floor(focusRoad.vehicles * 0.85);
+        const reducedQueue = `${(parseFloat(focusRoad.queueLength) * 0.85).toFixed(1)} 公里`;
+        const reducedTime = Math.floor(focusRoad.durationMinutes * 0.85);
+
+        mainPressureLabelRef.current.setText(
+          `进港大道压力链\n${reducedQueue} · ${reducedVehicles}辆 · ${reducedTime}min`
+        );
+        mainPressureLabelRef.current.setStyle({
+          'background-color': 'rgba(245,158,11,0.15)',
+          border: '1px solid rgba(245,158,11,0.35)',
+          'border-radius': '7px',
+          padding: '6px 10px',
+          'font-size': '11px',
+          color: '#F59E0B',
+          'white-space': 'pre-line',
+          'text-align': 'center',
+          'line-height': '1.5',
+        });
+      }
+    }, 15000);
+    timers.push(timer3);
+
+    // Cleanup timers on unmount or when strategy changes
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+    };
+  }, [strategies, mapReady, fieldPersons, focusRoad]);
 
   // === Layer visibility control ===
   const mapLayers = useCommandStore((s) => s.commandState.mapLayers);
