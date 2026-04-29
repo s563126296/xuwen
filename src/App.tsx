@@ -26,8 +26,6 @@ import { useUIStore, useOverviewStore } from './stores';
 import { computeAiSummary } from './utils/aiSummaryEngine';
 import { initTTS, BroadcastScenarios } from './utils/assistantEngine';
 import { predictRisk } from './utils/riskPredictionEngine';
-import { useCommandStore } from './stores/commandStore';
-import { computeCauses, recommendStrategies } from './utils/commandEngine';
 import './App.css';
 
 interface DeviceData {
@@ -143,7 +141,6 @@ function App() {
   const weatherCouplingForRisk = useOverviewStore((s) => s.weatherCoupling);
   const specialEventsForRisk = useOverviewStore((s) => s.specialEvents);
   const setActiveAlertForRisk = useOverviewStore((s) => s.setActiveAlert);
-  const enterCommandModeForRisk = useCommandStore((s) => s.enterCommandMode);
 
   useEffect(() => {
     if (systemMode !== 'overview') return;
@@ -171,26 +168,20 @@ function App() {
       });
 
       if (prediction.level === 'emergency') {
-        // Only auto-switch if user hasn't manually navigated back to overview recently
-        // (prevents loop: user clicks overview → 15s later auto-switches back to command)
-        const lastManualSwitch = (window as any).__lastManualModeSwitch || 0;
-        if (Date.now() - lastManualSwitch < 30000) return; // 30s cooldown after manual switch
-
-        // Auto-switch to command mode with precomputed data
-        const engineSlice = {
-          portDigestion: overviewState.portDigestion,
-          tidalEffect: overviewState.tidalEffect,
-          corridorPressure: overviewState.corridorPressure,
-          weatherCoupling: overviewState.weatherCoupling,
-          specialEvents: overviewState.specialEvents,
-        };
-        const causes = computeCauses(engineSlice);
-        const strategies = recommendStrategies(causes, engineSlice);
-
-        enterCommandModeForRisk(
-          { title: '紧急自动切换', description: prediction.reason, priority: 'high', mode: 'command' },
-          { riskPrediction: prediction, precomputedCauses: causes, precomputedStrategies: strategies, earlyEntry: true }
-        );
+        // Show urgent alert popup, let user decide to switch
+        setActiveAlertForRisk({
+          id: `risk-emergency-${Date.now()}`,
+          type: 'emergency',
+          title: '紧急事故预警',
+          content: prediction.reason,
+          factors: [
+            { name: '港口积压', weight: overviewState.portDigestion.xuwen.waitingVehicles > 800 ? 60 : 30 },
+            { name: '通道压力', weight: maxPressure > 85 ? 25 : 10 },
+            { name: '天气影响', weight: overviewState.weatherCoupling.overallScore > 50 ? 15 : 5 },
+          ],
+          suggestion: '建议立即进入指挥模式，启动应急处置',
+          timestamp: Date.now(),
+        });
       } else if (prediction.level === 'high') {
         // Show popup suggesting early command mode entry
         setActiveAlertForRisk({
@@ -221,7 +212,6 @@ function App() {
     weatherCouplingForRisk,
     specialEventsForRisk,
     setActiveAlertForRisk,
-    enterCommandModeForRisk,
   ]);
 
   // 感知设备数据

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Settings, X } from 'lucide-react';
+import { FlaskConical, X } from 'lucide-react';
 import { useUIStore } from '../../stores/uiStore';
 import { useOverviewStore } from '../../stores/overviewStore';
 import { useCommandStore } from '../../stores/commandStore';
@@ -25,7 +25,6 @@ export default function ScenarioPresetPanel() {
   const setCorridorPressure = useOverviewStore((s) => s.setCorridorPressure);
   const setCommandState = useCommandStore((s) => s.setCommandState);
   const setMonitorState = useCommandStore((s) => s.setMonitorState);
-  const enterCommandMode = useCommandStore((s) => s.enterCommandMode);
 
   // Close on click outside
   useEffect(() => {
@@ -184,6 +183,7 @@ export default function ScenarioPresetPanel() {
       description: '事故发生，拥堵指数7.0',
       color: '#DC2626',
       apply: () => {
+        setSystemMode('overview');
         updatePortData('xuwen', { congestionIndex: 7.0, status: 'congested' });
         setPortDigestion({
           xuwen: { waitingVehicles: 1500, digestionMinutes: 480, shipInterval: 35, shipCapacity: 280, nextDeparture: '14:30', loadEfficiency: 0.95 },
@@ -195,13 +195,38 @@ export default function ScenarioPresetPanel() {
           west: { name: '西向通道（G207方向）', currentFlow: 1480, designCapacity: 1600, pressure: 93, directionLabel: 'G207国道' },
           east: { name: '东向通道（环半岛方向）', currentFlow: 950, designCapacity: 1400, pressure: 68, directionLabel: '环半岛公路' },
         });
-        clearActiveAlert();
-        // Auto-switch to command mode
-        enterCommandMode({
-          title: '紧急事故处置',
-          description: '检测到交通事故，拥堵指数7.0',
-          priority: 'high',
-          mode: 'command',
+        setAiSummary({
+          level: 'red',
+          conclusion: '紧急事故',
+          suggestionHint: '进港大道发生交通事故，拥堵指数7.0',
+          badges: [{ label: '事故', type: 'flow' }, { label: '指数7.0', type: 'port' }, { label: '韧性 25', type: 'resilience' }],
+          headerTitle: '紧急事故 · 建议立即进入指挥模式',
+          metrics: [
+            { value: '7.0', label: '拥堵指数', color: '#DC2626' },
+            { value: '1,500', label: '港口等待(辆)', color: '#DC2626' },
+            { value: '99%', label: '南向通道压力', color: '#DC2626' },
+            { value: '25', label: '应急韧性', color: '#DC2626' },
+          ],
+          forecasts: [{ time: '现在', text: '进港大道发生交通事故，需立即处置', level: 'danger' }],
+          actions: [{ title: '立即进入指挥模式', description: '启动事故快速处置方案', priority: 'high', mode: 'command' }],
+          compares: [],
+          compareConclusion: '',
+          expanded: true,
+          riskForecast: { next30min: 'high', next1hour: 'high' },
+          predictionConfidence: 95,
+        });
+        setActiveAlert({
+          id: 'emergency-alert',
+          type: 'emergency',
+          title: '紧急事故预警',
+          content: '进港大道发生交通事故，拥堵指数已达 7.0，需立即启动应急处置',
+          factors: [
+            { name: '交通事故', weight: 70 },
+            { name: '港口积压', weight: 20 },
+            { name: '通道饱和', weight: 10 },
+          ],
+          suggestion: '建议立即进入指挥模式，启动 S-07 事故快速处置方案',
+          timestamp: Date.now(),
         });
       },
     },
@@ -373,7 +398,7 @@ export default function ScenarioPresetPanel() {
           }
         }}
       >
-        <Settings size={16} color={open ? '#00D0E9' : '#94A3B8'} />
+        <FlaskConical size={16} color={open ? '#00D0E9' : '#94A3B8'} />
       </button>
 
       {/* Dropdown panel */}
