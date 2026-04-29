@@ -28,6 +28,10 @@ export default function StrategySimulator() {
   const [hasRun, setHasRun] = useState(false);
 
   const handleRun = () => {
+    if (params.selectedStrategies.length > 5) {
+      alert('最多只能同时选择 5 个策略进行对比');
+      return;
+    }
     runSimulation();
     setHasRun(true);
   };
@@ -72,23 +76,33 @@ export default function StrategySimulator() {
 
             {/* Strategy Selection */}
             <ParamSection label="选择策略">
+              {params.selectedStrategies.length >= 5 && (
+                <div style={{ fontSize: 10, color: '#F59E0B', marginBottom: 6 }}>
+                  已达上限（最多 5 个）
+                </div>
+              )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {STRATEGY_OPTIONS.map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={params.selectedStrategies.includes(opt.id)}
-                      onChange={(e) => {
-                        const newList = e.target.checked
-                          ? [...params.selectedStrategies, opt.id]
-                          : params.selectedStrategies.filter((id) => id !== opt.id);
-                        setSelectedStrategies(newList);
-                      }}
-                      style={{ accentColor: '#00D0E9' }}
-                    />
-                    <span style={{ fontSize: 11, color: '#CBD5E1' }}>{opt.name}</span>
-                  </label>
-                ))}
+                {STRATEGY_OPTIONS.map((opt) => {
+                  const checked = params.selectedStrategies.includes(opt.id);
+                  const disabled = !checked && params.selectedStrategies.length >= 5;
+                  return (
+                    <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1 }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={(e) => {
+                          const newList = e.target.checked
+                            ? [...params.selectedStrategies, opt.id]
+                            : params.selectedStrategies.filter((id) => id !== opt.id);
+                          setSelectedStrategies(newList);
+                        }}
+                        style={{ accentColor: '#00D0E9' }}
+                      />
+                      <span style={{ fontSize: 11, color: '#CBD5E1' }}>{opt.name}</span>
+                    </label>
+                  );
+                })}
               </div>
             </ParamSection>
 
@@ -279,8 +293,9 @@ export default function StrategySimulator() {
                   <YAxis
                     stroke="#64748B"
                     tick={{ fill: '#94A3B8', fontSize: 11 }}
-                    label={{ value: '拥堵指数', angle: -90, position: 'insideLeft', fill: '#94A3B8', fontSize: 11 }}
+                    label={{ value: '拥堵指数', angle: -90, position: 'insideLeft', dx: -10, fill: '#94A3B8', fontSize: 11 }}
                     domain={[0, 8]}
+                    width={50}
                   />
                   <Tooltip
                     contentStyle={{
@@ -291,16 +306,16 @@ export default function StrategySimulator() {
                     }}
                     labelStyle={{ color: '#E2E8F0' }}
                   />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="baseline" stroke="#64748B" strokeWidth={2} strokeDasharray="5 5" name="无干预基线" dot={false} />
+                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconType="plainline" />
+                  <Line type="natural" dataKey="baseline" stroke="#64748B" strokeWidth={2} strokeDasharray="5 5" name="无干预基线" dot={false} />
                   {results.map((result, i) => (
                     <Line
                       key={result.strategyId}
-                      type="monotone"
+                      type="natural"
                       dataKey={`strategy_${i}`}
                       stroke={COLORS[i % COLORS.length]}
-                      strokeWidth={2}
-                      name={result.strategyName}
+                      strokeWidth={2.5}
+                      name={`${result.strategyName}`}
                       dot={false}
                     />
                   ))}

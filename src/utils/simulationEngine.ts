@@ -131,7 +131,7 @@ export function generateBaselineCurve(): Array<{ time: number; congestion: numbe
   for (let t = 0; t <= SIMULATION_DURATION; t += SIMULATION_INTERVAL) {
     // Natural decay is very slow without intervention
     const naturalDecay = 0.005 * t;
-    const noise = (Math.sin(t * 0.3) * 0.15);
+    const noise = (Math.sin(t * 0.3) * 0.05);
     const congestion = Math.max(TARGET_CONGESTION + 0.5, STARTING_CONGESTION - naturalDecay + noise);
     points.push({ time: t, congestion: Math.round(congestion * 100) / 100 });
   }
@@ -206,7 +206,7 @@ function simulateStrategy(strategyData: StrategyEffectData, params: SimulatorPar
       congestion = STARTING_CONGESTION - drop;
     }
     // Add slight noise for realism
-    const noise = Math.sin(t * 0.5 + strategyData.arrivalMin) * 0.08;
+    const noise = Math.sin(t * 0.5 + strategyData.arrivalMin) * 0.03;
     congestion = Math.max(TARGET_CONGESTION * 0.9, congestion + noise);
     congestion = Math.round(congestion * 100) / 100;
     curve.push({ time: t, congestion });
