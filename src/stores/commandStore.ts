@@ -328,6 +328,15 @@ export interface CommandState {
   // v2.0 Batch1: Execution records for learning loop
   executionRecords: ExecutionRecord[];
   activeExecutionId: string | null;
+
+  // Map layer visibility control
+  mapLayers: {
+    congestion: boolean;
+    personnel: boolean;
+    equipment: boolean;
+    routes: boolean;
+    vehicles: boolean;
+  };
 }
 
 // === Default Command State ===
@@ -528,6 +537,13 @@ const defaultCommandState: CommandState = {
   },
   executionRecords: [],
   activeExecutionId: null,
+  mapLayers: {
+    congestion: true,
+    personnel: true,
+    equipment: false,
+    routes: false,
+    vehicles: false,
+  },
 };
 
 // === Command Store Interface ===
@@ -536,6 +552,8 @@ interface CommandStoreState {
   commandState: CommandState;
   setCommandState: (data: Partial<CommandState>) => void;
   setCommandScene: (scene: 'congestion' | 'emergency') => void;
+  toggleMapLayer: (layer: keyof CommandState['mapLayers']) => void;
+  setAllMapLayers: (visible: boolean) => void;
   enterCommandMode: (action: AiSummaryAction | null, precomputed?: PrecomputedCommandData) => void;
   exitCommandMode: () => void;
   executeStrategy: (strategyId: string) => void;
@@ -569,6 +587,29 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
 
   setCommandScene: (scene) => set((state) => ({
     commandState: { ...state.commandState, commandScene: scene },
+  })),
+
+  toggleMapLayer: (layer) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      mapLayers: {
+        ...state.commandState.mapLayers,
+        [layer]: !state.commandState.mapLayers[layer],
+      },
+    },
+  })),
+
+  setAllMapLayers: (visible) => set((state) => ({
+    commandState: {
+      ...state.commandState,
+      mapLayers: {
+        congestion: visible,
+        personnel: visible,
+        equipment: visible,
+        routes: visible,
+        vehicles: visible,
+      },
+    },
   })),
 
   setMonitorState: (data) => set((state) => ({

@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useUIStore } from '../../stores/uiStore';
 import { useCommandMap } from '../../hooks/useCommandMap';
 import CommandMapLegend from './CommandMapLegend';
+import LayerFilterButtons from './LayerFilterButtons';
 import './command-map.css';
 
 export default function CommandMap() {
@@ -43,7 +44,12 @@ export default function CommandMap() {
           <span style={{ color: '#94A3B8', fontSize: 11 }}>{mapError}</span>
         </div>
       )}
-      {mapReady && <CommandMapLegend />}
+      {mapReady && (
+        <>
+          <LayerFilterButtons />
+          <CommandMapLegend />
+        </>
+      )}
     </div>
   );
 }

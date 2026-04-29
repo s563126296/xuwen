@@ -20,6 +20,9 @@ interface CommandMapRefs {
   emergencyLaneRef: React.MutableRefObject<any>;
   emergencyLabelRef: React.MutableRefObject<any>;
   g207LineRef: React.MutableRefObject<any>;
+  g207LabelRef: React.MutableRefObject<any>;
+  backPressureLineRef: React.MutableRefObject<any>;
+  diversionReturnRef: React.MutableRefObject<any>;
   nodeMarkersRef: React.MutableRefObject<Record<string, any>>;
   personMarkersRef: React.MutableRefObject<Record<string, any>>;
 }
@@ -39,6 +42,9 @@ export function useCommandMap(
   const emergencyLaneRef = useRef<any>(null);
   const emergencyLabelRef = useRef<any>(null);
   const g207LineRef = useRef<any>(null);
+  const g207LabelRef = useRef<any>(null);
+  const backPressureLineRef = useRef<any>(null);
+  const diversionReturnRef = useRef<any>(null);
   const nodeMarkersRef = useRef<Record<string, any>>({});
   const personMarkersRef = useRef<Record<string, any>>({});
 
@@ -173,6 +179,7 @@ export function useCommandMap(
         zIndex: 12,
       });
       map.add(backPressureLine);
+      backPressureLineRef.current = backPressureLine;
 
       // 分流承接
       const diversionReturn = new AMap.Polyline({
@@ -185,6 +192,7 @@ export function useCommandMap(
         zIndex: 12,
       });
       map.add(diversionReturn);
+      diversionReturnRef.current = diversionReturn;
 
       // === 走廊标签 ===
 
@@ -276,6 +284,7 @@ export function useCommandMap(
         zIndex: 120,
       });
       map.add(g207Label);
+      g207LabelRef.current = g207Label;
 
       // === 固定节点 Marker ===
 
@@ -591,6 +600,46 @@ export function useCommandMap(
     });
   }, [fieldPersons, mapReady]);
 
+  // === Layer visibility control ===
+  const mapLayers = useCommandStore((s) => s.commandState.mapLayers);
+
+  useEffect(() => {
+    if (!mapReady) return;
+
+    // Helper: show/hide an AMap overlay
+    const setVisible = (overlay: any, visible: boolean) => {
+      if (!overlay) return;
+      if (visible) {
+        overlay.show();
+      } else {
+        overlay.hide();
+      }
+    };
+
+    // Congestion layer: main pressure segments + label + back pressure line
+    mainPressureSegmentsRef.current.forEach((seg) => setVisible(seg, mapLayers.congestion));
+    setVisible(mainPressureLabelRef.current, mapLayers.congestion);
+    setVisible(backPressureLineRef.current, mapLayers.congestion);
+
+    // Personnel layer: person markers
+    Object.values(personMarkersRef.current).forEach((marker) => setVisible(marker, mapLayers.personnel));
+
+    // Equipment layer: fixed node markers (gates, control points, port, dispatch center)
+    Object.values(nodeMarkersRef.current).forEach((marker) => setVisible(marker, mapLayers.equipment));
+
+    // Routes layer: diversion routes (S376, emergency lane, G207, diversion return)
+    setVisible(s376LineRef.current, mapLayers.routes);
+    setVisible(s376LabelRef.current, mapLayers.routes);
+    setVisible(emergencyLaneRef.current, mapLayers.routes);
+    setVisible(emergencyLabelRef.current, mapLayers.routes);
+    setVisible(g207LineRef.current, mapLayers.routes);
+    setVisible(g207LabelRef.current, mapLayers.routes);
+    setVisible(diversionReturnRef.current, mapLayers.routes);
+
+    // Vehicles layer: special vehicle markers (placeholder for future implementation)
+    // Currently no special vehicle markers on map; this will control them when added
+  }, [mapLayers, mapReady]);
+
   return {
     mapInstance,
     mapReady,
@@ -603,6 +652,9 @@ export function useCommandMap(
       emergencyLaneRef,
       emergencyLabelRef,
       g207LineRef,
+      g207LabelRef,
+      backPressureLineRef,
+      diversionReturnRef,
       nodeMarkersRef,
       personMarkersRef,
     } as CommandMapRefs,
