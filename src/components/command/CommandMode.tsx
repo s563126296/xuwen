@@ -14,6 +14,7 @@ import EmergencyPanels from './EmergencyPanels';
 import DeviationMonitorPanel from './DeviationMonitorPanel';
 import InquiryModal from './InquiryModal';
 import StrategyFeedbackPanel from './StrategyFeedbackPanel';
+import CustomStrategyModal from './CustomStrategyModal';
 import { useCommandStore } from '../../stores/commandStore';
 import { useIncomingCallHandler } from '../../hooks/useIncomingCallHandler';
 
@@ -154,6 +155,7 @@ export default function CommandMode() {
 
       <InquiryModal />
       <StrategyFeedbackPanel />
+      <CustomStrategyModal />
     </>
   );
 }

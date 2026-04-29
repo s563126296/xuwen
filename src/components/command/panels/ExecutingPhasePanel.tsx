@@ -118,7 +118,7 @@ export default function ExecutingPhasePanel() {
       )}
 
       <button
-        onClick={() => alert('自定义策略功能开发中')}
+        onClick={() => setActiveModal('custom-strategy')}
         style={{
           width: '100%',
           padding: '10px 0',

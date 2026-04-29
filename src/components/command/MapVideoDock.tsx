@@ -1,9 +1,10 @@
-import { Plane, Maximize2 } from 'lucide-react';
+import { Plane, Maximize2, Link2 } from 'lucide-react';
 import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
 import Modal from '../Modal';
 import VideoFeed from './video-dock/VideoFeed';
 import ThumbnailStrip from './video-dock/ThumbnailStrip';
+import { useStrategyVideoSync } from '../../hooks/useStrategyVideoSync';
 
 // Camera mode AI detection boxes (small panel)
 const CAMERA_DETECTION_BOXES = [
@@ -34,6 +35,9 @@ export default function MapVideoDock() {
   const setActiveModal = useUIStore((s) => s.setActiveModal);
   const setActiveVideoChannel = useCommandStore((s) => s.setActiveVideoChannel);
   const { isDroneDeployed, resources, activeVideoChannel } = commandState;
+
+  // Auto-sync video channel with executing strategy
+  const strategyVideoInfo = useStrategyVideoSync();
 
   const channel = activeVideoChannel;
 
@@ -102,6 +106,30 @@ export default function MapVideoDock() {
             </span>
           </div>
         </div>
+
+        {/* Strategy association indicator */}
+        {strategyVideoInfo && strategyVideoInfo.channel === channel && (
+          <div style={{
+            marginBottom: 8,
+            padding: '4px 8px',
+            background: 'rgba(0,208,233,0.08)',
+            border: '1px solid rgba(0,208,233,0.2)',
+            borderRadius: 4,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}>
+            <Link2 size={12} style={{ color: '#00D0E9', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 10, color: '#00D0E9', fontWeight: 500 }}>
+                {strategyVideoInfo.strategyName}
+              </div>
+              <div style={{ fontSize: 9, color: '#64748B', marginTop: 1 }}>
+                {strategyVideoInfo.videoLabel}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Video Display */}
         <VideoFeed

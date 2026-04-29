@@ -1,5 +1,6 @@
 import { ListChecks, Plus, Package } from 'lucide-react';
 import { useCommandStore } from '../../../stores/commandStore';
+import { useUIStore } from '../../../stores/uiStore';
 import CollapsibleCard from '../../common/CollapsibleCard';
 import EnhancedStrategyCard from '../strategy/EnhancedStrategyCard';
 
@@ -7,6 +8,7 @@ export default function SelectingPhasePanel() {
   const cmd = useCommandStore((s) => s.commandState);
   const resources = useCommandStore((s) => s.commandState.resources);
   const executionResources = useCommandStore((s) => s.commandState.executionResources);
+  const setActiveModal = useUIStore((s) => s.setActiveModal);
 
   const recommendedStrategy = cmd.strategies.find((s) => s.recommended && s.status === 'idle');
   const alternativeStrategies = cmd.strategies.filter((s) => !s.recommended && s.status === 'idle').slice(0, 3);
@@ -55,9 +57,9 @@ export default function SelectingPhasePanel() {
         </CollapsibleCard>
       )}
 
-      {/* Custom Strategy Entry (Placeholder) */}
+      {/* Custom Strategy Entry */}
       <button
-        onClick={() => alert('自定义策略功能开发中')}
+        onClick={() => setActiveModal('custom-strategy')}
         style={{
           width: '100%',
           padding: '10px 0',
