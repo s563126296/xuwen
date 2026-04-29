@@ -28,7 +28,7 @@ interface StrategyEffectData {
 
 const STRATEGY_EFFECTS: Record<string, StrategyEffectData> = {
   'S-01': {
-    id: 'S-01', name: '应急车道借用',
+    id: 'S-01', name: '应急车道开放',
     effectModel: { baseEffect: 1.7, factorModifiers: { weather_rain: -0.2, weather_fog: -0.15, truck_ratio_high: -0.1, road_congested: 0.15, inflow_high: 0.1 } },
     arrivalMin: 8, historicalSuccessRate: 0.87, avgReliefMinutes: 28, diversionBase: 350,
   },
@@ -37,25 +37,70 @@ const STRATEGY_EFFECTS: Record<string, StrategyEffectData> = {
     effectModel: { baseEffect: 1.3, factorModifiers: { weather_rain: -0.15, weather_fog: -0.1, truck_ratio_high: 0.05, road_congested: 0.1, inflow_high: 0.15 } },
     arrivalMin: 5, historicalSuccessRate: 0.91, avgReliefMinutes: 22, diversionBase: 200,
   },
-  'S-04': {
-    id: 'S-04', name: '信号灯配时优化',
+  'S-03': {
+    id: 'S-03', name: '进港大道信号灯优化',
     effectModel: { baseEffect: 0.9, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: -0.1, road_congested: 0.2, inflow_high: 0.05 } },
     arrivalMin: 3, historicalSuccessRate: 0.94, avgReliefMinutes: 18, diversionBase: 120,
+  },
+  'S-04': {
+    id: 'S-04', name: '诱导屏引导',
+    effectModel: { baseEffect: 0.3, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: -0.05, road_congested: 0.1, inflow_high: 0.1 } },
+    arrivalMin: 0, historicalSuccessRate: 0.82, avgReliefMinutes: 12, diversionBase: 50,
   },
   'S-05': {
     id: 'S-05', name: '港口增开班次',
     effectModel: { baseEffect: 1.5, factorModifiers: { weather_rain: -0.3, weather_fog: -0.5, truck_ratio_high: 0.0, road_congested: 0.0, inflow_high: 0.2 } },
     arrivalMin: 30, historicalSuccessRate: 0.75, avgReliefMinutes: 55, diversionBase: 400,
   },
+  'S-06': {
+    id: 'S-06', name: '临时停车场启用',
+    effectModel: { baseEffect: 0.8, factorModifiers: { weather_rain: -0.1, weather_fog: -0.05, truck_ratio_high: 0.15, road_congested: 0.1, inflow_high: 0.2 } },
+    arrivalMin: 15, historicalSuccessRate: 0.78, avgReliefMinutes: 32, diversionBase: 180,
+  },
   'S-07': {
     id: 'S-07', name: '事故快速处置',
     effectModel: { baseEffect: 2.0, factorModifiers: { weather_rain: -0.2, weather_fog: -0.1, truck_ratio_high: -0.15, road_congested: 0.3, inflow_high: 0.0 } },
     arrivalMin: 6, historicalSuccessRate: 0.93, avgReliefMinutes: 35, diversionBase: 0,
   },
+  'S-08': {
+    id: 'S-08', name: '交警现场疏导',
+    effectModel: { baseEffect: 1.2, factorModifiers: { weather_rain: -0.15, weather_fog: -0.2, truck_ratio_high: -0.1, road_congested: 0.25, inflow_high: 0.05 } },
+    arrivalMin: 10, historicalSuccessRate: 0.89, avgReliefMinutes: 25, diversionBase: 150,
+  },
   'S-09': {
-    id: 'S-09', name: '诱导屏信息发布',
-    effectModel: { baseEffect: 0.3, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: -0.05, road_congested: 0.1, inflow_high: 0.1 } },
-    arrivalMin: 0, historicalSuccessRate: 0.82, avgReliefMinutes: 12, diversionBase: 50,
+    id: 'S-09', name: '社会化停车场协调',
+    effectModel: { baseEffect: 0.6, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: 0.1, road_congested: 0.05, inflow_high: 0.15 } },
+    arrivalMin: 20, historicalSuccessRate: 0.72, avgReliefMinutes: 40, diversionBase: 220,
+  },
+  'S-10': {
+    id: 'S-10', name: '公交专线调度',
+    effectModel: { baseEffect: 0.5, factorModifiers: { weather_rain: -0.1, weather_fog: -0.15, truck_ratio_high: 0.0, road_congested: 0.05, inflow_high: 0.1 } },
+    arrivalMin: 25, historicalSuccessRate: 0.68, avgReliefMinutes: 45, diversionBase: 100,
+  },
+  'S-11': {
+    id: 'S-11', name: '货车限行',
+    effectModel: { baseEffect: 1.4, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: 0.4, road_congested: 0.15, inflow_high: 0.1 } },
+    arrivalMin: 12, historicalSuccessRate: 0.85, avgReliefMinutes: 30, diversionBase: 280,
+  },
+  'S-12': {
+    id: 'S-12', name: '预约通行',
+    effectModel: { baseEffect: 1.1, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: 0.05, road_congested: 0.1, inflow_high: 0.25 } },
+    arrivalMin: 0, historicalSuccessRate: 0.80, avgReliefMinutes: 50, diversionBase: 300,
+  },
+  'S-13': {
+    id: 'S-13', name: '动态车道调整',
+    effectModel: { baseEffect: 1.0, factorModifiers: { weather_rain: -0.1, weather_fog: -0.1, truck_ratio_high: -0.05, road_congested: 0.2, inflow_high: 0.1 } },
+    arrivalMin: 18, historicalSuccessRate: 0.83, avgReliefMinutes: 28, diversionBase: 200,
+  },
+  'S-14': {
+    id: 'S-14', name: '远端分流预警',
+    effectModel: { baseEffect: 0.7, factorModifiers: { weather_rain: -0.05, weather_fog: -0.1, truck_ratio_high: 0.05, road_congested: 0.15, inflow_high: 0.2 } },
+    arrivalMin: 0, historicalSuccessRate: 0.76, avgReliefMinutes: 35, diversionBase: 160,
+  },
+  'S-15': {
+    id: 'S-15', name: '应急通道启用',
+    effectModel: { baseEffect: 1.6, factorModifiers: { weather_rain: -0.15, weather_fog: -0.1, truck_ratio_high: -0.05, road_congested: 0.2, inflow_high: 0.15 } },
+    arrivalMin: 22, historicalSuccessRate: 0.81, avgReliefMinutes: 38, diversionBase: 320,
   },
 };
 

@@ -4,12 +4,21 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { useSimulatorStore } from '../../stores/simulatorStore';
 
 const STRATEGY_OPTIONS = [
-  { id: 'S-01', name: '应急车道借用' },
+  { id: 'S-01', name: '应急车道开放' },
   { id: 'S-02', name: 'S376 省道分流' },
-  { id: 'S-04', name: '信号灯配时优化' },
+  { id: 'S-03', name: '进港大道信号灯优化' },
+  { id: 'S-04', name: '诱导屏引导' },
   { id: 'S-05', name: '港口增开班次' },
+  { id: 'S-06', name: '临时停车场启用' },
   { id: 'S-07', name: '事故快速处置' },
-  { id: 'S-09', name: '诱导屏信息发布' },
+  { id: 'S-08', name: '交警现场疏导' },
+  { id: 'S-09', name: '社会化停车场协调' },
+  { id: 'S-10', name: '公交专线调度' },
+  { id: 'S-11', name: '货车限行' },
+  { id: 'S-12', name: '预约通行' },
+  { id: 'S-13', name: '动态车道调整' },
+  { id: 'S-14', name: '远端分流预警' },
+  { id: 'S-15', name: '应急通道启用' },
 ];
 
 const COLORS = ['#00D0E9', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444', '#EC4899'];
@@ -38,31 +47,7 @@ export default function StrategySimulator() {
   }) : [];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
-      {/* AI Recommendation */}
-      {aiRecommendation && (
-        <div style={{
-          padding: 16,
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 100%)',
-          border: '1px solid rgba(139,92,246,0.3)',
-          borderRadius: 8,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Sparkles size={16} color="#8B5CF6" />
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#A78BFA' }}>AI 推荐策略</span>
-          </div>
-          <div style={{ fontSize: 12, color: '#E2E8F0', lineHeight: 1.6, marginBottom: 8 }}>
-            {aiRecommendation.reason}
-          </div>
-          {aiRecommendation.riskFactors.length > 0 && (
-            <div style={{ fontSize: 11, color: '#94A3B8' }}>
-              风险提示：{aiRecommendation.riskFactors.join('；')}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: 16, flex: 1, minHeight: 0 }}>
+    <div style={{ display: 'flex', gap: 16, height: '100%', overflow: 'hidden' }}>
         {/* Left: Parameters */}
         <div style={{
           width: 280,
@@ -210,7 +195,31 @@ export default function StrategySimulator() {
         </div>
 
         {/* Right: Chart + Table */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0, overflowY: 'auto' }}>
+          {/* AI Recommendation */}
+          {aiRecommendation && (
+            <div style={{
+              padding: 16,
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 100%)',
+              border: '1px solid rgba(139,92,246,0.3)',
+              borderRadius: 8,
+              flexShrink: 0,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <Sparkles size={16} color="#8B5CF6" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#A78BFA' }}>AI 推荐策略</span>
+              </div>
+              <div style={{ fontSize: 12, color: '#E2E8F0', lineHeight: 1.6, marginBottom: 8 }}>
+                {aiRecommendation.reason}
+              </div>
+              {aiRecommendation.riskFactors.length > 0 && (
+                <div style={{ fontSize: 11, color: '#94A3B8' }}>
+                  风险提示：{aiRecommendation.riskFactors.join('；')}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Chart */}
           <div style={{
             flex: 1,
@@ -331,7 +340,6 @@ export default function StrategySimulator() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
