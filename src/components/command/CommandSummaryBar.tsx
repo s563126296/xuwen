@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useCommandStore } from '../../stores/commandStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useOverviewStore } from '../../stores/overviewStore';
@@ -17,7 +17,6 @@ export default function CommandSummaryBar() {
   const cmd = useCommandStore((s) => s.commandState);
   const selectedPort = useUIStore((s) => s.selectedPort);
   const setSelectedPort = useUIStore((s) => s.setSelectedPort);
-  const exitCommandMode = useCommandStore((s) => s.exitCommandMode);
   const setActiveModal = useUIStore((s) => s.setActiveModal);
   const causes = useCommandStore((s) => s.commandState.causes);
   const commandScene = useCommandStore((s) => s.commandState.commandScene);
@@ -306,102 +305,6 @@ export default function CommandSummaryBar() {
             );
           })}
         </div>
-
-        {/* View report button (when strategy done) */}
-        {hasExecuted && (
-          <button
-            onClick={() => setActiveModal('command-report')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '3px 12px',
-              fontSize: 11,
-              fontWeight: 500,
-              color: '#2ED573',
-              backgroundColor: 'rgba(46,213,115,0.1)',
-              border: '1px solid rgba(46,213,115,0.3)',
-              borderRadius: 4,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(46,213,115,0.2)';
-              e.currentTarget.style.boxShadow = '0 0 8px rgba(46,213,115,0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(46,213,115,0.1)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            <FileText size={12} />
-            查看处置报告
-          </button>
-        )}
-
-        {/* Return to overview button (when relieved) */}
-        {isRelieved ? (
-          <button
-            onClick={exitCommandMode}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '3px 12px',
-              fontSize: 11,
-              fontWeight: 600,
-              color: '#2ED573',
-              backgroundColor: 'rgba(46,213,115,0.15)',
-              border: '1px solid rgba(46,213,115,0.5)',
-              borderRadius: 4,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              boxShadow: '0 0 8px rgba(46,213,115,0.15)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(46,213,115,0.25)';
-              e.currentTarget.style.boxShadow = '0 0 12px rgba(46,213,115,0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(46,213,115,0.15)';
-              e.currentTarget.style.boxShadow = '0 0 8px rgba(46,213,115,0.15)';
-            }}
-          >
-            <ArrowLeft size={12} />
-            返回总览模式
-          </button>
-        ) : (
-          <button
-            onClick={exitCommandMode}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '3px 12px',
-              fontSize: 11,
-              fontWeight: 500,
-              color: '#94A3B8',
-              backgroundColor: 'rgba(13,27,42,0.6)',
-              border: '1px solid rgba(0,208,233,0.12)',
-              borderRadius: 4,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(13,27,42,0.9)';
-              e.currentTarget.style.borderColor = 'rgba(0,208,233,0.3)';
-              e.currentTarget.style.color = '#E2E8F0';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(13,27,42,0.6)';
-              e.currentTarget.style.borderColor = 'rgba(0,208,233,0.12)';
-              e.currentTarget.style.color = '#94A3B8';
-            }}
-          >
-            <ArrowLeft size={12} />
-            返回总览
-          </button>
-        )}
 
         {/* Escalate button */}
         {shouldShowEscalate && (

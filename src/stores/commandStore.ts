@@ -1001,6 +1001,21 @@ export const useCommandStore = create<CommandStoreState>((set) => ({
   },
 }));
 
+/**
+ * Get current execution phase based on strategy status
+ * - 'selecting': all strategies are idle (no execution yet)
+ * - 'executing': at least one strategy is executing
+ * - 'completed': at least one strategy is done, none executing
+ */
+export function getCurrentExecutionPhase(state: CommandState): 'selecting' | 'executing' | 'completed' {
+  const hasExecuting = state.strategies.some((s) => s.status === 'executing');
+  const hasDone = state.strategies.some((s) => s.status === 'done');
+
+  if (hasExecuting) return 'executing';
+  if (hasDone) return 'completed';
+  return 'selecting';
+}
+
 
 
 
