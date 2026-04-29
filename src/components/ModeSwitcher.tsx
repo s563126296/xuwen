@@ -1,9 +1,11 @@
 import { useUIStore } from '../stores';
+import { useOverviewStore } from '../stores/overviewStore';
 import type { SystemMode } from '../stores';
 
 export default function ModeSwitcher() {
   const systemMode = useUIStore((s) => s.systemMode);
   const setSystemMode = useUIStore((s) => s.setSystemMode);
+  const clearActiveAlert = useOverviewStore((s) => s.clearActiveAlert);
 
   const modes: { id: SystemMode; label: string }[] = [
     { id: 'overview', label: '总览' },
@@ -29,6 +31,10 @@ export default function ModeSwitcher() {
           aria-label={`切换到${mode.label}`}
           onClick={() => {
             (window as any).__lastManualModeSwitch = Date.now();
+            // Clear alert popup when switching away from overview mode
+            if (systemMode === 'overview' && mode.id !== 'overview') {
+              clearActiveAlert();
+            }
             setSystemMode(mode.id);
           }}
           style={{
