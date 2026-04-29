@@ -60,7 +60,7 @@ export default function AIStrategyMainView() {
       </div>
 
       {/* View content */}
-      <div style={{ flex: 1, minHeight: 0, padding: 16, paddingRight: 24, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 0, padding: 16, paddingRight: 24, position: 'relative' }}>
         {activeView === 'simulator' && <StrategySimulator />}
         {activeView === 'evolution' && <EvolutionRecords />}
         {activeView === 'decision' && <DecisionTree />}

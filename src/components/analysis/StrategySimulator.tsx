@@ -51,7 +51,7 @@ export default function StrategySimulator() {
   }) : [];
 
   return (
-    <div style={{ display: 'flex', gap: 16, height: '100%', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', gap: 16, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         {/* Left: Parameters */}
         <div style={{
           width: 280,

@@ -8,6 +8,8 @@ export default function AIStrategyMode() {
       bottom: 16,
       left: 16,
       right: 16,
+      display: 'flex',
+      flexDirection: 'column',
     }}>
       <AIStrategyMainView />
     </div>
