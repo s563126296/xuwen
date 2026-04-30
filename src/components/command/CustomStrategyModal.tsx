@@ -36,8 +36,6 @@ export default function CustomStrategyModal() {
   const commandState = useCommandStore((s) => s.commandState);
   const executeStrategy = useCommandStore((s) => s.executeStrategy);
 
-  if (activeModal !== 'custom-strategy') return null;
-
   const [activeTab, setActiveTab] = useState<'library' | 'manual'>('library');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -45,6 +43,8 @@ export default function CustomStrategyModal() {
   const [manualName, setManualName] = useState('');
   const [manualAction, setManualAction] = useState('');
   const [manualEffect, setManualEffect] = useState('');
+
+  if (activeModal !== 'custom-strategy') return null;
 
   // Filter out strategies already in the command state
   const existingIds = new Set(commandState.strategies.map((s) => s.id));
