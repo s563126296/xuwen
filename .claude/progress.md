@@ -1,11 +1,76 @@
 # 徐闻县智慧交通大屏系统 — 项目进度
 
-> 最后更新：2026-04-29
+> 最后更新：2026-04-30
 
 ---
 
-## 当前状态：v2.1 已交付 ✅
-## 最新进展：v2.1 完整交付（11项改进 + 文档 + 交付包 + 测试）
+## 当前状态：v2.1.1 视觉统一版 ✅
+## 最新进展：视觉一致性统一改造 + 设计系统规范建立 + Bug 修复
+
+---
+
+## 2026-04-30 工作记录
+
+### 完成工作
+
+**视觉一致性审查：**
+- Playwright 全量测试（5 个模式，0 错误，16 警告）
+- 源码样式审查（发现 17 个不一致问题）
+- 输出审查报告：`doc/视觉一致性审查报告-20260430.md`
+
+**设计系统规范建立：**
+- 完整设计系统规范文档（10 章节）：`doc/design-system/设计系统规范.md`
+  - 色彩系统（主色/辅助色/语义色/背景色/文字色/边框色/发光效果）
+  - 字体系统（4 种字体家族 + 完整字号层级）
+  - 间距系统（7 级间距刻度）
+  - 卡片面板规范（4 级玻璃层次 + 圆角 + 阴影 + 边框）
+  - 图表样式规范（折线图/柱状图/饼图/地图统一标准）
+  - 交互规范（hover/focus/transition/动画）
+  - 图标规范、组件规范、栅格布局、自适应规则
+- 3 个可视化 Demo：`doc/design-system/demos/`
+  - components-demo.html（基础组件展示）
+  - charts-demo.html（图表标准展示）
+  - modules-demo.html（模块标准展示）
+
+**视觉一致性统一改造（12 个组件）：**
+- 统计分析模式（10 个组件）：紫色 #8B5CF6 → 青蓝色 #4DA6FF
+  - QueryFilterPanel / HistoryEventList / StatsSummaryPanel / QuickFilterPanel / MainViewArea
+  - StrategySimulator / EvolutionRecords / DecisionTree / KnowledgeGraph
+- AI 策略模式（2 个组件）：AIStrategyMainView Tab 栏统一
+- 港口模式（1 个 CSS 文件）：--port-* 变量映射到全局 tokens
+- 约 160 处紫色引用替换为青蓝色
+- 容器背景/边框/毛玻璃/圆角统一到 CSS 变量
+
+**Bug 修复：**
+- 修复自定义策略弹窗黑屏问题（React Hooks 规则违反：useState 在条件 return null 之后调用）
+
+**UI 改版效果图：**
+- 统计分析模式改版前后对比：`doc/ui-redesign/analysis-mode-redesign.html`
+- AI 策略模式改版前后对比：`doc/ui-redesign/ai-strategy-mode-redesign.html`
+
+**功能清单文档：**
+- 完整功能清单（234 个功能项，85% 完成度）：`doc/完整功能清单.md`
+
+**Git 提交：3 次提交**
+- `bc17f7d` refactor(visual): 统一统计分析和AI策略模式为青蓝主题
+- `a360749` docs: 添加设计系统规范和视觉一致性审查报告
+- `3e0a3fe` fix(command): 修复自定义策略弹窗黑屏问题
+
+### 待办事项
+
+**短期（本周）：**
+- [ ] 项目经理验收系统
+- [ ] 根据验收反馈调整
+- [ ] 准备项目汇报演示
+
+**中期（下周）：**
+- [ ] 数据对接协调（高德地图、港口、公安局）
+- [ ] 历史数据仓库搭建（6-12个月数据积累）
+
+### 已知问题
+
+- Canvas2D 性能警告（多条）：建议在 Canvas 初始化时添加 willReadFrequently: true
+- 地图图片 ID 重复警告（8 条）：非阻塞性，不影响功能
 
 ---
 
