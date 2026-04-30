@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块标准展示 - 徐闻智慧交通大屏设计系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========== Design Tokens ========== */
+        :root {
+            /* Colors */
+            --color-primary: #4DA6FF;
+            --color-accent: #F0B429;
+            --color-success: #34D399;
+            --color-warning: #FBBF24;
+            --color-danger: #F87171;
+
+            /* Background */
+            --bg-void: #060D1A;
+            --bg-deep: #0A1628;
+            --bg-surface: #0F1F3A;
+
+            /* Text */
+            --text-primary: rgba(255, 255, 255, 0.92);
+            --text-secondary: rgba(180, 200, 220, 0.65);
+            --text-tertiary: rgba(140, 160, 180, 0.45);
+
+            /* Border */
+            --glass-border: rgba(100, 180, 255, 0.08);
+            --glass-border-hover: rgba(100, 180, 255, 0.18);
+            --divider: rgba(180, 200, 220, 0.08);
+
+            /* Fonts */
+            --font-body: 'Noto Sans SC', -apple-system, sans-serif;
+            --font-data: 'JetBrains Mono', monospace;
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-2xl: 24px;
+            --space-3xl: 32px;
+
+            /* Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+
+            /* Transitions */
+            --duration-fast: 200ms;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ========== Base Styles ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-void);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .page-wrapper {
+            padding: var(--space-3xl);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--space-3xl);
+            padding-bottom: var(--space-2xl);
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+
+        .page-header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .demo-section {
+            max-width: 1400px;
+            margin: 0 auto var(--space-3xl);
+            padding: var(--space-2xl);
+            background: rgba(12, 25, 48, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: var(--space-xl);
+            color: var(--color-primary);
+        }
+
+        .demo-info {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(77, 166, 255, 0.05);
+            border-left: 3px solid var(--color-primary);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ========== Header Standard ========== */
+        .demo-header {
+            background: linear-gradient(180deg,
+                rgba(6, 13, 26, 0.95) 0%,
+                rgba(6, 13, 26, 0.7) 70%,
+                transparent 100%);
+            backdrop-filter: blur(30px) saturate(140%);
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-2xl);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2xl);
+        }
+
+        .header-logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .header-nav {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .nav-item {
+            padding: var(--space-sm) var(--space-lg);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            transition: all var(--duration-fast) var(--ease-out);
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: rgba(77, 166, 255, 0.1);
+            color: var(--color-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(77, 166, 255, 0.15);
+            color: var(--color-primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .header-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-btn {
+            padding: var(--space-sm) var(--space-lg);
+            background: rgba(77, 166, 255, 0.15);
+            border: 1px solid rgba(77, 166, 255, 0.2);
+            border-radius: var(--radius-sm);
+            color: var(--color-primary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+        }
+
+        .header-btn:hover {
+            background: rgba(77, 166, 255, 0.2);
+            border-color: rgba(77, 166, 255, 0.3);
+        }
+
+        /* ========== Sidebar Panel ========== */
+        .demo-sidebar {
+            background: rgba(12, 25, 48, 0.82);
+            backdrop-filter: blur(40px) saturate(150%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(100, 180, 255, 0.06);
+            padding: var(--space-lg);
+            max-width: 320px;
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .sidebar-card {
+            background: rgba(15, 31, 58, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+
+        .sidebar-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .card-value {
+            font-size: 20px;
+            font-weight: 600;
+            font-family: var(--font-data);
+            color: var(--color-primary);
+        }
+
+        /* ========== Tab Bar ========== */
+        .tab-bar {
+            display: flex;
+            gap: var(--space-xs);
+            background: rgba(77, 166, 255, 0.06);
+            border-radius: var(--radius-sm);
+            padding: var(--space-xs);
+            margin-bottom: var(--space-lg);
+        }
+
+        .tab {
+            flex: 1;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        .tab:hover {
+            background: rgba(77, 166, 255, 0.08);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: rgba(77, 166, 255, 0.2);
+            color: var(--color-primary);
+            box-shadow: 0 0 12px rgba(77, 166, 255, 0.15);
+            border-color: rgba(77, 166, 255, 0.2);
+        }
+
+        /* ========== Table ========== */
+        .demo-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .demo-table thead {
+            background: rgba(77, 166, 255, 0.08);
+        }
+
+        .demo-table th {
+            padding: var(--space-md);
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .demo-table td {
+            padding: var(--space-md);
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(180, 200, 220, 0.04);
+        }
+
+        .demo-table tbody tr {
+            transition: background var(--duration-fast) var(--ease-out);
+        }
+
+        .demo-table tbody tr:hover {
+            background: rgba(77, 166, 255, 0.05);
+        }
+
+        .demo-table tbody tr:nth-child(even) {
+            background: rgba(15, 31, 58, 0.3);
+        }
+
+        .demo-table tbody tr:nth-child(even):hover {
+            background: rgba(77, 166, 255, 0.08);
+        }
+
+        /* ========== Tags & Badges ========== */
+        .tag-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .tag {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .tag-primary {
+            background: rgba(77, 166, 255, 0.15);
+            color: var(--color-primary);
+            border: 1px solid rgba(77, 166, 255, 0.2);
+        }
+
+        .tag-success {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--color-success);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .tag-warning {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--color-warning);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .tag-danger {
+            background: rgba(248, 113, 113, 0.15);
+            color: var(--color-danger);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .tag-sm {
+            padding: 2px 6px;
+            font-size: 11px;
+        }
+
+        .tag-lg {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="page-header">
+            <h1>模块标准展示</h1>
+            <p>基于设计系统规范 v1.0 | 徐闻智慧交通大屏</p>
+        </div>
+
+        <!-- 1. Header Standard -->
+        <section class="demo-section">
+            <h2 class="section-title">1. Header 标准</h2>
+            <div class="demo-header">
+                <div class="header-left">
+                    <div class="header-logo">徐闻智慧交通</div>
+                    <nav class="header-nav">
+                        <a href="#" class="nav-item active">总览</a>
+                        <a href="#" class="nav-item">港口</a>
+                        <a href="#" class="nav-item">指挥</a>
+                        <a href="#" class="nav-item">统计分析</a>
+                        <a href="#" class="nav-item">AI策略</a>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <div class="header-info">2026-04-30 14:30 | 晴 25°C</div>
+                    <button class="header-btn">场景预设</button>
+                </div>
+            </div>
+            <div class="demo-info">
+                <strong>样式规范：</strong><br>
+                • 高度：72px<br>
+                • 背景：linear-gradient + backdrop-filter: blur(30px)<br>
+                • Logo：20px，font-weight: 700，--color-primary<br>
+                • 导航项：14px，padding: 8px 16px，hover 和 active 状态<br>
+                • 右侧信息：13px，--text-secondary
+            </div>
+        </section>
+
+        <!-- 2. Sidebar Panel -->
+        <section class="demo-section">
+            <h2 class="section-title">2. 侧栏面板标准</h2>
+            <div class="demo-sidebar">
+                <div class="sidebar-title">实时数据</div>
+                <div class="sidebar-card">
+                    <div class="card-label">车流总量</div>
+                    <div class="card-value">12,345</div>
+                </div>
+                <div class="sidebar-card">
+                    <div class="card-label">平均速度</div>
+                    <div class="card-value" style="color: var(--color-accent);">45.8 km/h</div>
+                </div>
+                <div class="sidebar-card">
+                    <div class="card-label">拥堵路段</div>
+                    <div class="card-value" style="color: var(--color-danger);">8</div>
+                </div>
+                <div class="sidebar-card">
+                    <div class="card-label">在线设备</div>
+                    <div class="card-value" style="color: var(--color-success);">156</div>
+                </div>
+            </div>
+            <div class="demo-info">
+                <strong>样式规范：</strong><br>
+                • 宽度：320px<br>
+                • 背景：rgba(12, 25, 48, 0.82) + backdrop-filter: blur(40px)<br>
+                • 边框：1px solid rgba(100, 180, 255, 0.08)<br>
+                • 圆角：20px (--radius-lg)<br>
+                • 内边距：16px (--space-lg)<br>
+                • 卡片间距：12px (--space-md)
+            </div>
+        </section>
+
+        <!-- 3. Tab Bar -->
+        <section class="demo-section">
+            <h2 class="section-title">3. Tab 栏标准</h2>
+            <div class="tab-bar">
+                <div class="tab active">今日</div>
+                <div class="tab">本周</div>
+                <div class="tab">本月</div>
+                <div class="tab">本年</div>
+            </div>
+            <div class="demo-info">
+                <strong>样式规范：</strong><br>
+                • 容器背景：rgba(77, 166, 255, 0.06)<br>
+                • 容器圆角：8px，内边距：4px<br>
+                • Tab 项：padding: 8px 16px，font-size: 14px<br>
+                • 默认状态：--text-secondary<br>
+                • Hover 状态：background: rgba(77, 166, 255, 0.08)<br>
+                • Active 状态：background: rgba(77, 166, 255, 0.2)，color: --color-primary，发光效果
+            </div>
+        </section>
+
+        <!-- 4. Table -->
+        <section class="demo-section">
+            <h2 class="section-title">4. 表格标准</h2>
+            <table class="demo-table">
+                <thead>
+                    <tr>
+                        <th>路段名称</th>
+                        <th>车流量</th>
+                        <th>平均速度</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>海安大道</td>
+                        <td>1,234</td>
+                        <td>45 km/h</td>
+                        <td><span class="tag tag-success tag-sm">正常</span></td>
+                    </tr>
+                    <tr>
+                        <td>港口路</td>
+                        <td>2,456</td>
+                        <td>32 km/h</td>
+                        <td><span class="tag tag-warning tag-sm">缓行</span></td>
+                    </tr>
+                    <tr>
+                        <td>徐闻大道</td>
+                        <td>3,789</td>
+                        <td>18 km/h</td>
+                        <td><span class="tag tag-danger tag-sm">拥堵</span></td>
+                    </tr>
+                    <tr>
+                        <td>滨海路</td>
+                        <td>987</td>
+                        <td>52 km/h</td>
+                        <td><span class="tag tag-success tag-sm">正常</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="demo-info">
+                <strong>样式规范：</strong><br>
+                • 表头背景：rgba(77, 166, 255, 0.08)<br>
+                • 表头字体：13px，font-weight: 600，--text-primary<br>
+                • 单元格内边距：12px (--space-md)<br>
+                • 边框：1px solid rgba(180, 200, 220, 0.04)<br>
+                • Hover 效果：background: rgba(77, 166, 255, 0.05)<br>
+                • 斑马纹：偶数行 background: rgba(15, 31, 58, 0.3)
+            </div>
+        </section>
+
+        <!-- 5. Tags & Badges -->
+        <section class="demo-section">
+            <h2 class="section-title">5. 标签/徽章标准</h2>
+
+            <h3 style="font-size: 16px; margin-bottom: var(--space-md); color: var(--text-primary);">颜色变体</h3>
+            <div class="tag-grid">
+                <span class="tag tag-primary">主要标签</span>
+                <span class="tag tag-success">成功标签</span>
+                <span class="tag tag-warning">警告标签</span>
+                <span class="tag tag-danger">危险标签</span>
+            </div>
+
+            <h3 style="font-size: 16px; margin: var(--space-xl) 0 var(--space-md); color: var(--text-primary);">尺寸变体</h3>
+            <div class="tag-grid">
+                <span class="tag tag-primary tag-sm">小标签</span>
+                <span class="tag tag-primary">中标签</span>
+                <span class="tag tag-primary tag-lg">大标签</span>
+            </div>
+
+            <div class="demo-info">
+                <strong>样式规范：</strong><br>
+                • 默认尺寸：padding: 4px 8px，font-size: 12px<br>
+                • 小尺寸：padding: 2px 6px，font-size: 11px<br>
+                • 大尺寸：padding: 6px 12px，font-size: 13px<br>
+                • 圆角：8px (--radius-sm)<br>
+                • 背景：rgba(color, 0.15)<br>
+                • 边框：1px solid rgba(color, 0.2)<br>
+                • 字体：font-weight: 500
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

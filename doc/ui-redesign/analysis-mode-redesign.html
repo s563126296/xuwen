@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计分析模式 - 视觉改版对比</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #060d1a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(180deg, rgba(10, 15, 25, 0.95) 0%, rgba(6, 13, 26, 0.8) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #00D0E9 0%, #4DA6FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .comparison-container {
+            display: flex;
+            height: calc(100vh - 140px);
+            position: relative;
+        }
+
+        .version {
+            flex: 1;
+            padding: 30px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .version-label {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .before .version-label {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .after .version-label {
+            background: rgba(0, 208, 233, 0.15);
+            border: 1px solid rgba(0, 208, 233, 0.3);
+            color: #00D0E9;
+        }
+
+        .divider {
+            width: 2px;
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 20%,
+                rgba(255, 255, 255, 0.1) 80%,
+                transparent 100%
+            );
+            position: relative;
+        }
+
+        .divider::before {
+            content: 'VS';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #0a0f19;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        /* 改版前样式 */
+        .before .panel {
+            background: rgba(13, 27, 42, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .before .panel:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .before .panel-title {
+            font-size: 13px;
+            color: #a78bfa;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .before .panel-title::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: #8B5CF6;
+            border-radius: 2px;
+        }
+
+        .before .stat-card {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .before .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #a78bfa;
+            margin-bottom: 4px;
+        }
+
+        .before .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .before .event-item {
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 3px solid #8B5CF6;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .before .event-title {
+            font-size: 13px;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+
+        .before .event-meta {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 改版后样式 */
+        .after .panel {
+            background: rgba(12, 25, 48, 0.82);
+            border: 1px solid rgba(0, 208, 233, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(40px) saturate(150%);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .after .panel:hover {
+            border-color: rgba(0, 208, 233, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 32px rgba(0, 208, 233, 0.15);
+        }
+
+        .after .panel-title {
+            font-size: 13px;
+            color: #00D0E9;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .after .panel-title::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: linear-gradient(180deg, #00D0E9 0%, #4DA6FF 100%);
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(0, 208, 233, 0.5);
+        }
+
+        .after .stat-card {
+            background: rgba(0, 208, 233, 0.08);
+            border: 1px solid rgba(0, 208, 233, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .after .stat-card:hover {
+            background: rgba(0, 208, 233, 0.12);
+            border-color: rgba(0, 208, 233, 0.25);
+        }
+
+        .after .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00D0E9;
+            margin-bottom: 4px;
+            text-shadow: 0 0 20px rgba(0, 208, 233, 0.3);
+        }
+
+        .after .stat-label {
+            font-size: 12px;
+            color: rgba(180, 200, 220, 0.65);
+        }
+
+        .after .event-item {
+            background: rgba(0, 208, 233, 0.05);
+            border-left: 3px solid #00D0E9;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .after .event-item:hover {
+            background: rgba(0, 208, 233, 0.08);
+            transform: translateX(2px);
+        }
+
+        .after .event-title {
+            font-size: 13px;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+
+        .after .event-meta {
+            font-size: 11px;
+            color: rgba(180, 200, 220, 0.5);
+        }
+
+        /* 标注箭头 */
+        .annotations {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .annotation {
+            background: rgba(10, 15, 25, 0.95);
+            border: 1px solid rgba(0, 208, 233, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #00D0E9;
+            position: relative;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            animation: fadeInRight 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .annotation:nth-child(1) { animation-delay: 0.2s; }
+        .annotation:nth-child(2) { animation-delay: 0.4s; }
+        .annotation:nth-child(3) { animation-delay: 0.6s; }
+        .annotation:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .annotation::before {
+            content: '→';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #00D0E9;
+        }
+
+        .annotation strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 208, 233, 0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 208, 233, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>统计分析模式 - 视觉改版对比</h1>
+        <p>基于视觉一致性审查报告的改版方案 | 2026-04-30</p>
+    </div>
+
+    <div class="comparison-container">
+        <!-- 改版前 -->
+        <div class="version before">
+            <div class="version-label">改版前（紫色主题）</div>
+
+            <div class="panel">
+                <div class="panel-title">查询条件</div>
+                <div class="grid-2">
+                    <div class="stat-card">
+                        <div class="stat-label">时间范围</div>
+                        <div class="stat-value" style="font-size: 14px;">近 6 个月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">事件类型</div>
+                        <div class="stat-value" style="font-size: 14px;">全部</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">历史事件列表</div>
+                <div class="event-item">
+                    <div class="event-title">2026-01-28 春节高峰</div>
+                    <div class="event-meta">严重程度：高 | 持续时间：48h</div>
+                </div>
+                <div class="event-item">
+                    <div class="event-title">2026-02-15 大雾停航</div>
+                    <div class="event-meta">严重程度：中 | 持续时间：12h</div>
+                </div>
+                <div class="event-item">
+                    <div class="event-title">2026-03-05 交通事故</div>
+                    <div class="event-meta">严重程度：低 | 持续时间：2h</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">统计摘要</div>
+                <div class="grid-2">
+                    <div class="stat-card">
+                        <div class="stat-value">126</div>
+                        <div class="stat-label">历史事件</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">68%</div>
+                        <div class="stat-label">策略采纳率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">84%</div>
+                        <div class="stat-label">预测准确率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">32min</div>
+                        <div class="stat-label">平均缓解时间</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 改版后 -->
+        <div class="version after">
+            <div class="version-label">改版后（青蓝主题）</div>
+
+            <div class="panel">
+                <div class="panel-title">查询条件</div>
+                <div class="grid-2">
+                    <div class="stat-card">
+                        <div class="stat-label">时间范围</div>
+                        <div class="stat-value" style="font-size: 14px;">近 6 个月</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">事件类型</div>
+                        <div class="stat-value" style="font-size: 14px;">全部</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">历史事件列表</div>
+                <div class="event-item">
+                    <div class="event-title">2026-01-28 春节高峰</div>
+                    <div class="event-meta">严重程度：高 | 持续时间：48h</div>
+                </div>
+                <div class="event-item">
+                    <div class="event-title">2026-02-15 大雾停航</div>
+                    <div class="event-meta">严重程度：中 | 持续时间：12h</div>
+                </div>
+                <div class="event-item">
+                    <div class="event-title">2026-03-05 交通事故</div>
+                    <div class="event-meta">严重程度：低 | 持续时间：2h</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">统计摘要</div>
+                <div class="grid-2">
+                    <div class="stat-card">
+                        <div class="stat-value">126</div>
+                        <div class="stat-label">历史事件</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">68%</div>
+                        <div class="stat-label">策略采纳率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">84%</div>
+                        <div class="stat-label">预测准确率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">32min</div>
+                        <div class="stat-label">平均缓解时间</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 标注 -->
+        <div class="annotations">
+            <div class="annotation">
+                <strong>主题色</strong><br>
+                紫色 #8B5CF6 → 青蓝色 #00D0E9
+            </div>
+            <div class="annotation">
+                <strong>卡片圆角</strong><br>
+                8px → 12px（更柔和）
+            </div>
+            <div class="annotation">
+                <strong>毛玻璃强度</strong><br>
+                blur(10px) → blur(40px)
+            </div>
+            <div class="annotation">
+                <strong>hover 效果</strong><br>
+                新增上浮 + 发光阴影
+            </div>
+        </div>
+    </div>
+</body>
+</html>

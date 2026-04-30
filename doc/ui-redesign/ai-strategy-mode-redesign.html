@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI策略模式 - 视觉改版对比</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #060d1a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(180deg, rgba(10, 15, 25, 0.95) 0%, rgba(6, 13, 26, 0.8) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #00D0E9 0%, #4DA6FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p { font-size: 14px; color: rgba(255, 255, 255, 0.6); }
+
+        .comparison-container {
+            display: flex;
+            height: calc(100vh - 140px);
+            position: relative;
+        }
+
+        .version {
+            flex: 1;
+            padding: 30px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .version-label {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .before .version-label {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .after .version-label {
+            background: rgba(0, 208, 233, 0.15);
+            border: 1px solid rgba(0, 208, 233, 0.3);
+            color: #00D0E9;
+        }
+
+        .divider {
+            width: 2px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.1) 80%, transparent 100%);
+            position: relative;
+        }
+
+        .divider::before {
+            content: 'VS';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #0a0f19;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        /* ===== 改版前 ===== */
+        .before .panel {
+            background: rgba(13, 27, 42, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .before .panel-title {
+            font-size: 13px;
+            color: #a78bfa;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .before .panel-title::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: #8B5CF6;
+            border-radius: 2px;
+        }
+
+        .before .tab-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: rgba(139, 92, 246, 0.08);
+            border-radius: 6px;
+            padding: 4px;
+        }
+
+        .before .tab {
+            flex: 1;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .before .tab.active {
+            background: rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .before .param-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            font-size: 13px;
+        }
+
+        .before .param-label { color: rgba(255, 255, 255, 0.6); }
+
+        .before .param-value {
+            color: #a78bfa;
+            font-weight: 600;
+        }
+
+        .before .slider-track {
+            width: 120px;
+            height: 4px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .before .slider-fill {
+            height: 100%;
+            background: #8B5CF6;
+            border-radius: 2px;
+            width: 60%;
+        }
+
+        .before .btn-run {
+            width: 100%;
+            padding: 12px;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 6px;
+            color: #a78bfa;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .before .strategy-chip {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 4px;
+            font-size: 12px;
+            color: #a78bfa;
+            margin: 4px;
+        }
+
+        .before .empty-chart {
+            height: 200px;
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px dashed rgba(139, 92, 246, 0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 13px;
+        }
+
+        /* ===== 改版后 ===== */
+        .after .panel {
+            background: rgba(12, 25, 48, 0.82);
+            border: 1px solid rgba(0, 208, 233, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(40px) saturate(150%);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .after .panel:hover {
+            border-color: rgba(0, 208, 233, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 32px rgba(0, 208, 233, 0.15);
+        }
+
+        .after .panel-title {
+            font-size: 13px;
+            color: #00D0E9;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .after .panel-title::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: linear-gradient(180deg, #00D0E9 0%, #4DA6FF 100%);
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(0, 208, 233, 0.5);
+        }
+
+        .after .tab-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: rgba(0, 208, 233, 0.06);
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid rgba(0, 208, 233, 0.1);
+        }
+
+        .after .tab {
+            flex: 1;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(180, 200, 220, 0.5);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .after .tab:hover {
+            color: rgba(180, 200, 220, 0.8);
+            background: rgba(0, 208, 233, 0.08);
+        }
+
+        .after .tab.active {
+            background: rgba(0, 208, 233, 0.2);
+            color: #00D0E9;
+            box-shadow: 0 0 12px rgba(0, 208, 233, 0.15);
+        }
+
+        .after .param-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 208, 233, 0.08);
+            font-size: 13px;
+        }
+
+        .after .param-label { color: rgba(180, 200, 220, 0.65); }
+
+        .after .param-value {
+            color: #00D0E9;
+            font-weight: 600;
+        }
+
+        .after .slider-track {
+            width: 120px;
+            height: 4px;
+            background: rgba(0, 208, 233, 0.15);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .after .slider-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00D0E9, #4DA6FF);
+            border-radius: 2px;
+            width: 60%;
+            box-shadow: 0 0 8px rgba(0, 208, 233, 0.4);
+        }
+
+        .after .btn-run {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(0, 208, 233, 0.2) 0%, rgba(77, 166, 255, 0.2) 100%);
+            border: 1px solid rgba(0, 208, 233, 0.3);
+            border-radius: 8px;
+            color: #00D0E9;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 16px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(0, 208, 233, 0.1);
+        }
+
+        .after .btn-run:hover {
+            background: linear-gradient(135deg, rgba(0, 208, 233, 0.3) 0%, rgba(77, 166, 255, 0.3) 100%);
+            box-shadow: 0 8px 24px rgba(0, 208, 233, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .after .strategy-chip {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(0, 208, 233, 0.1);
+            border: 1px solid rgba(0, 208, 233, 0.2);
+            border-radius: 6px;
+            font-size: 12px;
+            color: #00D0E9;
+            margin: 4px;
+            transition: all 0.2s;
+        }
+
+        .after .strategy-chip:hover {
+            background: rgba(0, 208, 233, 0.15);
+            border-color: rgba(0, 208, 233, 0.35);
+        }
+
+        .after .empty-chart {
+            height: 200px;
+            background: rgba(0, 208, 233, 0.03);
+            border: 1px dashed rgba(0, 208, 233, 0.15);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(180, 200, 220, 0.35);
+            font-size: 13px;
+            gap: 8px;
+        }
+
+        .after .empty-chart .hint {
+            font-size: 11px;
+            color: rgba(0, 208, 233, 0.4);
+        }
+
+        /* 标注 */
+        .annotations {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .annotation {
+            background: rgba(10, 15, 25, 0.95);
+            border: 1px solid rgba(0, 208, 233, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #00D0E9;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            animation: fadeInRight 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .annotation:nth-child(1) { animation-delay: 0.2s; }
+        .annotation:nth-child(2) { animation-delay: 0.4s; }
+        .annotation:nth-child(3) { animation-delay: 0.6s; }
+        .annotation:nth-child(4) { animation-delay: 0.8s; }
+        .annotation:nth-child(5) { animation-delay: 1.0s; }
+
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .annotation::before {
+            content: '→';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #00D0E9;
+        }
+
+        .annotation strong { color: #fff; font-weight: 600; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 208, 233, 0.3); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI 策略模式 - 视觉改版对比</h1>
+        <p>基于视觉一致性审查报告的改版方案 | 2026-04-30</p>
+    </div>
+
+    <div class="comparison-container">
+        <!-- 改版前 -->
+        <div class="version before">
+            <div class="version-label">改版前（紫色主题）</div>
+
+            <div class="tab-bar">
+                <div class="tab active">策略模拟器</div>
+                <div class="tab">进化记录</div>
+                <div class="tab">决策树</div>
+                <div class="tab">知识图谱</div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">策略选择</div>
+                <div>
+                    <span class="strategy-chip">S-02 S376分流</span>
+                    <span class="strategy-chip">S-05 限速管控</span>
+                    <span class="strategy-chip">S-09 信号优化</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">通用环境参数</div>
+                <div class="param-row">
+                    <span class="param-label">天气条件</span>
+                    <span class="param-value">晴天</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">车流量</span>
+                    <div class="slider-track"><div class="slider-fill"></div></div>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">货车比例</span>
+                    <span class="param-value">30%</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">时段</span>
+                    <span class="param-value">晚高峰</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">模拟结果</div>
+                <div class="empty-chart">选择策略并运行模拟</div>
+            </div>
+
+            <div class="btn-run">运行模拟</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 改版后 -->
+        <div class="version after">
+            <div class="version-label">改版后（青蓝主题）</div>
+
+            <div class="tab-bar">
+                <div class="tab active">策略模拟器</div>
+                <div class="tab">进化记录</div>
+                <div class="tab">决策树</div>
+                <div class="tab">知识图谱</div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">策略选择</div>
+                <div>
+                    <span class="strategy-chip">S-02 S376分流</span>
+                    <span class="strategy-chip">S-05 限速管控</span>
+                    <span class="strategy-chip">S-09 信号优化</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">通用环境参数</div>
+                <div class="param-row">
+                    <span class="param-label">天气条件</span>
+                    <span class="param-value">晴天</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">车流量</span>
+                    <div class="slider-track"><div class="slider-fill"></div></div>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">货车比例</span>
+                    <span class="param-value">30%</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">时段</span>
+                    <span class="param-value">晚高峰</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">模拟结果</div>
+                <div class="empty-chart">
+                    选择策略并运行模拟
+                    <span class="hint">支持最多 5 个策略同时对比</span>
+                </div>
+            </div>
+
+            <div class="btn-run">运行模拟</div>
+        </div>
+
+        <!-- 标注 -->
+        <div class="annotations">
+            <div class="annotation">
+                <strong>Tab 栏</strong><br>
+                紫色底 → 青蓝底 + 圆角 + 发光
+            </div>
+            <div class="annotation">
+                <strong>策略标签</strong><br>
+                紫色 → 青蓝色 + hover 效果
+            </div>
+            <div class="annotation">
+                <strong>滑块渐变</strong><br>
+                纯紫 → 青蓝渐变 + 发光
+            </div>
+            <div class="annotation">
+                <strong>按钮</strong><br>
+                扁平紫 → 渐变青蓝 + 阴影 + hover
+            </div>
+            <div class="annotation">
+                <strong>空态提示</strong><br>
+                新增引导文案 + 柔和边框
+            </div>
+        </div>
+    </div>
+</body>
+</html>

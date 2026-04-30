@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图表标准展示 - 徐闻智慧交通大屏设计系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ========== Design Tokens ========== */
+        :root {
+            /* Colors */
+            --color-primary: #4DA6FF;
+            --color-accent: #F0B429;
+            --color-success: #34D399;
+            --color-warning: #FBBF24;
+            --color-danger: #F87171;
+            --color-secondary: #A78BFA;
+
+            /* Background */
+            --bg-void: #060D1A;
+            --bg-deep: #0A1628;
+            --bg-surface: #0F1F3A;
+
+            /* Text */
+            --text-primary: rgba(255, 255, 255, 0.92);
+            --text-secondary: rgba(180, 200, 220, 0.65);
+            --text-tertiary: rgba(140, 160, 180, 0.45);
+            --text-data: rgba(255, 255, 255, 0.88);
+
+            /* Border */
+            --glass-border: rgba(100, 180, 255, 0.08);
+            --divider: rgba(180, 200, 220, 0.08);
+
+            /* Glow */
+            --glow-primary: 0 0 12px rgba(77, 166, 255, 0.35);
+            --glow-accent: 0 0 12px rgba(240, 180, 41, 0.3);
+
+            /* Fonts */
+            --font-body: 'Noto Sans SC', -apple-system, sans-serif;
+            --font-data: 'JetBrains Mono', 'Roboto Mono', monospace;
+
+            /* Spacing */
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-2xl: 24px;
+            --space-3xl: 32px;
+
+            /* Radius */
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+
+        /* ========== Base Styles ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-void);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: var(--space-3xl);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: var(--space-3xl);
+            padding-bottom: var(--space-2xl);
+            border-bottom: 1px solid var(--divider);
+        }
+
+        header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: var(--text-primary);
+        }
+
+        header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section {
+            margin-bottom: var(--space-3xl);
+            padding: var(--space-2xl);
+            background: rgba(12, 25, 48, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: var(--space-xl);
+            color: var(--color-primary);
+        }
+
+        .chart-container {
+            background: rgba(12, 25, 48, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-info {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(77, 166, 255, 0.05);
+            border-left: 3px solid var(--color-primary);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+        }
+
+        .kpi-card {
+            background: rgba(12, 25, 48, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: var(--font-data);
+            color: var(--color-primary);
+            text-shadow: var(--glow-primary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .kpi-trend {
+            font-size: 12px;
+            font-family: var(--font-data);
+        }
+
+        .kpi-trend.up {
+            color: var(--color-success);
+        }
+
+        .kpi-trend.down {
+            color: var(--color-danger);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>图表标准展示</h1>
+        <p>基于设计系统规范 v1.0 | 徐闻智慧交通大屏</p>
+    </header>
+
+    <main>
+        <!-- 1. Line Chart -->
+        <section class="section">
+            <h2 class="section-title">1. 折线图标准</h2>
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="chart-info">
+                    <strong>样式规范：</strong><br>
+                    • 线条粗细：2px<br>
+                    • 主线颜色：#4DA6FF (--color-primary)<br>
+                    • 辅助线颜色：#F0B429 (--color-accent)<br>
+                    • 数据点：圆形，半径 4px，hover 时 6px + 发光<br>
+                    • 网格线：rgba(180, 200, 220, 0.08)，虚线<br>
+                    • 坐标轴标签：11px，--text-tertiary
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Bar Chart -->
+        <section class="section">
+            <h2 class="section-title">2. 柱状图标准</h2>
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="chart-info">
+                    <strong>样式规范：</strong><br>
+                    • 柱子颜色：渐变（从 #4DA6FF 到 rgba(77, 166, 255, 0.3)）<br>
+                    • 柱子圆角：顶部 4px<br>
+                    • 柱子间距：20%<br>
+                    • 柱子最小宽度：8px
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Pie Chart -->
+        <section class="section">
+            <h2 class="section-title">3. 饼图标准</h2>
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="chart-info">
+                    <strong>样式规范：</strong><br>
+                    • 颜色序列：['#4DA6FF', '#34D399', '#F0B429', '#FB923C', '#F87171', '#A78BFA']<br>
+                    • 描边：2px，颜色 #060D1A<br>
+                    • hover 偏移：10px
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. KPI Cards -->
+        <section class="section">
+            <h2 class="section-title">4. 数据卡片标准</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">车流总量</div>
+                    <div class="kpi-value">12,345</div>
+                    <div class="kpi-trend up">↑ 12.5%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">平均速度</div>
+                    <div class="kpi-value" style="color: var(--color-accent); text-shadow: var(--glow-accent);">45.8</div>
+                    <div class="kpi-trend down">↓ 3.2%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">拥堵路段</div>
+                    <div class="kpi-value" style="color: var(--color-danger);">8</div>
+                    <div class="kpi-trend up">↑ 2</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">在线设备</div>
+                    <div class="kpi-value" style="color: var(--color-success);">156</div>
+                    <div class="kpi-trend up">↑ 5</div>
+                </div>
+            </div>
+            <div class="chart-info" style="margin-top: var(--space-xl);">
+                <strong>样式规范：</strong><br>
+                • 数据数字：32px，JetBrains Mono，font-weight: 700<br>
+                • 发光效果：text-shadow: 0 0 12px rgba(color, 0.35)<br>
+                • 标签：13px，--text-secondary<br>
+                • 趋势：12px，JetBrains Mono，上升用 --color-success，下降用 --color-danger
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Chart.js default configuration
+        Chart.defaults.color = 'rgba(180, 200, 220, 0.65)';
+        Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
+        Chart.defaults.font.size = 11;
+
+        // 1. Line Chart
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                datasets: [
+                    {
+                        label: '主线数据',
+                        data: [120, 190, 300, 500, 420, 300, 180],
+                        borderColor: '#4DA6FF',
+                        backgroundColor: 'rgba(77, 166, 255, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#4DA6FF',
+                        pointBorderColor: '#4DA6FF',
+                        pointHoverBackgroundColor: '#4DA6FF',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: '辅助线数据',
+                        data: [80, 140, 220, 380, 320, 240, 150],
+                        borderColor: '#F0B429',
+                        backgroundColor: 'rgba(240, 180, 41, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#F0B429',
+                        pointBorderColor: '#F0B429',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: 'rgba(180, 200, 220, 0.65)',
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(180, 200, 220, 0.08)',
+                            borderColor: 'rgba(180, 200, 220, 0.12)',
+                            borderDash: [4, 4]
+                        },
+                        ticks: {
+                            color: 'rgba(140, 160, 180, 0.45)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(180, 200, 220, 0.08)',
+                            borderColor: 'rgba(180, 200, 220, 0.12)',
+                            borderDash: [4, 4]
+                        },
+                        ticks: {
+                            color: 'rgba(140, 160, 180, 0.45)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Bar Chart
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '车流量',
+                    data: [1200, 1900, 1500, 2100, 1800, 2400, 2200],
+                    backgroundColor: function(context) {
+                        const chart = context.chart;
+                        const {ctx, chartArea} = chart;
+                        if (!chartArea) return '#4DA6FF';
+
+                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                        gradient.addColorStop(0, 'rgba(77, 166, 255, 0.3)');
+                        gradient.addColorStop(1, '#4DA6FF');
+                        return gradient;
+                    },
+                    borderRadius: {
+                        topLeft: 4,
+                        topRight: 4
+                    },
+                    borderSkipped: false,
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            borderColor: 'rgba(180, 200, 220, 0.12)'
+                        },
+                        ticks: {
+                            color: 'rgba(140, 160, 180, 0.45)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(180, 200, 220, 0.08)',
+                            borderColor: 'rgba(180, 200, 220, 0.12)',
+                            borderDash: [4, 4]
+                        },
+                        ticks: {
+                            color: 'rgba(140, 160, 180, 0.45)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. Pie Chart
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['小型车', '中型车', '大型车', '货车', '特种车', '其他'],
+                datasets: [{
+                    data: [45, 25, 15, 10, 3, 2],
+                    backgroundColor: [
+                        '#4DA6FF',
+                        '#34D399',
+                        '#F0B429',
+                        '#FB923C',
+                        '#F87171',
+                        '#A78BFA'
+                    ],
+                    borderColor: '#060D1A',
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            color: 'rgba(180, 200, 220, 0.65)',
+                            padding: 12,
+                            font: { size: 12 },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
