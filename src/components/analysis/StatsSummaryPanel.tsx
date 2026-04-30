@@ -14,7 +14,7 @@ export default function StatsSummaryPanel() {
   const totalStranded = filteredEvents.reduce((sum, e) => sum + e.maxStrandedVehicles, 0);
 
   const stats = [
-    { icon: Activity, label: '事件总数', value: filteredEvents.length, unit: '条', color: '#8B5CF6' },
+    { icon: Activity, label: '事件总数', value: filteredEvents.length, unit: '条', color: '#4DA6FF' },
     { icon: Target, label: '策略执行', value: relatedRecords.length, unit: '次', color: '#00D0E9' },
     { icon: Clock, label: '平均缓解', value: avgReliefMinutes, unit: '分钟', color: '#2ED573' },
     { icon: TrendingUp, label: '策略采纳率', value: adoptionRate, unit: '%', color: '#F5A623' },
@@ -25,14 +25,14 @@ export default function StatsSummaryPanel() {
   return (
     <div style={{
       flexShrink: 0,
-      background: 'rgba(13,27,42,0.8)',
-      border: '1px solid rgba(139,92,246,0.2)',
+      background: 'var(--glass-bg)',
+      border: '1px solid var(--glass-border)',
       borderRadius: 8,
-      backdropFilter: 'blur(10px)',
+      backdropFilter: 'blur(var(--glass-blur))',
       padding: 16,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <TrendingUp size={14} color="#8B5CF6" />
+        <TrendingUp size={14} color="#4DA6FF" />
         <span style={{ fontSize: 13, fontWeight: 600, color: '#E2E8F0' }}>统计摘要</span>
       </div>
 

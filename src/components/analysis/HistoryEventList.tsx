@@ -29,17 +29,17 @@ export default function HistoryEventList() {
     <div style={{
       flex: 1,
       minHeight: 0,
-      background: 'rgba(13,27,42,0.8)',
-      border: '1px solid rgba(139,92,246,0.2)',
+      background: 'var(--glass-bg)',
+      border: '1px solid var(--glass-border)',
       borderRadius: 8,
-      backdropFilter: 'blur(10px)',
+      backdropFilter: 'blur(var(--glass-blur))',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
     }}>
       <div style={{ flexShrink: 0, padding: 16, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Clock size={14} color="#8B5CF6" />
+          <Clock size={14} color="#4DA6FF" />
           <span style={{ fontSize: 13, fontWeight: 600, color: '#E2E8F0' }}>历史事件</span>
           <span style={{ fontSize: 11, color: '#64748B' }}>({filteredEvents.length})</span>
         </div>
@@ -58,8 +58,8 @@ export default function HistoryEventList() {
               return (
                 <div key={event.id} onClick={() => selectAnalysisEvent(event.id)} style={{
                   padding: 10,
-                  background: isSelected ? 'rgba(139,92,246,0.15)' : 'rgba(0,0,0,0.2)',
-                  border: `1px solid ${isSelected ? '#8B5CF6' : 'rgba(255,255,255,0.05)'}`,
+                  background: isSelected ? 'rgba(77, 166, 255, 0.15)' : 'rgba(0,0,0,0.2)',
+                  border: `1px solid ${isSelected ? '#4DA6FF' : 'rgba(255,255,255,0.05)'}`,
                   borderRadius: 6,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
@@ -69,7 +69,7 @@ export default function HistoryEventList() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0', marginBottom: 4 }}>{event.name}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 10, padding: '2px 6px', background: 'rgba(139,92,246,0.2)', color: '#8B5CF6', borderRadius: 3 }}>
+                        <span style={{ fontSize: 10, padding: '2px 6px', background: 'rgba(77, 166, 255, 0.15)', color: '#4DA6FF', borderRadius: 3 }}>
                           {TYPE_LABELS[event.type]}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>

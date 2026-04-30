@@ -21,7 +21,7 @@ const STRATEGY_OPTIONS = [
   { id: 'S-15', name: '预约通行引导' },
 ];
 
-const COLORS = ['#00D0E9', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444', '#EC4899'];
+const COLORS = ['#00D0E9', '#4DA6FF', '#F59E0B', '#10B981', '#EF4444', '#EC4899'];
 
 export default function StrategySimulator() {
   const { params, results, baselineCurve, isSimulating, aiRecommendation, setCommonEnv, setStrategyParam, setSelectedStrategies, runSimulation, clearResults } = useSimulatorStore();
@@ -237,14 +237,14 @@ export default function StrategySimulator() {
           {aiRecommendation && (
             <div style={{
               padding: 16,
-              background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 100%)',
-              border: '1px solid rgba(139,92,246,0.3)',
+              background: 'linear-gradient(135deg, rgba(77,166,255,0.15) 0%, rgba(77,166,255,0.05) 100%)',
+              border: '1px solid rgba(77,166,255,0.3)',
               borderRadius: 8,
               flexShrink: 0,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <Sparkles size={16} color="#8B5CF6" />
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#A78BFA' }}>AI 推荐策略</span>
+                <Sparkles size={16} color="#4DA6FF" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#7EC8FF' }}>AI 推荐策略</span>
               </div>
               <div style={{ fontSize: 12, color: '#E2E8F0', lineHeight: 1.6, marginBottom: 8 }}>
                 {aiRecommendation.reason}

@@ -21,10 +21,10 @@ export default function AIStrategyMainView() {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      background: 'rgba(13,27,42,0.8)',
-      border: '1px solid rgba(139,92,246,0.2)',
+      background: 'var(--glass-bg)',
+      border: '1px solid var(--glass-border)',
       borderRadius: 8,
-      backdropFilter: 'blur(10px)',
+      backdropFilter: 'blur(var(--glass-blur))',
       overflow: 'hidden',
     }}>
       {/* Tab bar */}
@@ -44,13 +44,13 @@ export default function AIStrategyMainView() {
               alignItems: 'center',
               gap: 6,
               padding: '8px 14px',
-              background: isActive ? 'rgba(139,92,246,0.15)' : 'transparent',
+              background: isActive ? 'rgba(77,166,255,0.15)' : 'transparent',
               border: 'none',
-              borderBottom: isActive ? '2px solid #8B5CF6' : '2px solid transparent',
+              borderBottom: isActive ? '2px solid #4DA6FF' : '2px solid transparent',
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}>
-              <Icon size={13} color={isActive ? '#8B5CF6' : '#64748B'} />
+              <Icon size={13} color={isActive ? '#4DA6FF' : '#64748B'} />
               <span style={{ fontSize: 12, color: isActive ? '#E2E8F0' : '#64748B', fontWeight: isActive ? 600 : 400 }}>
                 {tab.label}
               </span>

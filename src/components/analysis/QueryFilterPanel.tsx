@@ -33,15 +33,15 @@ export default function QueryFilterPanel() {
 
   return (
     <div style={{
-      background: 'rgba(13,27,42,0.8)',
-      border: '1px solid rgba(139,92,246,0.2)',
+      background: 'var(--glass-bg)',
+      border: '1px solid var(--glass-border)',
       borderRadius: 8,
-      backdropFilter: 'blur(10px)',
+      backdropFilter: 'blur(var(--glass-blur))',
       padding: 16,
       flexShrink: 0,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <Search size={14} color="#8B5CF6" />
+        <Search size={14} color="#4DA6FF" />
         <span style={{ fontSize: 13, fontWeight: 600, color: '#E2E8F0' }}>查询条件</span>
       </div>
 
@@ -75,9 +75,9 @@ export default function QueryFilterPanel() {
                   setLocalFilters({ ...localFilters, eventTypes: newTypes });
                 }} style={{
                   padding: '3px 8px', fontSize: 10, borderRadius: 4, border: '1px solid', cursor: 'pointer',
-                  background: selected ? 'rgba(139,92,246,0.2)' : 'rgba(0,0,0,0.3)',
-                  borderColor: selected ? '#8B5CF6' : 'rgba(255,255,255,0.1)',
-                  color: selected ? '#8B5CF6' : '#A0A8B4',
+                  background: selected ? 'rgba(77, 166, 255, 0.15)' : 'rgba(0,0,0,0.3)',
+                  borderColor: selected ? '#4DA6FF' : 'rgba(255,255,255,0.1)',
+                  color: selected ? '#4DA6FF' : '#A0A8B4',
                 }}>
                   {opt.label}
                 </button>
@@ -100,7 +100,7 @@ export default function QueryFilterPanel() {
 
         {/* Query button */}
         <button onClick={handleQuery} style={{
-          marginTop: 4, padding: '6px 12px', background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
+          marginTop: 4, padding: '6px 12px', background: 'linear-gradient(135deg, #4DA6FF 0%, #3B82F6 100%)',
           border: 'none', borderRadius: 4, fontSize: 12, fontWeight: 600, color: '#FFF', cursor: 'pointer',
         }}>
           查询

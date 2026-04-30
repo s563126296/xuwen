@@ -10,7 +10,7 @@ const cameras = [
     resolution: '1080P',
     channel: 'CH-01',
     ip: '10.68.1.101',
-    videoUrl: 'https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4',
+    videoUrl: '', // 使用占位图标，避免外部视频 403 错误
   },
   {
     name: '码头监控',
@@ -18,7 +18,7 @@ const cameras = [
     resolution: '1080P',
     channel: 'CH-03',
     ip: '10.68.2.203',
-    videoUrl: 'https://videos.pexels.com/video-files/3015512/3015512-uhd_2560_1440_24fps.mp4',
+    videoUrl: '', // 使用占位图标，避免外部视频 403 错误
   },
 ];
 

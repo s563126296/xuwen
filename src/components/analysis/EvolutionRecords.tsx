@@ -4,7 +4,7 @@ import { useEvolutionStore } from '../../stores/evolutionStore';
 
 const TOOLTIP_STYLE = {
   background: 'linear-gradient(135deg, rgba(13,27,42,0.98) 0%, rgba(20,35,55,0.98) 100%)',
-  border: '1px solid rgba(139,92,246,0.4)',
+  border: '1px solid rgba(77,166,255,0.4)',
   borderRadius: 8,
   fontSize: 11,
   padding: '8px 12px',
@@ -29,7 +29,7 @@ export default function EvolutionRecords() {
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <h3 style={{ fontSize: 14, fontWeight: 600, color: '#E2E8F0', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <GitBranch size={14} color="#8B5CF6" /> 策略进化记录
+          <GitBranch size={14} color="#4DA6FF" /> 策略进化记录
         </h3>
         <p style={{ fontSize: 11, color: '#64748B' }}>
           追踪 AI 模型从 v1.0 到 {currentVersion} 的进化历程，准确率从 72% 提升至 {currentAccuracy}%
@@ -73,7 +73,7 @@ export default function EvolutionRecords() {
         borderRadius: 8
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-          <Sparkles size={12} color="#8B5CF6" />
+          <Sparkles size={12} color="#4DA6FF" />
           <span style={{ fontSize: 12, fontWeight: 600, color: '#E2E8F0' }}>进化时间线</span>
         </div>
 
@@ -86,7 +86,7 @@ export default function EvolutionRecords() {
             top: 0,
             bottom: 0,
             width: 2,
-            background: 'linear-gradient(180deg, rgba(139,92,246,0.5) 0%, rgba(0,208,233,0.3) 100%)'
+            background: 'linear-gradient(180deg, rgba(77,166,255,0.5) 0%, rgba(0,208,233,0.3) 100%)'
           }} />
 
           {sortedRecords.map((record, index) => {
@@ -103,16 +103,16 @@ export default function EvolutionRecords() {
                   width: 8,
                   height: 8,
                   borderRadius: '50%',
-                  background: isFirst ? '#8B5CF6' : '#00D0E9',
+                  background: isFirst ? '#4DA6FF' : '#00D0E9',
                   border: '2px solid #0A0F19',
-                  boxShadow: isFirst ? '0 0 8px rgba(139,92,246,0.6)' : '0 0 6px rgba(0,208,233,0.4)'
+                  boxShadow: isFirst ? '0 0 8px rgba(77,166,255,0.6)' : '0 0 6px rgba(0,208,233,0.4)'
                 }} />
 
                 {/* Record card */}
                 <div style={{
                   padding: 12,
-                  background: isFirst ? 'rgba(139,92,246,0.08)' : 'rgba(0,0,0,0.15)',
-                  border: `1px solid ${isFirst ? 'rgba(139,92,246,0.3)' : 'rgba(255,255,255,0.05)'}`,
+                  background: isFirst ? 'rgba(77,166,255,0.08)' : 'rgba(0,0,0,0.15)',
+                  border: `1px solid ${isFirst ? 'rgba(77,166,255,0.3)' : 'rgba(255,255,255,0.05)'}`,
                   borderRadius: 6
                 }}>
                   {/* Header: version + date + accuracy delta */}
@@ -121,10 +121,10 @@ export default function EvolutionRecords() {
                       <span style={{
                         fontSize: 11,
                         fontWeight: 700,
-                        color: isFirst ? '#8B5CF6' : '#00D0E9',
+                        color: isFirst ? '#4DA6FF' : '#00D0E9',
                         fontFamily: 'monospace',
                         padding: '2px 6px',
-                        background: isFirst ? 'rgba(139,92,246,0.15)' : 'rgba(0,208,233,0.15)',
+                        background: isFirst ? 'rgba(77,166,255,0.15)' : 'rgba(0,208,233,0.15)',
                         borderRadius: 4
                       }}>
                         {record.version}
@@ -192,13 +192,13 @@ export default function EvolutionRecords() {
       <div style={{
         marginTop: 16,
         padding: 14,
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(0,208,233,0.05) 100%)',
-        border: '1px solid rgba(139,92,246,0.25)',
+        background: 'linear-gradient(135deg, rgba(77,166,255,0.12) 0%, rgba(0,208,233,0.05) 100%)',
+        border: '1px solid rgba(77,166,255,0.25)',
         borderRadius: 8
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-          <Sparkles size={14} color="#8B5CF6" />
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#8B5CF6' }}>进化洞察</span>
+          <Sparkles size={14} color="#4DA6FF" />
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#4DA6FF' }}>进化洞察</span>
         </div>
         <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: '#C9CDD4', lineHeight: 1.8 }}>
           <li>模型经过 {records.length} 次迭代，准确率从 72% 提升至 {currentAccuracy}%，提升 {currentAccuracy - 72} 个百分点</li>

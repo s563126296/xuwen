@@ -4,11 +4,11 @@
   overflow: hidden;
   animation: portFadeIn 500ms ease-out;
   color: rgba(239, 248, 255, 0.94);
-  --port-cyan: #00d0e9;
+  --port-cyan: var(--color-primary);
   --port-cyan-soft: rgba(0, 208, 233, 0.14);
-  --port-amber: #f5a623;
-  --port-green: #2ed573;
-  --port-red: #ff4757;
+  --port-amber: var(--color-accent);
+  --port-green: var(--color-success);
+  --port-red: var(--color-danger);
   --port-panel-bg: linear-gradient(145deg, rgba(6, 16, 31, 0.9), rgba(8, 31, 49, 0.84));
 }
 

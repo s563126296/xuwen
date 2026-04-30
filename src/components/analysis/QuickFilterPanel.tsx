@@ -3,7 +3,7 @@ import { useAnalysisStore } from '../../stores';
 
 const QUICK_FILTERS = [
   { id: 'today', label: '今日概览', icon: Calendar, color: '#00D0E9' },
-  { id: 'week', label: '本周汇总', icon: BarChart3, color: '#8B5CF6' },
+  { id: 'week', label: '本周汇总', icon: BarChart3, color: '#4DA6FF' },
   { id: 'spring', label: '春运专题', icon: Zap, color: '#F5A623' },
   { id: 'typhoon', label: '台风事件', icon: CloudRain, color: '#FF4757' },
   { id: 'congestion', label: '重大拥堵', icon: AlertTriangle, color: '#F5A623' },
@@ -18,17 +18,17 @@ export default function QuickFilterPanel() {
     <div style={{
       flex: 1,
       minHeight: 0,
-      background: 'rgba(13,27,42,0.8)',
-      border: '1px solid rgba(139,92,246,0.2)',
+      background: 'var(--glass-bg)',
+      border: '1px solid var(--glass-border)',
       borderRadius: 8,
-      backdropFilter: 'blur(10px)',
+      backdropFilter: 'blur(var(--glass-blur))',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
     }}>
       <div style={{ flexShrink: 0, padding: 16, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Zap size={14} color="#8B5CF6" />
+          <Zap size={14} color="#4DA6FF" />
           <span style={{ fontSize: 13, fontWeight: 600, color: '#E2E8F0' }}>快速筛选</span>
         </div>
       </div>

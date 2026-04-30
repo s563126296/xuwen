@@ -6,7 +6,7 @@ import { DECISION_TREE, type TreeNode } from '../../utils/decisionTreeData';
 const NODE_COLORS: Record<TreeNode['type'], { fill: string; stroke: string; text: string }> = {
   root:      { fill: 'rgba(0,208,233,0.15)',  stroke: '#00D0E9', text: '#00D0E9' },
   cause:     { fill: 'rgba(245,166,35,0.15)',  stroke: '#F5A623', text: '#F5A623' },
-  condition: { fill: 'rgba(139,92,246,0.15)',  stroke: '#8B5CF6', text: '#8B5CF6' },
+  condition: { fill: 'rgba(77,166,255,0.15)',  stroke: '#4DA6FF', text: '#4DA6FF' },
   strategy:  { fill: 'rgba(46,213,115,0.15)',  stroke: '#2ED573', text: '#2ED573' },
 };
 
@@ -94,7 +94,7 @@ function NodeRenderer({ layout, expandedIds, onToggle }: NodeRendererProps) {
             y1={y + NODE_H}
             x2={childCenterX}
             y2={childCenterY}
-            stroke="rgba(139,92,246,0.3)"
+            stroke="rgba(77,166,255,0.3)"
             strokeWidth={2}
             strokeDasharray="4 2"
           />
@@ -124,8 +124,8 @@ function NodeRenderer({ layout, expandedIds, onToggle }: NodeRendererProps) {
             width={40}
             height={16}
             rx={8}
-            fill="rgba(139,92,246,0.85)"
-            stroke="rgba(196,181,253,0.6)"
+            fill="rgba(77,166,255,0.85)"
+            stroke="rgba(157,206,255,0.6)"
             strokeWidth={1}
           />
           <text
@@ -239,7 +239,7 @@ export default function DecisionTree() {
     <div>
       <div style={{ marginBottom: 16 }}>
         <h3 style={{ fontSize: 14, fontWeight: 600, color: '#E2E8F0', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <GitBranch size={14} color="#8B5CF6" /> 策略决策树
+          <GitBranch size={14} color="#4DA6FF" /> 策略决策树
         </h3>
         <p style={{ fontSize: 11, color: '#64748B' }}>
           基于拥堵成因、环境条件和历史效果的策略推荐逻辑。点击节点可展开或收起分支。
@@ -272,13 +272,13 @@ export default function DecisionTree() {
       <div style={{
         marginTop: 16,
         padding: 14,
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(0,208,233,0.05) 100%)',
-        border: '1px solid rgba(139,92,246,0.25)',
+        background: 'linear-gradient(135deg, rgba(77,166,255,0.12) 0%, rgba(0,208,233,0.05) 100%)',
+        border: '1px solid rgba(77,166,255,0.25)',
         borderRadius: 8
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-          <Sparkles size={14} color="#8B5CF6" />
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#8B5CF6' }}>决策树洞察</span>
+          <Sparkles size={14} color="#4DA6FF" />
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#4DA6FF' }}>决策树洞察</span>
         </div>
         <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: '#C9CDD4', lineHeight: 1.8 }}>
           <li>港口积压是最高频主因，累计命中 45 次，整体成功率 82%</li>

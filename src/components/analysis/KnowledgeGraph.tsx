@@ -92,7 +92,7 @@ function getEdgeStyle(type: GraphEdge['type']): { stroke: string; dasharray: str
   switch (type) {
     case 'mutex': return { stroke: '#EF4444', dasharray: '6 4' };
     case 'linkage': return { stroke: '#3B82F6', dasharray: '' };
-    case 'influence': return { stroke: '#8B5CF6', dasharray: '2 4' };
+    case 'influence': return { stroke: '#4DA6FF', dasharray: '2 4' };
   }
 }
 
@@ -102,10 +102,10 @@ function getConnectedEdges(nodeId: string): GraphEdge[] {
 
 const LEGEND_ITEMS = [
   { color: '#00D0E9', label: '策略节点', dash: '' },
-  { color: '#8B5CF6', label: '影响因子', dash: '' },
+  { color: '#4DA6FF', label: '影响因子', dash: '' },
   { color: '#EF4444', label: '互斥关系', dash: '6 4' },
   { color: '#3B82F6', label: '联动关系', dash: '' },
-  { color: '#8B5CF6', label: '影响关系', dash: '2 4' },
+  { color: '#4DA6FF', label: '影响关系', dash: '2 4' },
 ];
 
 // --- Component ---
@@ -144,7 +144,7 @@ export default function KnowledgeGraph() {
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <h3 style={{ fontSize: 14, fontWeight: 600, color: '#E2E8F0', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Share2 size={14} color="#8B5CF6" /> 策略知识图谱
+          <Share2 size={14} color="#4DA6FF" /> 策略知识图谱
         </h3>
         <p style={{ fontSize: 11, color: '#64748B' }}>
           展示策略间的互斥、联动关系及影响因子，节点大小反映执行次数
@@ -190,7 +190,7 @@ export default function KnowledgeGraph() {
             {layoutNodes.map((node) => {
               const r = getNodeRadius(node);
               const isStrategy = node.type === 'strategy';
-              const fill = isStrategy ? '#00D0E9' : '#8B5CF6';
+              const fill = isStrategy ? '#00D0E9' : '#4DA6FF';
               const isHovered = hoveredNodeId === node.id;
               const isSelected = selectedNodeId === node.id;
               const dimmed = hoveredNodeId && !isNodeConnectedToHovered(node.id);
@@ -228,7 +228,7 @@ export default function KnowledgeGraph() {
                     </text>
                   )}
                   {node.versionTag && (
-                    <text x={node.x} y={node.y + 4} textAnchor="middle" fill="#A78BFA" fontSize={8}>
+                    <text x={node.x} y={node.y + 4} textAnchor="middle" fill="#7EC8FF" fontSize={8}>
                       {node.versionTag}
                     </text>
                   )}
@@ -258,8 +258,8 @@ export default function KnowledgeGraph() {
             width: 220,
             flexShrink: 0,
             padding: 16,
-            background: 'rgba(13,27,42,0.9)',
-            border: '1px solid rgba(139,92,246,0.3)',
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
             borderRadius: 8,
             alignSelf: 'flex-start',
           }}>
