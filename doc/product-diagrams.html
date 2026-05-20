@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>徐闻智慧交通 - 产品架构与流程图</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0A0F19;
+  color: #E8F4FF;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  padding: 60px 40px;
+}
+h1 { text-align: center; font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #4DA6FF, #00D0E9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+.subtitle { text-align: center; color: #5A8BA8; font-size: 14px; margin-bottom: 64px; letter-spacing: 2px; }
+.section { margin-bottom: 80px; max-width: 1300px; margin-left: auto; margin-right: auto; }
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.section-header h2 { font-size: 22px; color: #fff; font-weight: 600; }
+.section-header .badge { padding: 3px 10px; border-radius: 4px; font-size: 11px; background: rgba(77,166,255,0.15); color: #4DA6FF; border: 1px solid rgba(77,166,255,0.3); }
+.section-desc { color: #5A8BA8; font-size: 13px; margin-bottom: 28px; }
+.diagram-box {
+  background: rgba(255,255,255,0.015); border: 1px solid rgba(77,166,255,0.1);
+  border-radius: 16px; padding: 40px 32px; position: relative; overflow-x: auto;
+}
+.diagram-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(77,166,255,0.3), transparent); }
+.nav { position: fixed; top: 24px; right: 24px; display: flex; flex-direction: column; gap: 6px; z-index: 100; }
+.nav a { padding: 6px 14px; background: rgba(10,15,25,0.95); border: 1px solid rgba(77,166,255,0.2); border-radius: 6px; color: #4DA6FF; text-decoration: none; font-size: 12px; transition: all 0.2s; }
+.nav a:hover { background: rgba(77,166,255,0.1); border-color: #4DA6FF; }
+
+/* ===== 产品架构图 ===== */
+.pa-grid { display: grid; grid-template-columns: 100px 1fr; gap: 0; }
+.pa-row-label {
+  writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; padding: 12px 8px; border-radius: 8px 0 0 8px;
+  letter-spacing: 2px;
+}
+.pa-row-content { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 16px; border-radius: 0 8px 8px 0; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; }
+.pa-cell { padding: 14px 10px; border-radius: 8px; text-align: center; font-size: 11px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); transition: all 0.2s; }
+.pa-cell:hover { transform: translateY(-2px); }
+.pa-cell .title { font-weight: 600; font-size: 12px; margin-bottom: 4px; }
+.pa-cell .items { color: #5A8BA8; font-size: 10px; line-height: 1.6; }
+.pa-col-headers { display: grid; grid-template-columns: 100px repeat(5, 1fr); gap: 10px; margin-bottom: 16px; padding: 0 16px; }
+.pa-col-header { text-align: center; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px; }
+
+.rl-value { background: rgba(139,92,246,0.1); color: #A78BFA; }
+.rl-core { background: rgba(77,166,255,0.1); color: #4DA6FF; }
+.rl-base { background: rgba(0,208,233,0.1); color: #00D0E9; }
+.rl-data { background: rgba(46,213,115,0.1); color: #2ED573; }
+
+/* ===== 业务流程图（泳道） ===== */
+.swim-container { display: flex; flex-direction: column; }
+.swim-header { display: grid; grid-template-columns: 100px repeat(8, 1fr); border-bottom: 2px solid rgba(77,166,255,0.2); padding-bottom: 12px; margin-bottom: 0; }
+.swim-header .step-label { text-align: center; font-size: 11px; color: #4DA6FF; font-weight: 500; }
+.swim-lane { display: grid; grid-template-columns: 100px repeat(8, 1fr); min-height: 80px; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; }
+.swim-lane-name { font-size: 12px; font-weight: 600; padding: 8px; border-right: 1px solid rgba(255,255,255,0.06); }
+.swim-cell { display: flex; justify-content: center; align-items: center; padding: 8px 4px; position: relative; }
+.swim-node { padding: 8px 10px; border-radius: 8px; font-size: 10px; text-align: center; max-width: 110px; line-height: 1.4; }
+.swim-decision { clip-path: polygon(50% 0%, 95% 50%, 50% 100%, 5% 50%); padding: 16px 12px; font-size: 9px; min-width: 90px; }
+.sn-blue { background: rgba(77,166,255,0.12); border: 1px solid rgba(77,166,255,0.35); color: #7EC8FF; }
+.sn-purple { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.35); color: #C4B5FD; }
+.sn-cyan { background: rgba(0,208,233,0.12); border: 1px solid rgba(0,208,233,0.35); color: #67E8F9; }
+.sn-green { background: rgba(46,213,115,0.12); border: 1px solid rgba(46,213,115,0.35); color: #6EE7A0; }
+.sn-orange { background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.35); color: #FCD34D; }
+.sn-red { background: rgba(255,71,87,0.12); border: 1px solid rgba(255,71,87,0.35); color: #FCA5A5; }
+.lane-ai .swim-lane-name { color: #A78BFA; }
+.lane-cmd .swim-lane-name { color: #4DA6FF; }
+.lane-ops .swim-lane-name { color: #00D0E9; }
+.lane-ext .swim-lane-name { color: #2ED573; }
+
+/* 连接箭头 */
+.arrow-down { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); color: #3A6A8A; font-size: 14px; z-index: 2; }
+.arrow-right { position: absolute; right: -8px; top: 50%; transform: translateY(-50%); color: #3A6A8A; font-size: 12px; z-index: 2; }
+
+/* ===== 系统流程图 ===== */
+.sys-diagram { position: relative; }
+.sys-modules { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 24px; flex-wrap: wrap; }
+.sys-module { flex: 1; min-width: 150px; padding: 20px 16px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); }
+.sys-module .mod-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.sys-module .mod-items { font-size: 10px; color: #5A8BA8; line-height: 1.8; }
+.sys-flow-arrows { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 16px 0; }
+.sys-flow-arrows .line { flex: 1; height: 2px; background: linear-gradient(90deg, transparent, #2A5A7A, transparent); position: relative; }
+.sys-flow-arrows .line::after { content: '▶'; position: absolute; right: -4px; top: -8px; color: #3A6A8A; font-size: 12px; }
+.sys-flow-arrows .label { font-size: 10px; color: #4DA6FF; white-space: nowrap; padding: 2px 8px; background: rgba(77,166,255,0.08); border-radius: 4px; }
+.sys-row { display: flex; align-items: stretch; gap: 16px; margin-bottom: 20px; }
+.sys-row-label { min-width: 80px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; padding: 8px; border-radius: 8px; text-align: center; }
+.sys-row-nodes { display: flex; gap: 12px; flex: 1; flex-wrap: wrap; }
+.sys-rnode { padding: 12px 14px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); min-width: 130px; }
+.sys-rnode .t { font-weight: 500; color: #E8F4FF; margin-bottom: 3px; }
+.sys-rnode .d { font-size: 10px; color: #5A8BA8; }
+.sys-connector { display: flex; align-items: center; justify-content: center; padding: 10px 0; gap: 12px; }
+.sys-connector .cline { flex: 1; height: 1px; background: rgba(77,166,255,0.2); }
+.sys-connector .clabel { font-size: 10px; color: #5A8BA8; padding: 2px 10px; border: 1px solid rgba(77,166,255,0.15); border-radius: 4px; background: rgba(77,166,255,0.05); }
+.sys-feedback { margin-top: 20px; padding: 14px 20px; border-radius: 8px; text-align: center; background: rgba(255,71,87,0.04); border: 1px dashed rgba(255,71,87,0.25); font-size: 11px; color: #FF6B7A; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#arch">产品架构</a>
+  <a href="#business">业务流程</a>
+  <a href="#system">系统流程</a>
+</nav>
+
+<h1>徐闻智慧交通大屏 v2.1</h1>
+<div class="subtitle">AI 驱动的交通指挥决策系统 &mdash; 产品架构与核心流程</div>
+
+<!-- ========== 1. 产品架构图 ========== -->
+<div class="section" id="arch">
+  <div class="section-header"><h2>产品架构图</h2><span class="badge">功能地图</span></div>
+  <p class="section-desc">横轴为 5 大业务场景，纵轴为功能层级（增值能力 → 核心功能 → 基础能力 → 数据底座），展示产品功能模块的组织关系</p>
+  <div class="diagram-box">
+    <!-- 列头：场景 -->
+    <div class="pa-col-headers">
+      <div></div>
+      <div class="pa-col-header" style="background:rgba(77,166,255,0.08);color:#4DA6FF;">总览监控</div>
+      <div class="pa-col-header" style="background:rgba(0,208,233,0.08);color:#00D0E9;">港口调度</div>
+      <div class="pa-col-header" style="background:rgba(139,92,246,0.08);color:#A78BFA;">指挥处置</div>
+      <div class="pa-col-header" style="background:rgba(245,166,35,0.08);color:#F5A623;">统计分析</div>
+      <div class="pa-col-header" style="background:rgba(46,213,115,0.08);color:#2ED573;">AI策略</div>
+    </div>
+    <div class="pa-grid">
+      <!-- 增值能力层 -->
+      <div class="pa-row-label rl-value">增值能力</div>
+      <div class="pa-row-content">
+        <div class="pa-cell"><div class="title">AI态势播报</div><div class="items">语音播报<br/>日报/周报</div></div>
+        <div class="pa-cell"><div class="title">跨海峡预测</div><div class="items">潮汐预判<br/>气象耦合</div></div>
+        <div class="pa-cell"><div class="title">模拟推演</div><div class="items">策略仿真<br/>效果预测</div></div>
+        <div class="pa-cell"><div class="title">智能报告</div><div class="items">自动生成<br/>多维对比</div></div>
+        <div class="pa-cell"><div class="title">策略自进化</div><div class="items">效果学习<br/>参数自调</div></div>
+      </div>
+    </div>
+    <div class="pa-grid">
+      <!-- 核心功能层 -->
+      <div class="pa-row-label rl-core">核心功能</div>
+      <div class="pa-row-content">
+        <div class="pa-cell"><div class="title">风险预警</div><div class="items">4级预警<br/>15秒刷新<br/>弹窗提醒</div></div>
+        <div class="pa-cell"><div class="title">容量管理</div><div class="items">排队预测<br/>泊位调度<br/>双港对比</div></div>
+        <div class="pa-cell"><div class="title">策略执行</div><div class="items">AI推荐<br/>冲突检测<br/>偏差监控</div></div>
+        <div class="pa-cell"><div class="title">趋势洞察</div><div class="items">历史回溯<br/>场景对比<br/>热力分析</div></div>
+        <div class="pa-cell"><div class="title">方案比选</div><div class="items">多策略PK<br/>成本评估<br/>风险预判</div></div>
+      </div>
+    </div>
+    <div class="pa-grid">
+      <!-- 基础能力层 -->
+      <div class="pa-row-label rl-base">基础能力</div>
+      <div class="pa-row-content">
+        <div class="pa-cell"><div class="title">指标看板</div><div class="items">15项KPI<br/>实时刷新</div></div>
+        <div class="pa-cell"><div class="title">船舶追踪</div><div class="items">AIS定位<br/>航线展示</div></div>
+        <div class="pa-cell"><div class="title">资源调度</div><div class="items">人员/车辆<br/>物资/设备</div></div>
+        <div class="pa-cell"><div class="title">数据查询</div><div class="items">多维筛选<br/>时间范围</div></div>
+        <div class="pa-cell"><div class="title">策略库</div><div class="items">6类预案<br/>历史策略</div></div>
+      </div>
+    </div>
+    <div class="pa-grid">
+      <!-- 数据底座 -->
+      <div class="pa-row-label rl-data">数据底座</div>
+      <div class="pa-row-content" style="grid-template-columns: repeat(5, 1fr);">
+        <div class="pa-cell"><div class="title">地图服务</div><div class="items">高德/L7<br/>GCJ-02</div></div>
+        <div class="pa-cell"><div class="title">视频服务</div><div class="items">海康/大华<br/>6路+无人机</div></div>
+        <div class="pa-cell"><div class="title">通讯服务</div><div class="items">消息/视频<br/>指令下发</div></div>
+        <div class="pa-cell"><div class="title">数据仓库</div><div class="items">历史归档<br/>统计聚合</div></div>
+        <div class="pa-cell"><div class="title">外部接口</div><div class="items">9部门<br/>58项数据</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 2. 核心业务流程图（泳道图） ========== -->
+<div class="section" id="business">
+  <div class="section-header"><h2>核心业务流程图</h2><span class="badge">泳道图</span></div>
+  <p class="section-desc">以"发现拥堵→处置→恢复"为主线，展示各角色在一次完整交通事件处置中的协作流程</p>
+  <div class="diagram-box">
+    <div class="swim-container">
+      <!-- 步骤头 -->
+      <div class="swim-header">
+        <div></div>
+        <div class="step-label">发现异常</div>
+        <div class="step-label">态势研判</div>
+        <div class="step-label">等级判定</div>
+        <div class="step-label">方案生成</div>
+        <div class="step-label">人工决策</div>
+        <div class="step-label">指令执行</div>
+        <div class="step-label">效果监控</div>
+        <div class="step-label">复盘归档</div>
+      </div>
+      <!-- 泳道1: AI系统 -->
+      <div class="swim-lane lane-ai">
+        <div class="swim-lane-name">AI 系统</div>
+        <div class="swim-cell"><div class="swim-node sn-purple">数据异常<br/>自动识别</div></div>
+        <div class="swim-cell"><div class="swim-node sn-purple">9指标<br/>综合评估</div></div>
+        <div class="swim-cell"><div class="swim-node sn-orange swim-decision">风险<br/>分级</div></div>
+        <div class="swim-cell"><div class="swim-node sn-purple">3条策略<br/>自动推荐</div></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"><div class="swim-node sn-purple">偏差检测<br/>±15%预警</div></div>
+        <div class="swim-cell"><div class="swim-node sn-purple">效果评分<br/>策略优化</div></div>
+      </div>
+      <!-- 泳道2: 指挥员 -->
+      <div class="swim-lane lane-cmd">
+        <div class="swim-lane-name">指挥员</div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"><div class="swim-node sn-blue">查看AI<br/>摘要结论</div></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"><div class="swim-node sn-blue">审核方案<br/>冲突检查</div></div>
+        <div class="swim-cell"><div class="swim-node sn-blue" style="border-color:rgba(77,166,255,0.6);box-shadow:0 0 12px rgba(77,166,255,0.2);">确认执行<br/>或调整</div></div>
+        <div class="swim-cell"><div class="swim-node sn-blue">下达指令<br/>分配资源</div></div>
+        <div class="swim-cell"><div class="swim-node sn-blue">查看进度<br/>处理偏差</div></div>
+        <div class="swim-cell"><div class="swim-node sn-blue">签发报告</div></div>
+      </div>
+      <!-- 泳道3: 一线执行 -->
+      <div class="swim-lane lane-ops">
+        <div class="swim-lane-name">一线人员</div>
+        <div class="swim-cell"><div class="swim-node sn-cyan">现场发现<br/>上报</div></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"><div class="swim-node sn-cyan">执行任务<br/>反馈进度</div></div>
+        <div class="swim-cell"><div class="swim-node sn-cyan">现场确认<br/>拍照回传</div></div>
+        <div class="swim-cell"></div>
+      </div>
+      <!-- 泳道4: 外部协同 -->
+      <div class="swim-lane lane-ext">
+        <div class="swim-lane-name">外部部门</div>
+        <div class="swim-cell"><div class="swim-node sn-green">数据推送<br/>(高德/气象)</div></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"><div class="swim-node sn-green">信号灯调整<br/>诱导屏更新</div></div>
+        <div class="swim-cell"></div>
+        <div class="swim-cell"><div class="swim-node sn-green">数据归档<br/>入数据仓库</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 3. 核心系统流程图 ========== -->
+<div class="section" id="system">
+  <div class="section-header"><h2>核心系统流程图</h2><span class="badge">模块交互</span></div>
+  <p class="section-desc">一次"拥堵事件"从触发到处置完成，系统各模块之间的调用关系和数据流向</p>
+  <div class="diagram-box">
+    <!-- 第1层：触发 -->
+    <div class="sys-row">
+      <div class="sys-row-label" style="background:rgba(46,213,115,0.1);color:#2ED573;">触发源</div>
+      <div class="sys-row-nodes">
+        <div class="sys-rnode"><div class="t">高德路况API</div><div class="d">拥堵指数突增 → 推送事件</div></div>
+        <div class="sys-rnode"><div class="t">视频AI检测</div><div class="d">车辆排队超阈值 → 触发告警</div></div>
+        <div class="sys-rnode"><div class="t">人工上报</div><div class="d">一线人员通过通讯系统上报</div></div>
+      </div>
+    </div>
+    <div class="sys-connector"><div class="cline"></div><div class="clabel">事件进入系统</div><div class="cline"></div></div>
+    <!-- 第2层：AI研判 -->
+    <div class="sys-row">
+      <div class="sys-row-label" style="background:rgba(139,92,246,0.1);color:#A78BFA;">AI引擎</div>
+      <div class="sys-row-nodes">
+        <div class="sys-rnode"><div class="t">风险预测引擎</div><div class="d">读取9项指标 → 计算风险等级(绿/黄/橙/红)</div></div>
+        <div class="sys-rnode"><div class="t">因果分析引擎</div><div class="d">5维归因(天气/事故/港口/潮汐/节假日)</div></div>
+        <div class="sys-rnode"><div class="t">策略匹配引擎</div><div class="d">规则库匹配 → 冲突检测 → 输出3条方案</div></div>
+      </div>
+    </div>
+    <div class="sys-connector"><div class="cline"></div><div class="clabel">写入 commandStore + 推送UI</div><div class="cline"></div></div>
+    <!-- 第3层：前端交互 -->
+    <div class="sys-row">
+      <div class="sys-row-label" style="background:rgba(77,166,255,0.1);color:#4DA6FF;">前端UI</div>
+      <div class="sys-row-nodes">
+        <div class="sys-rnode"><div class="t">AI摘要栏更新</div><div class="d">显示预警等级 + 态势结论 + 建议</div></div>
+        <div class="sys-rnode"><div class="t">策略面板渲染</div><div class="d">展示3条方案 + 冲突标记 + 效果预测</div></div>
+        <div class="sys-rnode"><div class="t">地图热力图</div><div class="d">拥堵路段高亮 + 影响范围标注</div></div>
+      </div>
+    </div>
+    <div class="sys-connector"><div class="cline"></div><div class="clabel">指挥员点击"确认执行"</div><div class="cline"></div></div>
+    <!-- 第4层：执行 -->
+    <div class="sys-row">
+      <div class="sys-row-label" style="background:rgba(0,208,233,0.1);color:#00D0E9;">执行层</div>
+      <div class="sys-row-nodes">
+        <div class="sys-rnode"><div class="t">指令下发模块</div><div class="d">拆解策略 → 生成子任务 → 分配到人/设备</div></div>
+        <div class="sys-rnode"><div class="t">通讯系统</div><div class="d">消息推送 + 视频连线 + 快捷指令</div></div>
+        <div class="sys-rnode"><div class="t">外部系统调用</div><div class="d">信号灯API / 诱导屏API / 广播系统</div></div>
+      </div>
+    </div>
+    <div class="sys-connector"><div class="cline"></div><div class="clabel">执行进度回传(30秒轮询)</div><div class="cline"></div></div>
+    <!-- 第5层：监控反馈 -->
+    <div class="sys-row">
+      <div class="sys-row-label" style="background:rgba(245,166,35,0.1);color:#F5A623;">监控层</div>
+      <div class="sys-row-nodes">
+        <div class="sys-rnode"><div class="t">偏差监控引擎</div><div class="d">实际指标 vs 预期 → 超±15%触发预警</div></div>
+        <div class="sys-rnode"><div class="t">执行看板</div><div class="d">进度条 + 子任务状态 + 视频画面</div></div>
+        <div class="sys-rnode"><div class="t">反馈分析引擎</div><div class="d">执行完成 → 效果评分 → 归档到analysisStore</div></div>
+      </div>
+    </div>
+    <div class="sys-feedback">&#8634; 偏差超阈值时：监控引擎 → 生成调整建议 → 推送UI → 指挥员二次决策 → 重新进入执行层</div>
+  </div>
+</div>
+
+</body>
+</html>

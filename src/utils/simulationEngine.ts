@@ -1,15 +1,21 @@
 /**
  * Simulation engine for strategy comparison.
- * Uses effectModel from STRATEGY_DB in commandEngine.ts
+ * Strategies organized by main road / alternative road structure per construction plan.
+ *
+ * Strategy library:
+ *  - 3 core diversion strategies (main road → alternative road)
+ *  - 2 placeholder strategies (pending field survey confirmation)
+ * Support actions (LED, parking, police checkpoint) are no longer independent strategies.
  */
 
 import type { SimulatorParams, SimulationResult, AIRecommendation } from '../stores/simulatorStore';
 
-// Re-define strategy data locally to avoid coupling with commandEngine's internal types.
-// This mirrors the effectModel + requiredResources + historicalData from STRATEGY_DB.
 interface StrategyEffectData {
   id: string;
   name: string;
+  mainRoad: string;
+  alternativeRoad: string;
+  supportActions: string[];
   effectModel: {
     baseEffect: number;
     factorModifiers: {
@@ -20,87 +26,52 @@ interface StrategyEffectData {
       inflow_high: number;
     };
   };
-  arrivalMin: number; // first resource arrival time
+  arrivalMin: number;
   historicalSuccessRate: number;
   avgReliefMinutes: number;
-  diversionBase: number; // base diversion volume
+  diversionBase: number;
 }
 
 const STRATEGY_EFFECTS: Record<string, StrategyEffectData> = {
   'S-01': {
-    id: 'S-01', name: '应急车道开放',
-    effectModel: { baseEffect: 1.7, factorModifiers: { weather_rain: -0.2, weather_fog: -0.15, truck_ratio_high: -0.1, road_congested: 0.15, inflow_high: 0.1 } },
-    arrivalMin: 8, historicalSuccessRate: 0.87, avgReliefMinutes: 28, diversionBase: 350,
-  },
-  'S-02': {
-    id: 'S-02', name: 'S376 省道分流',
+    id: 'S-01', name: '进港大道 → S376 省道分流',
+    mainRoad: '进港大道关键段',
+    alternativeRoad: 'S376 省道',
+    supportActions: ['诱导屏发布分流引导', '设卡核验预约时段', '临时停车区承接早到车辆'],
     effectModel: { baseEffect: 1.3, factorModifiers: { weather_rain: -0.15, weather_fog: -0.1, truck_ratio_high: 0.05, road_congested: 0.1, inflow_high: 0.15 } },
     arrivalMin: 5, historicalSuccessRate: 0.91, avgReliefMinutes: 22, diversionBase: 200,
   },
+  'S-02': {
+    id: 'S-02', name: '徐海路 → 环半岛公路分流',
+    mainRoad: '徐海路',
+    alternativeRoad: '环半岛公路',
+    supportActions: ['诱导屏发布通道引导', '设卡引导分流'],
+    effectModel: { baseEffect: 1.1, factorModifiers: { weather_rain: -0.1, weather_fog: -0.1, truck_ratio_high: 0.0, road_congested: 0.15, inflow_high: 0.1 } },
+    arrivalMin: 8, historicalSuccessRate: 0.83, avgReliefMinutes: 26, diversionBase: 180,
+  },
   'S-03': {
-    id: 'S-03', name: '进港大道信号灯优化',
-    effectModel: { baseEffect: 0.9, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: -0.1, road_congested: 0.2, inflow_high: 0.05 } },
-    arrivalMin: 3, historicalSuccessRate: 0.94, avgReliefMinutes: 18, diversionBase: 120,
-  },
-  'S-04': {
-    id: 'S-04', name: '诱导屏引导',
-    effectModel: { baseEffect: 0.3, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: -0.05, road_congested: 0.1, inflow_high: 0.1 } },
-    arrivalMin: 0, historicalSuccessRate: 0.82, avgReliefMinutes: 12, diversionBase: 50,
-  },
-  'S-05': {
-    id: 'S-05', name: '港口增开班次',
-    effectModel: { baseEffect: 1.5, factorModifiers: { weather_rain: -0.3, weather_fog: -0.5, truck_ratio_high: 0.0, road_congested: 0.0, inflow_high: 0.2 } },
-    arrivalMin: 30, historicalSuccessRate: 0.75, avgReliefMinutes: 55, diversionBase: 400,
-  },
-  'S-06': {
-    id: 'S-06', name: '临时停车场启用',
-    effectModel: { baseEffect: 0.8, factorModifiers: { weather_rain: -0.1, weather_fog: -0.05, truck_ratio_high: 0.15, road_congested: 0.1, inflow_high: 0.2 } },
-    arrivalMin: 15, historicalSuccessRate: 0.78, avgReliefMinutes: 32, diversionBase: 180,
-  },
-  'S-07': {
-    id: 'S-07', name: '事故快速处置',
-    effectModel: { baseEffect: 2.0, factorModifiers: { weather_rain: -0.2, weather_fog: -0.1, truck_ratio_high: -0.15, road_congested: 0.3, inflow_high: 0.0 } },
-    arrivalMin: 6, historicalSuccessRate: 0.93, avgReliefMinutes: 35, diversionBase: 0,
-  },
-  'S-08': {
-    id: 'S-08', name: '交警现场疏导',
-    effectModel: { baseEffect: 1.2, factorModifiers: { weather_rain: -0.15, weather_fog: -0.2, truck_ratio_high: -0.1, road_congested: 0.25, inflow_high: 0.05 } },
-    arrivalMin: 10, historicalSuccessRate: 0.89, avgReliefMinutes: 25, diversionBase: 150,
-  },
-  'S-09': {
-    id: 'S-09', name: '社会化停车场协调',
-    effectModel: { baseEffect: 0.6, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: 0.1, road_congested: 0.05, inflow_high: 0.15 } },
-    arrivalMin: 20, historicalSuccessRate: 0.72, avgReliefMinutes: 40, diversionBase: 220,
-  },
-  'S-10': {
-    id: 'S-10', name: '公交专线调度',
-    effectModel: { baseEffect: 0.5, factorModifiers: { weather_rain: -0.1, weather_fog: -0.15, truck_ratio_high: 0.0, road_congested: 0.05, inflow_high: 0.1 } },
-    arrivalMin: 25, historicalSuccessRate: 0.68, avgReliefMinutes: 45, diversionBase: 100,
-  },
-  'S-11': {
-    id: 'S-11', name: '货车限行',
-    effectModel: { baseEffect: 1.4, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: 0.4, road_congested: 0.15, inflow_high: 0.1 } },
-    arrivalMin: 12, historicalSuccessRate: 0.85, avgReliefMinutes: 30, diversionBase: 280,
-  },
-  'S-12': {
-    id: 'S-12', name: '预约通行',
-    effectModel: { baseEffect: 1.1, factorModifiers: { weather_rain: -0.05, weather_fog: -0.05, truck_ratio_high: 0.05, road_congested: 0.1, inflow_high: 0.25 } },
-    arrivalMin: 0, historicalSuccessRate: 0.80, avgReliefMinutes: 50, diversionBase: 300,
-  },
-  'S-13': {
-    id: 'S-13', name: '动态车道调整',
-    effectModel: { baseEffect: 1.0, factorModifiers: { weather_rain: -0.1, weather_fog: -0.1, truck_ratio_high: -0.05, road_congested: 0.2, inflow_high: 0.1 } },
-    arrivalMin: 18, historicalSuccessRate: 0.83, avgReliefMinutes: 28, diversionBase: 200,
-  },
-  'S-14': {
-    id: 'S-14', name: '远端分流预警',
-    effectModel: { baseEffect: 0.7, factorModifiers: { weather_rain: -0.05, weather_fog: -0.1, truck_ratio_high: 0.05, road_congested: 0.15, inflow_high: 0.2 } },
-    arrivalMin: 0, historicalSuccessRate: 0.76, avgReliefMinutes: 35, diversionBase: 160,
-  },
-  'S-15': {
-    id: 'S-15', name: '应急通道启用',
+    id: 'S-03', name: '全面管控 → 多路分流 + 临时停车',
+    mainRoad: '进港大道-徐海路全段',
+    alternativeRoad: '多路并行 + 临时停车区',
+    supportActions: ['诱导屏全网发布', '多点设卡', '启用临时停车区', '应急物资保障', '无人机巡查'],
     effectModel: { baseEffect: 1.6, factorModifiers: { weather_rain: -0.15, weather_fog: -0.1, truck_ratio_high: -0.05, road_congested: 0.2, inflow_high: 0.15 } },
     arrivalMin: 22, historicalSuccessRate: 0.81, avgReliefMinutes: 38, diversionBase: 320,
+  },
+  'S-04': {
+    id: 'S-04', name: '应急车道借用（待踏勘确认）',
+    mainRoad: '进港大道关键段',
+    alternativeRoad: '主路应急车道临时开放',
+    supportActions: ['诱导屏发布', '交警现场管控', '保留紧急通道'],
+    effectModel: { baseEffect: 1.7, factorModifiers: { weather_rain: -0.2, weather_fog: -0.15, truck_ratio_high: -0.1, road_congested: 0.15, inflow_high: 0.1 } },
+    arrivalMin: 8, historicalSuccessRate: 0.87, avgReliefMinutes: 28, diversionBase: 350,
+  },
+  'S-05': {
+    id: 'S-05', name: '远端拦截分流（待踏勘确认）',
+    mainRoad: '进港大道上游路口',
+    alternativeRoad: '上游路口提前分流至 S376 / 环半岛公路',
+    supportActions: ['上游诱导屏预警', '上游设卡引导', '临时停车区承接'],
+    effectModel: { baseEffect: 1.0, factorModifiers: { weather_rain: -0.1, weather_fog: -0.1, truck_ratio_high: 0.0, road_congested: 0.1, inflow_high: 0.2 } },
+    arrivalMin: 10, historicalSuccessRate: 0.78, avgReliefMinutes: 30, diversionBase: 220,
   },
 };
 
@@ -154,33 +125,20 @@ function simulateStrategy(strategyData: StrategyEffectData, params: SimulatorPar
 
   // Strategy-specific parameter bonuses
   let strategyBonus = 0;
-  if (strategyData.id === 'S-02' || strategyData.id === 'S-03') {
-    // Diversion ratio affects effectiveness
-    const ratio = strategyParams?.diversionRatio ?? (strategyData.id === 'S-02' ? 30 : 20);
-    strategyBonus = (ratio - 20) * 0.01; // Higher ratio = more effect
-  } else if (strategyData.id === 'S-04') {
-    // Signal plan affects effectiveness
-    const plan = strategyParams?.signalPlan ?? 'A';
-    strategyBonus = plan === 'C' ? 0.3 : plan === 'B' ? 0.2 : 0.1;
-  } else if (strategyData.id === 'S-06') {
-    // Flow restriction effectiveness
-    const interval = strategyParams?.releaseInterval ?? 5;
-    strategyBonus = (10 - interval) * 0.02; // Shorter interval = more flow = more effect
-  } else if (strategyData.id === 'S-07') {
-    // Accident response level
-    const level = strategyParams?.resourceLevel ?? 'level2';
-    strategyBonus = level === 'level3' ? 0.3 : level === 'level2' ? 0.15 : 0;
-  } else if (strategyData.id === 'S-08') {
-    // Parking capacity
+  if (strategyData.id === 'S-01' || strategyData.id === 'S-02') {
+    // Diversion ratio affects effectiveness (main road → alternative road)
+    const ratio = strategyParams?.diversionRatio ?? 30;
+    strategyBonus = (ratio - 20) * 0.01;
+  } else if (strategyData.id === 'S-03') {
+    // Full control mode: parking capacity affects effectiveness
     const capacity = strategyParams?.parkingCapacity ?? 300;
     strategyBonus = (capacity - 200) * 0.001;
-  } else if (strategyData.id === 'S-11') {
-    // Time-sharing effectiveness (higher in high truck ratio scenarios)
-    if (env.truckRatio === 'high') strategyBonus = 0.25;
-  } else if (strategyData.id === 'S-15') {
-    // Appointment coverage
-    const coverage = strategyParams?.appointmentCoverage ?? 50;
-    strategyBonus = coverage * 0.003;
+  } else if (strategyData.id === 'S-04') {
+    // Emergency lane borrow: weather/truck constraints
+    if (env.weather === 'rain' || env.weather === 'fog') strategyBonus -= 0.1;
+  } else if (strategyData.id === 'S-05') {
+    // Upstream early diversion: more effective when inflow is high
+    if (env.inflowRate === 'high') strategyBonus = 0.2;
   }
 
   // Time period affects effectiveness

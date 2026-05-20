@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>策略库重构 Demo - 三级递进响应</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #0a1628; color: #e0e8f0; min-height: 100vh; padding: 24px; }
+h1 { text-align: center; font-size: 20px; color: #00d4ff; margin-bottom: 20px; letter-spacing: 2px; }
+.container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+.panel { background: rgba(16, 32, 56, 0.9); border: 1px solid rgba(0, 180, 255, 0.2); border-radius: 12px; padding: 16px; }
+.panel-title { font-size: 14px; color: #7eb8d8; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,180,255,0.15); }
+
+/* Left: Status indicators */
+.status-card { padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
+.status-card:hover { transform: translateX(4px); }
+.status-card.active { border: 1px solid currentColor; }
+.status-green { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.status-yellow { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.status-orange { background: rgba(249, 115, 22, 0.1); color: #f97316; border: 1px solid rgba(249,115,22,0.2); }
+.status-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+.status-label { font-size: 13px; font-weight: bold; }
+.status-desc { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+/* Right: Strategy panel */
+.strategy-panel { min-height: 500px; }
+.ai-recommendation { background: rgba(0, 180, 255, 0.05); border: 1px solid rgba(0,180,255,0.3); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.ai-badge { background: linear-gradient(135deg, #0066cc, #00aaff); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+.ai-title { font-size: 15px; font-weight: bold; }
+.ai-reason { font-size: 12px; color: #8ab4d0; line-height: 1.6; margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px; }
+
+/* Routes */
+.route-section { margin-top: 14px; }
+.route-title { font-size: 13px; color: #7eb8d8; margin-bottom: 8px; }
+.route-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+.route-item:hover { background: rgba(0,180,255,0.08); }
+.route-item.selected { border-color: rgba(0,180,255,0.5); background: rgba(0,180,255,0.1); }
+.route-checkbox { width: 18px; height: 18px; border: 2px solid #4a6a8a; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.route-checkbox.checked { background: #0088cc; border-color: #0088cc; }
+.route-checkbox.checked::after { content: "✓"; font-size: 12px; color: white; }
+.route-info { flex: 1; }
+.route-name { font-size: 13px; font-weight: bold; }
+.route-detail { font-size: 11px; color: #7eb8d8; margin-top: 2px; }
+.route-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.route-status.ok { background: rgba(16,185,129,0.2); color: #10b981; }
+.route-status.busy { background: rgba(245,158,11,0.2); color: #f59e0b; }
+
+/* Support actions */
+.support-section { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(0,180,255,0.1); }
+.support-title { font-size: 12px; color: #5a8aaa; margin-bottom: 8px; }
+.support-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.support-tag { font-size: 11px; padding: 4px 10px; background: rgba(0,180,255,0.1); border: 1px solid rgba(0,180,255,0.2); border-radius: 12px; color: #8ac4e0; }
+
+/* Buttons */
+.btn-group { display: flex; gap: 10px; margin-top: 16px; }
+.btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #0066cc, #0088ff); color: white; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,100,255,0.3); }
+.btn-secondary { background: rgba(255,255,255,0.05); color: #8ab4d0; border: 1px solid rgba(0,180,255,0.2); }
+.btn-ghost { background: transparent; color: #5a7a9a; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; color: #4a6a8a; }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state .text { font-size: 14px; }
+
+/* Metrics bar */
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.metric { text-align: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+.metric-value { font-size: 20px; font-weight: bold; }
+.metric-label { font-size: 11px; color: #5a8aaa; margin-top: 2px; }
+</style>
+</head>
+<body>
+<h1>徐闻县智慧交通大屏 · 策略库重构 Demo</h1>
+<div class="container">
+<!-- PLACEHOLDER_LEFT -->
+</div>
+<script>
+const LEVELS = [
+  { id: 'green', label: '常态管控', desc: '道路正常，AI持续监测', css: 'status-green' },
+  { id: 'yellow', label: '预警通知', desc: '早到车流累积，建议推送通知', css: 'status-yellow' },
+  { id: 'orange', label: '道路分流', desc: '主路低速持续，启用分流路线', css: 'status-orange' },
+  { id: 'red', label: '全面管控', desc: '主通道阻断，跨部门联动', css: 'status-red' },
+];
+
+const ROUTES = [
+  { id: 'R-A', name: '进港大道 → S376 省道', main: '进港大道关键段', alt: 'S376 省道', vehicle: '日常限大车，分流时放开小车', status: 'ok', statusText: '替代路畅通' },
+  { id: 'R-B', name: '徐海路 → 环半岛公路', main: '徐海路', alt: '环半岛公路', vehicle: '日常限大车，分流时放开小车', status: 'ok', statusText: '替代路畅通' },
+  { id: 'R-C', name: '远端上游路口分流（待踏勘）', main: '进港大道上游', alt: '上游提前分流', vehicle: '全车型', status: 'busy', statusText: '待确认' },
+];
+
+let currentLevel = 'green';
+let selectedRoutes = [];
+
+function render() {
+  const container = document.querySelector('.container');
+  container.innerHTML = renderLeft() + renderRight();
+  bindEvents();
+}
+
+function renderLeft() {
+  return `<div class="panel">
+    <div class="panel-title">当前响应级别</div>
+    ${LEVELS.map(l => `
+      <div class="status-card ${l.css} ${currentLevel === l.id ? 'active' : ''}" data-level="${l.id}">
+        <div class="status-label">${l.label}</div>
+        <div class="status-desc">${l.desc}</div>
+      </div>
+    `).join('')}
+    <div style="margin-top:16px;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;">
+      <div style="font-size:11px;color:#5a8aaa;margin-bottom:6px;">模拟说明</div>
+      <div style="font-size:11px;color:#7eb8d8;line-height:1.6;">点击左侧响应级别，查看对应的AI策略推荐效果。这是重构后的策略库交互Demo。</div>
+    </div>
+  </div>`;
+}
+
+function renderRight() {
+  if (currentLevel === 'green') return renderGreen();
+  if (currentLevel === 'yellow') return renderYellow();
+  if (currentLevel === 'orange') return renderOrange();
+  if (currentLevel === 'red') return renderRed();
+}
+
+function renderGreen() {
+  return `<div class="panel strategy-panel">
+    <div class="panel-title">策略推荐</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value" style="color:#10b981">3.2</div><div class="metric-label">拥堵指数</div></div>
+      <div class="metric"><div class="metric-value" style="color:#10b981">42</div><div class="metric-label">主路车速 km/h</div></div>
+      <div class="metric"><div class="metric-value" style="color:#10b981">28%</div><div class="metric-label">早到车流压力</div></div>
+    </div>
+    <div class="empty-state">
+      <div class="icon">✅</div>
+      <div class="text">当前道路运行正常，无需干预<br><span style="font-size:12px;color:#3a5a7a;">AI 持续监测中，异常时自动预警</span></div>
+    </div>
+  </div>`;
+}
+
+function renderYellow() {
+  return `<div class="panel strategy-panel">
+    <div class="panel-title">策略推荐</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value" style="color:#f59e0b">4.8</div><div class="metric-label">拥堵指数</div></div>
+      <div class="metric"><div class="metric-value" style="color:#f59e0b">28</div><div class="metric-label">主路车速 km/h</div></div>
+      <div class="metric"><div class="metric-value" style="color:#f59e0b">62%</div><div class="metric-label">早到车流压力</div></div>
+    </div>
+    <div class="ai-recommendation">
+      <div class="ai-header">
+        <span class="ai-badge">AI 推荐</span>
+        <span class="ai-title" style="color:#f59e0b">S-01 预警通知</span>
+      </div>
+      <div class="ai-reason">
+        检测到早到车流压力达到 62%，道路车流量超过当前合规在港区车辆数。未来 2 小时预约到达量集中，建议向早到车辆预约用户推送通知，引导错峰到达。
+      </div>
+      <div style="font-size:13px;margin-bottom:8px;color:#e0e8f0;">执行内容：</div>
+      <div style="font-size:12px;color:#8ab4d0;line-height:1.8;padding-left:12px;">
+        • 向早到车辆预约用户推送"建议先到附近停车场休息"<br>
+        • 诱导屏发布"当前到港预计等待时间 45 分钟"<br>
+        • 提示人员预约用户合理安排出行时间
+      </div>
+      <div class="support-section">
+        <div class="support-title">配套措施（自动启用）</div>
+        <div class="support-tags">
+          <span class="support-tag">诱导屏提示</span>
+          <span class="support-tag">预约平台推送</span>
+          <span class="support-tag">无人机确认路况（可选）</span>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary">确认发送通知</button>
+        <button class="btn btn-secondary">调整通知内容</button>
+        <button class="btn btn-ghost">暂不执行</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderOrange() {
+  return `<div class="panel strategy-panel">
+    <div class="panel-title">策略推荐</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value" style="color:#f97316">6.2</div><div class="metric-label">拥堵指数</div></div>
+      <div class="metric"><div class="metric-value" style="color:#f97316">15</div><div class="metric-label">主路车速 km/h</div></div>
+      <div class="metric"><div class="metric-value" style="color:#f97316">78%</div><div class="metric-label">早到车流压力</div></div>
+    </div>
+    <div class="ai-recommendation">
+      <div class="ai-header">
+        <span class="ai-badge">AI 推荐</span>
+        <span class="ai-title" style="color:#f97316">S-02 道路分流</span>
+      </div>
+      <div class="ai-reason">
+        进港大道车速 15km/h 持续 12 分钟，预警通知发出后未明显缓解。S376 省道当前畅通（车速 55km/h），具备分流条件。建议启用进港大道 → S376 分流。
+      </div>
+      <div class="route-section">
+        <div class="route-title">选择分流路线（可多选组合）：</div>
+        ${ROUTES.map(r => `
+          <div class="route-item ${selectedRoutes.includes(r.id) ? 'selected' : ''}" data-route="${r.id}">
+            <div class="route-checkbox ${selectedRoutes.includes(r.id) ? 'checked' : ''}"></div>
+            <div class="route-info">
+              <div class="route-name">${r.id} ${r.name}</div>
+              <div class="route-detail">主路：${r.main} → 替代路：${r.alt}</div>
+              <div class="route-detail">车型规则：${r.vehicle}</div>
+            </div>
+            <span class="route-status ${r.status}">${r.statusText}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="support-section">
+        <div class="support-title">配套措施（选中路线后自动启用）</div>
+        <div class="support-tags">
+          <span class="support-tag">诱导屏发布分流引导</span>
+          <span class="support-tag">设卡核验预约时段</span>
+          <span class="support-tag">临时停车区承接早到车辆</span>
+          <span class="support-tag">无人机监控执行效果</span>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary">确认启用分流</button>
+        <button class="btn btn-secondary">调整路线</button>
+        <button class="btn btn-ghost">暂不执行</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderRed() {
+  selectedRoutes = ['R-A', 'R-B', 'R-C'];
+  return `<div class="panel strategy-panel">
+    <div class="panel-title">策略推荐</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value" style="color:#ef4444">8.1</div><div class="metric-label">拥堵指数</div></div>
+      <div class="metric"><div class="metric-value" style="color:#ef4444">5</div><div class="metric-label">主路车速 km/h</div></div>
+      <div class="metric"><div class="metric-value" style="color:#ef4444">95%</div><div class="metric-label">早到车流压力</div></div>
+    </div>
+    <div class="ai-recommendation" style="border-color:rgba(239,68,68,0.4);">
+      <div class="ai-header">
+        <span class="ai-badge" style="background:linear-gradient(135deg,#cc0000,#ff3333);">AI 推荐</span>
+        <span class="ai-title" style="color:#ef4444">S-03 全面管控</span>
+      </div>
+      <div class="ai-reason">
+        进港大道-徐海路全段大范围低速（车速 5km/h），主通道接近阻断。分流策略启用 15 分钟后仍持续恶化。建议升级至全面管控，启用所有分流路线 + 跨部门联动 + 应急资源调度。
+      </div>
+      <div class="route-section">
+        <div class="route-title">分流路线（全部启用，可取消勾选）：</div>
+        ${ROUTES.map(r => `
+          <div class="route-item selected" data-route="${r.id}">
+            <div class="route-checkbox checked"></div>
+            <div class="route-info">
+              <div class="route-name">${r.id} ${r.name}</div>
+              <div class="route-detail">主路：${r.main} → 替代路：${r.alt}</div>
+            </div>
+            <span class="route-status ${r.status}">${r.statusText}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="support-section">
+        <div class="support-title">全面管控额外动作</div>
+        <div class="support-tags">
+          <span class="support-tag" style="border-color:rgba(239,68,68,0.3);color:#f87171;">跨部门视频会商</span>
+          <span class="support-tag" style="border-color:rgba(239,68,68,0.3);color:#f87171;">应急物资保障</span>
+          <span class="support-tag" style="border-color:rgba(239,68,68,0.3);color:#f87171;">无人机全路段巡查</span>
+          <span class="support-tag" style="border-color:rgba(239,68,68,0.3);color:#f87171;">特殊车辆疏散</span>
+          <span class="support-tag">诱导屏全网发布</span>
+          <span class="support-tag">多点设卡</span>
+          <span class="support-tag">全部临时停车区</span>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" style="background:linear-gradient(135deg,#cc0000,#ff3333);">确认启动全面管控</button>
+        <button class="btn btn-secondary">调整路线</button>
+        <button class="btn btn-ghost">暂不执行</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindEvents() {
+  document.querySelectorAll('.status-card').forEach(card => {
+    card.addEventListener('click', () => {
+      currentLevel = card.dataset.level;
+      if (currentLevel === 'orange') selectedRoutes = ['R-A'];
+      else if (currentLevel === 'red') selectedRoutes = ['R-A', 'R-B', 'R-C'];
+      else selectedRoutes = [];
+      render();
+    });
+  });
+  document.querySelectorAll('.route-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = item.dataset.route;
+      if (selectedRoutes.includes(id)) selectedRoutes = selectedRoutes.filter(r => r !== id);
+      else selectedRoutes.push(id);
+      render();
+    });
+  });
+}
+
+// Init
+currentLevel = 'orange';
+selectedRoutes = ['R-A'];
+render();
+</script>
+</body>
+</html>
