@@ -30,6 +30,11 @@ pnpm-debug.log*
 _bmad-output/
 coverage/
 
+# Tool session caches (browser automation, agent state, test artifacts)
+.playwright-mcp/
+.omc/
+test-screenshots/
+
 # Local records / archives
 对话记录/
 对话记录_*.zip
